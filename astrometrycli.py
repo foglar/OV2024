@@ -16,14 +16,32 @@ logging.basicConfig(
 
 
 class AstrometryClient:
-    """Client for getting wcs data"""
+    """Client for interacting with the Astrometry API.
+
+    This class provides methods for authenticating the user, uploading images to the Astrometry.net API,
+    checking the status of a job, retrieving calibration information, and downloading WCS files.
+
+    Attributes:
+        api_key (str): The API key used for authentication.
+        session (str): The session key obtained after successful authentication.
+
+    """
 
     def __init__(self):
         self.api_key = ConfigLoader().get_astrometry_key()
         self.session = None
 
     def authenticate(self):
-        """Authenticate user and obtain session key"""
+        """Authenticate user and obtain session key.
+
+        This method sends a POST request to the Astrometry API to authenticate the user
+        using the provided API key. If the authentication is successful, the session key
+        is stored in the `session` attribute of the object. Otherwise, an error message
+        is logged.
+
+        Returns:
+            None
+        """
         response = requests.post(
             "http://nova.astrometry.net/api/login",
             data={"request-json": json.dumps({"apikey": self.api_key})},
@@ -36,26 +54,41 @@ class AstrometryClient:
             logging.critical("Authentication failed.")
 
     def upload_image(self, image_path):
-        """Upload image and return submission ID"""
-        if not self.session:
-            logging.warning("Please authenticate first.")
-            return None
+            """Uploads an image to the Astrometry.net API and returns the submission ID.
 
-        files = {
-            "request-json": (None, json.dumps({"session": self.session})),
-            "file": (image_path, open(image_path, "rb"), "application/octet-stream"),
-        }
-        response = requests.post("http://nova.astrometry.net/api/upload", files=files)
+            Args:
+                image_path (str): The path to the image file to be uploaded.
 
-        if response.status_code == 200:
-            logging.info("Image upload successful.")
-            return response.json()["subid"]
-        else:
-            logging.error("Image upload failed.")
-            return None
+            Returns:
+                str: The submission ID of the uploaded image, or None if the upload failed.
+            """
+            if not self.session:
+                logging.warning("Please authenticate first.")
+                return None
+
+            files = {
+                "request-json": (None, json.dumps({"session": self.session})),
+                "file": (image_path, open(image_path, "rb"), "application/octet-stream"),
+            }
+            response = requests.post("http://nova.astrometry.net/api/upload", files=files)
+
+            if response.status_code == 200:
+                logging.info("Image upload successful.")
+                return response.json()["subid"]
+            else:
+                logging.error("Image upload failed.")
+                return None
 
     def check_job_status(self, job_id):
-        """Check status of a job"""
+        """Check the status of a job.
+
+        Args:
+            job_id (int): The ID of the job to check.
+
+        Returns:
+            str: The status of the job, or None if there was an error.
+
+        """
         if not self.session:
             logging.warning("Please authenticate first.")
             return None
@@ -71,7 +104,19 @@ class AstrometryClient:
             return None
 
     def get_calibration(self, job_id):
-        """Get calibration information for a job"""
+        """Get calibration information for a job.
+
+        Args:
+            job_id (int): The ID of the job for which to retrieve calibration information.
+
+        Returns:
+            dict or None: A dictionary containing the calibration information if successful,
+            None otherwise.
+
+        Raises:
+            None
+
+        """
         if not self.session:
             logging.warning("Please authenticate first.")
             return None
@@ -87,7 +132,15 @@ class AstrometryClient:
             return None
 
     def get_wcs_file_url(self, job_id):
-        """Get URL of WCS file for a job"""
+        """
+        Get the URL of the WCS (World Coordinate System) file for a given job ID.
+
+        Args:
+            job_id (int): The ID of the job.
+
+        Returns:
+            str: The URL of the WCS file if successful, None otherwise.
+        """
         if not self.session:
             logging.warning("Please authenticate first.")
             return None
@@ -103,7 +156,16 @@ class AstrometryClient:
             return None
 
     def download_wcs_file(self, wcs_file_url, save_path):
-        """Download WCS file from given URL and save to disk"""
+        """
+        Download WCS file from the given URL and save it to disk.
+
+        Args:
+            wcs_file_url (str): The URL of the WCS file to download.
+            save_path (str): The path where the downloaded WCS file will be saved.
+
+        Returns:
+            None
+        """
         if not self.session:
             logging.warning("Please authenticate first.")
             return None
