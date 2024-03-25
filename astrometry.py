@@ -130,13 +130,15 @@ class AstrometryClient:
                 f"Error getting calibration information. Status code: {response.status_code}"
             )
             return None
-
-    def get_wcs_file_url(self, job_id):
+        
+    def get_wcs_file(self, job_id, save_path):
         """
-        Get the URL of the WCS (World Coordinate System) file for a given job ID.
+        Get the URL of the WCS (World Coordinate System) file for a given job ID
+        and download it to the specified save path.
 
         Args:
             job_id (int): The ID of the job.
+            save_path (str): The path where the downloaded WCS file will be saved.
 
         Returns:
             str: The URL of the WCS file if successful, None otherwise.
@@ -148,35 +150,13 @@ class AstrometryClient:
         url = f"http://nova.astrometry.net/wcs_file/{job_id}"
         response = requests.get(url)
         if response.status_code == 200:
-            return response.url
-        else:
-            logging.error(
-                f"Error getting WCS file. Status code: {response.status_code}"
-            )
-            return None
-
-    def download_wcs_file(self, wcs_file_url, save_path):
-        """
-        Download WCS file from the given URL and save it to disk.
-
-        Args:
-            wcs_file_url (str): The URL of the WCS file to download.
-            save_path (str): The path where the downloaded WCS file will be saved.
-
-        Returns:
-            None
-        """
-        if not self.session:
-            logging.warning("Please authenticate first.")
-            return None
-
-        response = requests.get(wcs_file_url)
-        if response.status_code == 200:
             with open(save_path, "wb") as f:
                 f.write(response.content)
             logging.info("WCS file downloaded successfully.")
+            return response.url
         else:
-            logging.error("Failed to download WCS file.")
+            logging.error(f"Error getting WCS file. Status code: {response.status_code}")
+            return None
 
 
 def main():

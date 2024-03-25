@@ -13,7 +13,7 @@ pip3 install -r requirements.txt
 > [!TIP]
 > It is recommended practice to use a virtual enviroment.
 > Download **[conda][conda]** and create a venv `conda -n ov2024`.
-> Activate it with a command `conda activate ~/.conda/envs/ov2024`
+> Activate it with a command `conda activate ov2024`
 
 - get an API key on the [astrometry.net][astrometryapi] and add it into the file **config.toml** as a variable *token* into astrometry category
 
