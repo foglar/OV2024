@@ -18,8 +18,8 @@ logging.basicConfig(
 class AstrometryClient:
     """Client for getting wcs data"""
 
-    def __init__(self, api_key):
-        self.api_key = api_key
+    def __init__(self):
+        self.api_key = ConfigLoader().get_astrometry_key()
         self.session = None
 
     def authenticate(self):
@@ -118,10 +118,7 @@ class AstrometryClient:
 
 
 def main():
-    # Load config file
-    config_loader = ConfigLoader()
-
-    client = AstrometryClient(api_key=config_loader.get_astrometry_key())
+    client = AstrometryClient()
     client.authenticate()
     submission_id = client.upload_image("./data/2024-01-08-21-35-44.jpg")
 
