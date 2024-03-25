@@ -49,9 +49,9 @@ class AstrometryClient:
         data = response.json()
         if data["status"] == "success":
             self.session = data["session"]
-            logging.info("Authentication successful.")
+            logging.info("Authentication successful. Session key: %s", self.session)
         else:
-            logging.critical("Authentication failed.")
+            logging.critical("Authentication failed. Session key not obtained.")
 
     def upload_image(self, image_path):
             """Uploads an image to the Astrometry.net API and returns the submission ID.
@@ -73,10 +73,10 @@ class AstrometryClient:
             response = requests.post("http://nova.astrometry.net/api/upload", files=files)
 
             if response.status_code == 200:
-                logging.info("Image upload successful.")
+                logging.info("Image upload successful. Submission ID: %s", response.json()["subid"])
                 return response.json()["subid"]
             else:
-                logging.error("Image upload failed.")
+                logging.error("Image upload failed. Status code: %s", response.status_code)
                 return None
 
     def check_job_status(self, job_id):

@@ -1,7 +1,15 @@
 import os
+import logging
 from modules import ConfigLoader
 
-
+# Enable or disable logging
+logging.basicConfig(
+    # filename="app.log",
+    # filemode="a",
+    format="%(asctime)s > %(name)s - %(levelname)s - %(message)s",
+    datefmt="%d-%b-%y %H:%M:%S",
+    level=logging.INFO,
+)
 class FolderComparator:
     """
     A class that compares two folders and finds matching subfolders.
@@ -32,14 +40,21 @@ class FolderComparator:
 
         """
         path1 = os.path.join(self.home_dir, folder1)
+        logging.info(f"Path 1: {path1}")
         path2 = os.path.join(self.home_dir, folder2)
+        logging.info(f"Path 2: {path2}")
 
         folders1 = [
             f for f in os.listdir(path1) if os.path.isdir(os.path.join(path1, f))
         ]
+
+        logging.info(f"Subfiles in {folder1}: {folders1}")
+
         folders2 = [
             f for f in os.listdir(path2) if os.path.isdir(os.path.join(path2, f))
         ]
+
+        logging.info(f"Subfiles in {folder2}: {folders2}")
 
         matching_folders = []
         for folder in folders1:

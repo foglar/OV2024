@@ -25,34 +25,10 @@ token = "your token in double quotes"
 
 ## Files
 
-- `astrometry-client.py` - get **ra** and **dec** from astrometry api
+- `astrometry.py` - get **ra** and **dec** from astrometry api
 - `compare.py` - finds and compares same meteors from two observatories
 - `modules.py` - modules for loading config and etc...
-
-## Documentation
-
-### class AstronomyClient()
-
-#### authenticate()
-
-- Authenticate user and obtain session key
-- self.session
-
-#### upload_image()
-
-- self, path
-- Upload image and return submission_ID
-- return submission_id
-
-#### check_job_status()
-
-- self, submission_ID
-
-#### get_calibration()
-
-#### get_wcs_file_url()
-
-#### download_wcs_file()
+- `main.py` - runs astrometry for each observation from both observatories in file tree
 
 [astrometryapi]: https://nova.astrometry.net/api_help
 [conda]: https://www.anaconda.com/download/
