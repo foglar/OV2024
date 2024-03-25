@@ -1,11 +1,11 @@
-# MAIA
+# OV2024
 
 ## Requirements and Installation
 
 ```bash
-git clone https://github.com/foglar/maia.git
+git clone https://github.com/foglar/ov2024.git
 
-cd maia
+cd ov2024
 
 pip3 install -r requirements.txt
 python3 main.py
@@ -13,14 +13,15 @@ python3 main.py
 
 > [!TIP]
 > It is recommended practice to use a virtual enviroment.
-> Download **[conda][conda]** and create a venv `conda -n maia`.
-> Activate it with a command `conda activate ~/.conda/envs/maia`
+> Download **[conda][conda]** and create a venv `conda -n ov2024`.
+> Activate it with a command `conda activate ~/.conda/envs/ov2024`
 
-- get an API key on the [astrometry.net][astrometryapi] and add it into the file **secret.py** as a variable *A_TOKEN*
+- get an API key on the [astrometry.net][astrometryapi] and add it into the file **config.toml** as a variable *token* into astrometry category
 
-```bash
-# secret.py
-A_TOKEN = "your_token"
+```toml
+[astrometry]
+
+token = "your token in double quotes"
 ```
 
 ## Documentation

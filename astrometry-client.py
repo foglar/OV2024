@@ -1,7 +1,9 @@
 import json
 import logging
-import secret
+
+# import secret
 import requests
+from modules import ConfigLoader
 
 # Enable or disable logging
 logging.basicConfig(
@@ -104,7 +106,7 @@ class AstrometryClient:
         """Download WCS file from given URL and save to disk"""
         if not self.session:
             logging.warning("Please authenticate first.")
-            return
+            return None
 
         response = requests.get(wcs_file_url)
         if response.status_code == 200:
@@ -116,7 +118,8 @@ class AstrometryClient:
 
 
 def main():
-    client = AstrometryClient(api_key=secret.A_TOKEN)
+    config_loader = ConfigLoader()
+    client = AstrometryClient(api_key=config_loader.get_astrometry_key())
     client.authenticate()
     submission_id = client.upload_image("./data/2024-01-08-21-35-44.jpg")
 
