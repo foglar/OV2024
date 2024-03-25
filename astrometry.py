@@ -1,5 +1,6 @@
 import json
 import logging
+from time import sleep
 
 # import secret
 import requests
@@ -72,6 +73,7 @@ class AstrometryClient:
             }
             response = requests.post("http://nova.astrometry.net/api/upload", files=files)
 
+            logging.info("Status code: %s", response.json())
             if response.status_code == 200:
                 logging.info("Image upload successful. Submission ID: %s", response.json()["subid"])
                 return response.json()["subid"]
@@ -95,11 +97,39 @@ class AstrometryClient:
 
         url = f"http://nova.astrometry.net/api/jobs/{job_id}"
         response = requests.get(url)
+
         if response.status_code == 200:
+            logging.info("Job status: %s", response.json().get("status"))
             return response.json().get("status")
         else:
             logging.warning(
                 f"Error checking job status. Status code: {response.status_code}"
+            )
+            return None
+        
+    def check_submission_status(self, submission_id):
+        """Check the status of a submission.
+
+        Args:
+            submission_id (int): The ID of the submission to check.
+
+        Returns:
+            str: The status of the submission, or None if there was an error.
+
+        """
+        if not self.session:
+            logging.warning("Please authenticate first.")
+            return None
+
+        url = f"http://nova.astrometry.net/api/submissions/{submission_id}"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            logging.info("Submission status: %s", response.json())
+            return response.json().get("jobs")
+        else:
+            logging.warning(
+                f"Error checking submission status. Status code: {response.status_code}"
             )
             return None
 
@@ -180,15 +210,16 @@ def main():
     if status != "success":
         logging.warning("Job is not successful. Aborting...")
         return
+    
+    while client.check_submission_status(submission_id) == [] or client.check_submission_status(submission_id) == [None]:
+        sleep(ConfigLoader().get_value_from_data("timeout"))
 
-    wcs_file_url = client.get_wcs_file_url(submission_id)
+    wcs_file_url = client.get_wcs_file(submission_id , "./test.wcs")
     if not wcs_file_url:
         logging.error("Failed to get WCS file URL.")
         return
 
     logging.info("WCS file URL: %s", wcs_file_url)
-
-    client.download_wcs_file(wcs_file_url, "./test.wcs")
 
     calibration_info = client.get_calibration(submission_id)
     if calibration_info:

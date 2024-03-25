@@ -49,11 +49,7 @@ class ConfigLoader:
             KeyError: If the astrometry token is not found in the configuration settings.
 
         """
-        config = self.load_config()
-        if "astrometry" in config and "token" in config["astrometry"]:
-            return config["astrometry"]["token"]
-        else:
-            raise KeyError("Astrometry token not found in config.toml")
+        return self.get_value_from_data("token", "astrometry")
 
     def get_home_dir(self):
         """
@@ -66,8 +62,24 @@ class ConfigLoader:
             KeyError: If the home directory is not found in the configuration settings.
 
         """
+        return self.get_value_from_data("home_dir")
+
+    def get_value_from_data(self, key="home_dir", category="data"):
+        """
+        Retrieves a value from the data section of the configuration settings.
+
+        Args:
+            key (str): The key of the value to retrieve.
+
+        Returns:
+            str: The value associated with the specified key.
+
+        Raises:
+            KeyError: If the specified key is not found in the data section of the configuration settings.
+
+        """
         config = self.load_config()
-        if "data" in config and "home_dir" in config["data"]:
-            return config["data"]["home_dir"]
+        if category in config and key in config[category]:
+            return config[category][key]
         else:
-            raise KeyError("Home directory not found in config.toml")
+            raise KeyError(f"Key '{key}' or Category '{category}' not found in the data section of config.toml")

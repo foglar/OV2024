@@ -4,4 +4,5 @@ token = "ijfeednnvwvojlfb"
 
 [data]
 
+timeout = 5
 home_dir = "/home/foglar/Documents/Programming/Projects/OV2024-Project/meteory"

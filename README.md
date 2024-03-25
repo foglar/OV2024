@@ -21,6 +21,22 @@ pip3 install -r requirements.txt
 [astrometry]
 
 token = "your token in double quotes"
+
+[data]
+
+home_dir = "/home/foglar/Documents/Programming/Projects/OV2024-Project/meteory"
+```
+
+```shell
+.
+├── "Observatory A"
+│  └── 2024-01-08-21-35-44
+│     ├── 2024-01-08-21-35-44.jpg
+│     └── data.txt
+└── "Observatory B"
+   └── 2024-01-08-21-35-44
+      ├── 2024-01-08-21-35-44.jpg
+      └── data.txt
 ```
 
 ## Files
