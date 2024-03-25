@@ -1,0 +1,32 @@
+astropy @ file:///work/perseverance-python-buildout/croot/astropy_1698877262877/work
+certifi==2024.2.2
+charset-normalizer==3.3.2
+contourpy @ file:///work/perseverance-python-buildout/croot/contourpy_1701756524386/work
+cycler @ file:///home/conda/feedstock_root/build_artifacts/cycler_1696677705766/work
+fonttools==4.25.0
+idna==3.6
+kiwisolver @ file:///work/perseverance-python-buildout/croot/kiwisolver_1698847502605/work
+matplotlib @ file:///work/perseverance-python-buildout/croot/matplotlib-suite_1698863180732/work
+mkl-fft @ file:///work/perseverance-python-buildout/croot/mkl_fft_1698845673361/work
+mkl-random @ file:///work/perseverance-python-buildout/croot/mkl_random_1698845720894/work
+mkl-service==2.4.0
+munkres==1.1.4
+numpy @ file:///croot/numpy_and_numpy_base_1708638617955/work/dist/numpy-1.26.4-cp312-cp312-linux_x86_64.whl#sha256=1d700f51d8b4fa684d858c9e3b56b1656bc5c82b6b79ff08d4e3b491c430059f
+packaging @ file:///work/perseverance-python-buildout/croot/packaging_1698805390494/work
+pillow @ file:///croot/pillow_1707233021655/work
+ply==3.11
+pyerfa @ file:///work/perseverance-python-buildout/croot/pyerfa_1698871532843/work
+pyparsing @ file:///home/conda/feedstock_root/build_artifacts/pyparsing_1635267989520/work
+PyQt5==5.15.10
+PyQt5-sip @ file:///work/perseverance-python-buildout/croot/pyqt-split_1698847927472/work/pyqt_sip
+python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/python-dateutil_1626286286081/work
+PyYAML @ file:///work/perseverance-python-buildout/croot/pyyaml_1698849903511/work
+requests==2.31.0
+scipy @ file:///work/perseverance-python-buildout/croot/scipy_1701734271484/work/dist/scipy-1.11.4-cp312-cp312-linux_x86_64.whl#sha256=9289920d160658418dd16cfd0f12bdea66b3fa37a45c5e8aca5e285681c014a9
+setuptools==68.2.2
+sip @ file:///work/perseverance-python-buildout/croot/sip_1698846977033/work
+six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
+tornado @ file:///work/perseverance-python-buildout/croot/tornado_1698866362018/work
+types-requests==2.31.0.20240218
+urllib3==2.2.1
+wheel==0.41.2
