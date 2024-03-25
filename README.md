@@ -8,7 +8,6 @@ git clone https://github.com/foglar/ov2024.git
 cd ov2024
 
 pip3 install -r requirements.txt
-python3 main.py
 ```
 
 > [!TIP]
@@ -23,6 +22,12 @@ python3 main.py
 
 token = "your token in double quotes"
 ```
+
+## Files
+
+- `astrometry-client.py` - get **ra** and **dec** from astrometry api
+- `compare.py` - finds and compares same meteors from two observatories
+- `modules.py` - modules for loading config and etc...
 
 ## Documentation
 

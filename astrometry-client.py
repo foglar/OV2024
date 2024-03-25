@@ -118,7 +118,9 @@ class AstrometryClient:
 
 
 def main():
+    # Load config file
     config_loader = ConfigLoader()
+
     client = AstrometryClient(api_key=config_loader.get_astrometry_key())
     client.authenticate()
     submission_id = client.upload_image("./data/2024-01-08-21-35-44.jpg")

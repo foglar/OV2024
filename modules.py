@@ -21,4 +21,11 @@ class ConfigLoader:
         if "astrometry" in config and "token" in config["astrometry"]:
             return config["astrometry"]["token"]
         else:
-            raise KeyError("Astrometry token not found in config.")
+            raise KeyError("Astrometry token not found in config.toml")
+
+    def get_home_dir(self):
+        config = self.load_config()
+        if "data" in config and "home_dir" in config["data"]:
+            return config["data"]["home_dir"]
+        else:
+            raise KeyError("Home directory not found in config.toml")
