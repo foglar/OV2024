@@ -84,29 +84,14 @@ class AstrometryClient:
             )
             return None
 
-    def get_wcs_file_url(self, job_id):
-        """Get URL of WCS file for a job"""
-        if not self.session:
-            logging.warning("Please authenticate first.")
-            return None
-
-        url = f"http://nova.astrometry.net/wcs_file/{job_id}"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.url
-        else:
-            logging.error(
-                f"Error getting WCS file. Status code: {response.status_code}"
-            )
-            return None
-
-    def download_wcs_file(self, wcs_file_url, save_path):
+    def download_wcs_file(self, job_id, save_path):
         """Download WCS file from given URL and save to disk"""
         if not self.session:
             logging.warning("Please authenticate first.")
             return
 
-        response = requests.get(wcs_file_url)
+        url = f"http://nova.astrometry.net/wcs_file/{job_id}"
+        response = requests.get(url)
         if response.status_code == 200:
             with open(save_path, "wb") as f:
                 f.write(response.content)
@@ -137,14 +122,7 @@ def main():
         logging.warning("Job is not successful. Aborting...")
         return
 
-    wcs_file_url = client.get_wcs_file_url(submission_id)
-    if not wcs_file_url:
-        logging.error("Failed to get WCS file URL.")
-        return
-
-    logging.info("WCS file URL: %s", wcs_file_url)
-
-    client.download_wcs_file(wcs_file_url, "./test.wcs")
+    client.download_wcs_file(submission_id, "./test.wcs")
 
     calibration_info = client.get_calibration(submission_id)
     if calibration_info:
