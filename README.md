@@ -1,52 +1,34 @@
-# MAIA
+# OV2024
 
 ## Requirements and Installation
 
 ```bash
-git clone https://github.com/foglar/maia.git
+git clone https://github.com/foglar/ov2024.git
 
-cd maia
+cd ov2024
 
 pip3 install -r requirements.txt
-python3 main.py
 ```
 
 > [!TIP]
 > It is recommended practice to use a virtual enviroment.
-> Download **[conda][conda]** and create a venv `conda -n maia`.
-> Activate it with a command `conda activate ~/.conda/envs/maia`
+> Download **[conda][conda]** and create a venv `conda -n ov2024`.
+> Activate it with a command `conda activate ov2024`
 
-- get an API key on the [astrometry.net][astrometryapi] and add it into the file **secret.py** as a variable *A_TOKEN*
+- get an API key on the [astrometry.net][astrometryapi] and add it into the file **config.toml** as a variable *token* into astrometry category
 
-```bash
-# secret.py
-A_TOKEN = "your_token"
+```toml
+[astrometry]
+
+token = "your token in double quotes"
 ```
 
-## Documentation
+## Files
 
-### class AstronomyClient()
-
-#### authenticate()
-
-- Authenticate user and obtain session key
-- self.session
-
-#### upload_image()
-
-- self, path
-- Upload image and return submission_ID
-- return submission_id
-
-#### check_job_status()
-
-- self, submission_ID
-
-#### get_calibration()
-
-#### get_wcs_file_url()
-
-#### download_wcs_file()
+- `astrometry.py` - get **ra** and **dec** from astrometry api
+- `compare.py` - finds and compares same meteors from two observatories
+- `modules.py` - modules for loading config and etc...
+- `main.py` - runs astrometry for each observation from both observatories in file tree
 
 [astrometryapi]: https://nova.astrometry.net/api_help
 [conda]: https://www.anaconda.com/download/
