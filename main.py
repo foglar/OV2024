@@ -4,9 +4,10 @@ from time import sleep
 
 from astrometry import AstrometryClient
 from compare import FolderComparator
+from modules import ConfigLoader
 
 
-class MeteorComparator:
+class MeteorsList:
     """
     A class that compares meteor data from two locations.
 
@@ -73,18 +74,20 @@ class MeteorComparator:
 
             job_id_a = obs_a.upload_image(self.make_img_path(folder[0]))
             job_id_b = obs_b.upload_image(self.make_img_path(folder[1]))
-
+            
+            timeout = ConfigLoader().get_value_from_data("timeout")
             for i in range(10):
                 status_a = obs_a.check_job_status(job_id_a)
                 status_b = obs_b.check_job_status(job_id_b)
 
                 if status_a == "success" and status_b == "success":
                     break
-
-                sleep(0.5)
+                
+                logging.info(f"Job status after {timeout*(i+1)} seconds: Status of submission A: {status_a}, Status of submission B: {status_b}")
+                sleep(timeout)
 
                 if i == 9:
-                    raise Exception("Job status not successful")
+                    raise Exception(f"Job status not successful after {timeout*10} seconds. Status of submission A: {status_a}, Status of submission B: {status_b}. Aborting...")
 
             calibration_a = obs_a.get_calibration(job_id_a)
             calibration_b = obs_b.get_calibration(job_id_b)
@@ -183,5 +186,5 @@ def main():
 
 
 if __name__ == "__main__":
-    comparator = MeteorComparator()
-    ra_dec_list = comparator.compare()
+    meteors = MeteorsList()
+    ra_dec_list = meteors.compare()
