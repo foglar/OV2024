@@ -2,7 +2,6 @@ import json
 import logging
 from time import sleep
 
-# import secret
 import requests
 from modules import ConfigLoader
 

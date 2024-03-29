@@ -138,7 +138,7 @@ class MeteorsList:
             )
             return None
 
-    def download_wcs_file(self, job_id, save_path):
+    def get_wcs_file(self, job_id, save_path):
         """Download WCS file from given URL and save to disk"""
         if not self.session:
             logging.warning("Please authenticate first.")
@@ -176,7 +176,7 @@ def main():
         logging.warning("Job is not successful. Aborting...")
         return
 
-    client.download_wcs_file(submission_id, "./test.wcs")
+    client.get_wcs_file(submission_id, "./test.wcs")
 
     calibration_info = client.get_calibration(submission_id)
     if calibration_info:
