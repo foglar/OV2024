@@ -100,6 +100,7 @@ class AstrometryClient:
 
         if response.status_code == 200:
             logging.info("Job status: %s", response.json().get("status"))
+            print(response.json())
             return response.json().get("status")
         else:
             logging.warning(
@@ -147,7 +148,7 @@ class AstrometryClient:
         response = requests.get(url)
         if response.json().get("job_calibrations") != []:
             logging.info("Job is done.")
-            return True
+            return response.json().get("job_calibrations")
         else:
             logging.info("Job is not done.")
             return False
