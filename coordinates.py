@@ -6,6 +6,9 @@ from meteor import Meteor
 from main import AstrometryClient
 import logging
 
+from time import sleep
+from modules import ConfigLoader
+
 def pixels_to_world(path: str, meteor: Meteor) -> list[list[float]]:
     """Convert pixel data to RA and Dec
     
@@ -85,20 +88,22 @@ def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path) -
 
     logging.info("Submission ID: %s", submission_id)
 
-    status = client.check_job_status(submission_id)
-    if not status:
-        logging.warning("Failed to check job status.")
-        return
+    job_id = None
+    timeout = ConfigLoader().get_value_from_data("timeout")
+    for i in range(10):
+        status = client.is_job_done(submission_id)
+        if status != False:
+            job_id = status[0][0]
+            break
+        sleep(timeout)
 
-    logging.info("Job status: %s", status)
-
-    if status != "success":
-        logging.warning("Job is not successful. Aborting...")
-        return
+        if i == 9:
+            logging.error(f"Job status not successful after {10*timeout} seconds. Aborting...")
+            raise Exception(f"Job status not successful after {timeout*10} seconds. Aborting...")
 
     # Get wcs file and convert pixel coordinates to world coordinates
     wcs_path = 'calibration.wcs'
-    client.get_wcs_file(submission_id, wcs_path)
+    client.get_wcs_file(job_id, wcs_path)
 
     meteors = load_meteors(data_path)
     
