@@ -99,7 +99,7 @@ class AstrometryClient:
         response = requests.get(url)
 
         if response.status_code == 200:
-            logging.info(f"Job status: {response.json().get("status")}")
+            logging.info(f"Job status: {response.json().get('status')}")
             return response.json().get("status")
         else:
             logging.warning(
