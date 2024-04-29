@@ -80,7 +80,7 @@ class MeteorsList:
                 status_a = obs_a.is_job_done(job_id_a)
                 status_b = obs_b.is_job_done(job_id_b)
 
-                if status_a == True and status_b == True:
+                if status_a != False and status_b != False:
                     break
                 
                 logging.info(f"Job status after {timeout*(i+1)} seconds: Status of submission A: {status_a}, Status of submission B: {status_b}")
@@ -89,8 +89,8 @@ class MeteorsList:
                 if i == 9:
                     raise Exception(f"Job status not successful after {timeout*10} seconds. Status of submission A: {status_a}, Status of submission B: {status_b}. Aborting...")
 
-            calibration_a = obs_a.get_calibration(job_id_a)
-            calibration_b = obs_b.get_calibration(job_id_b)
+            calibration_a = obs_a.get_calibration(status_a[0])
+            calibration_b = obs_b.get_calibration(status_b[0])
 
             logging.info(f"Calibration A: {calibration_a}")
             logging.info(f"Calibration B: {calibration_b}")
@@ -132,7 +132,7 @@ def main():
     
     timeout = ConfigLoader().get_value_from_data("timeout")
     for i in range(10):
-        status = client.check_job_status(submission_id)
+        status = client.is_job_done(submission_id)
         if status == True:
             break
         sleep(timeout)

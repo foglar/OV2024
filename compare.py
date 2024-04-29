@@ -56,6 +56,7 @@ class FolderComparator:
 
         logging.info(f"Subfiles in {folder2}: {folders2}")
 
+        # TODO: Add more complex logic to compare folders, tolerance for different timestamps...
         matching_folders = []
         for folder in folders1:
             if folder in folders2:

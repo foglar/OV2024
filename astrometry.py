@@ -236,7 +236,7 @@ def main():
     timeout = ConfigLoader().get_value_from_data("timeout")
     for i in range(10):
         status = client.is_job_done(submission_id)
-        if status == True:
+        if status != False:
             break
         sleep(timeout)
 
