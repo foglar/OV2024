@@ -77,10 +77,10 @@ class MeteorsList:
             
             timeout = ConfigLoader().get_value_from_data("timeout")
             for i in range(10):
-                status_a = obs_a.check_job_status(job_id_a)
-                status_b = obs_b.check_job_status(job_id_b)
+                status_a = obs_a.is_job_done(job_id_a)
+                status_b = obs_b.is_job_done(job_id_b)
 
-                if status_a == "success" and status_b == "success":
+                if status_a == True and status_b == True:
                     break
                 
                 logging.info(f"Job status after {timeout*(i+1)} seconds: Status of submission A: {status_a}, Status of submission B: {status_b}")
@@ -106,56 +106,10 @@ class MeteorsList:
 
         logging.info(f"Ra and Dec data for each meteor from both stations: {data}")
         return data
-    def check_job_status(self, job_id):
-        """Check status of a job"""
-        if not self.session:
-            logging.warning("Please authenticate first.")
-            return None
-
-        url = f"http://nova.astrometry.net/api/jobs/{job_id}"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json().get("status")
-        else:
-            logging.warning(
-                f"Error checking job status. Status code: {response.status_code}"
-            )
-            return None
-
-    def get_calibration(self, job_id):
-        """Get calibration information for a job"""
-        if not self.session:
-            logging.warning("Please authenticate first.")
-            return None
-
-        url = f"http://nova.astrometry.net/api/jobs/{job_id}/calibration/"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            logging.error(
-                f"Error getting calibration information. Status code: {response.status_code}"
-            )
-            return None
-
-    def get_wcs_file(self, job_id, save_path):
-        """Download WCS file from given URL and save to disk"""
-        if not self.session:
-            logging.warning("Please authenticate first.")
-            return
-
-        url = f"http://nova.astrometry.net/wcs_file/{job_id}"
-        response = requests.get(url)
-        if response.status_code == 200:
-            with open(save_path, "wb") as f:
-                f.write(response.content)
-            logging.info("WCS file downloaded successfully.")
-        else:
-            logging.error("Failed to download WCS file.")
 
 
 def main():
-    client = AstrometryClient(api_key=secret.A_TOKEN)
+    client = AstrometryClient(api_key=ConfigLoader.get_astrometry_key)
     client.authenticate()
     submission_id = client.upload_image("./data/2024-01-08-21-35-44.jpg")
 
@@ -175,6 +129,18 @@ def main():
     if status != "success":
         logging.warning("Job is not successful. Aborting...")
         return
+    
+    timeout = ConfigLoader().get_value_from_data("timeout")
+    for i in range(10):
+        status = client.check_job_status(submission_id)
+        if status == True:
+            break
+        sleep(timeout)
+
+        if i == 9:
+            logging.error(f"Job status not successful after {10*timeout} seconds. Aborting...")
+            raise Exception(f"Job status not successful after {timeout*10} seconds. Aborting...")
+        
 
     client.get_wcs_file(submission_id, "./test.wcs")
 

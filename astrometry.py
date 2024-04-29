@@ -14,8 +14,6 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-TIME_OUT = 5
-
 class AstrometryClient:
     """Client for interacting with the Astrometry API.
 
@@ -234,8 +232,17 @@ def main():
         logging.warning("Job is not successful. Aborting...")
         return
     
-    while client.is_job_done(submission_id) == False:
-        sleep(TIME_OUT)
+    # Check if job is done
+    timeout = ConfigLoader().get_value_from_data("timeout")
+    for i in range(10):
+        status = client.check_job_status(submission_id)
+        if status == True:
+            break
+        sleep(timeout)
+
+        if i == 9:
+            raise Exception(f"Job status not successful after {timeout*10} seconds. Aborting...")
+
 
     # Check submission status
     # while client.check_submission_status(
