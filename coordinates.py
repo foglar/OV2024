@@ -27,7 +27,8 @@ def pixels_to_world(path: str, meteor: Meteor) -> list[list[float]]:
     # Convert pixel coordinates to world coordinates
     world = []
     for point in meteor.pixels:
-        world.append(w.pixel_to_world(point[0], point[1]))
+        skyCoord = w.pixel_to_world(point[0], point[1])
+        world.append([skyCoord.ra.degree,skyCoord.dec.degree])
 
     return world
 
