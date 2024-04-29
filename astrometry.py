@@ -223,7 +223,7 @@ def main():
 
     status = client.check_job_status(submission_id)
     if not status:
-        logging.warning("Failed to check job status, Job_ID: {submission_id}")
+        logging.warning(f"Failed to check job status, Job_ID: {submission_id}")
         return
 
     logging.info("Job status: %s", status)
