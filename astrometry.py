@@ -92,15 +92,14 @@ class AstrometryClient:
 
         """
         if not self.session:
-            logging.warning("Please authenticate first.")
+            logging.warning(f"Please authenticate first, Job_ID: {job_id}")
             return None
 
         url = f"http://nova.astrometry.net/api/jobs/{job_id}"
         response = requests.get(url)
 
         if response.status_code == 200:
-            logging.info("Job status: %s", response.json().get("status"))
-            print(response.json())
+            logging.info(f"Job status: {response.json().get("status")}")
             return response.json().get("status")
         else:
             logging.warning(
@@ -119,18 +118,18 @@ class AstrometryClient:
 
         """
         if not self.session:
-            logging.warning("Please authenticate first.")
+            logging.warning("Please authenticate first, Job_ID: {submission_id}")
             return None
 
         url = f"http://nova.astrometry.net/api/submissions/{submission_id}"
         response = requests.get(url)
 
         if response.status_code == 200:
-            logging.info("Submission status: %s", response.json())
+            logging.info(f"Submission status: {response.json}, Job_ID: {submission_id}")
             return response.json().get("jobs")
         else:
             logging.warning(
-                f"Error checking submission status. Status code: {response.status_code}"
+                f"Error checking submission status. Status code: {response.status_code}, Job_ID: {submission_id}"
             )
             return None
         
@@ -147,10 +146,10 @@ class AstrometryClient:
         url = f"http://nova.astrometry.net/api/submissions/{job_id}"
         response = requests.get(url)
         if response.json().get("job_calibrations") != []:
-            logging.info("Job is done.")
+            logging.info(f"Job is done, Job_ID: {job_id}")
             return response.json().get("job_calibrations")
         else:
-            logging.info("Job is not done.")
+            logging.info(f"Job is not done, Job_ID: {job_id}")
             return False
 
     def get_calibration(self, job_id):
@@ -168,7 +167,7 @@ class AstrometryClient:
 
         """
         if not self.session:
-            logging.warning("Please authenticate first.")
+            logging.warning(f"Please authenticate first, Job_ID: {job_id}")
             return None
 
         url = f"http://nova.astrometry.net/api/jobs/{job_id}/calibration/"
@@ -177,7 +176,7 @@ class AstrometryClient:
             return response.json()
         else:
             logging.error(
-                f"Error getting calibration information. Status code: {response.status_code}"
+                f"Error getting calibration information. Status code: {response.status_code}, Job_ID: {job_id}"
             )
             return None
 
@@ -194,7 +193,7 @@ class AstrometryClient:
             str: The URL of the WCS file if successful, None otherwise.
         """
         if not self.session:
-            logging.warning("Please authenticate first.")
+            logging.warning(f"Please authenticate first, Job_ID: {job_id}")
             return None
 
         url = f"http://nova.astrometry.net/wcs_file/{job_id}"
@@ -202,11 +201,11 @@ class AstrometryClient:
         if response.status_code == 200:
             with open(save_path, "wb") as f:
                 f.write(response.content)
-            logging.info("WCS file downloaded successfully.")
+            logging.info(f"WCS file downloaded successfully, Job_ID: {job_id}")
             return response.url
         else:
             logging.error(
-                f"Error getting WCS file. Status code: {response.status_code}"
+                f"Error getting WCS file. Status code: {response.status_code}, Job_ID: {job_id}"
             )
             return None
 
@@ -224,19 +223,19 @@ def main():
 
     status = client.check_job_status(submission_id)
     if not status:
-        logging.warning("Failed to check job status.")
+        logging.warning(f"Failed to check job status, Job_ID: {submission_id}")
         return
 
     logging.info("Job status: %s", status)
 
     if status != "success":
-        logging.warning("Job is not successful. Aborting...")
+        logging.warning(f"Job is not successful, Job_ID: {submission_id}. Aborting...")
         return
     
     # Check if job is done
     timeout = ConfigLoader().get_value_from_data("timeout")
     for i in range(10):
-        status = client.check_job_status(submission_id)
+        status = client.is_job_done(submission_id)
         if status == True:
             break
         sleep(timeout)
