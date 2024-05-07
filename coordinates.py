@@ -1,5 +1,6 @@
 from astropy import wcs
 from astropy.io import fits
+from astropy.coordinates import SkyCoord
 
 from meteor import Meteor
 
@@ -31,6 +32,28 @@ def pixels_to_world(path: str, meteor: Meteor) -> list[list[float]]:
         world.append([skyCoord.ra.degree,skyCoord.dec.degree])
 
     return world
+
+def world_to_pixel(path: str, meteor: list[list[float]]):
+    """Convert RA and Dec to pixel coordinates
+    
+    Args:
+        path (str): WCS file path
+        meteor (list[list[float]]): Meteor path in RA and Dec
+
+    Returns:
+        list[list[float]]: Meteor path in pixel coordinates
+    """
+
+    # Load WCS from file
+    hdulist = fits.open(path)
+    w = wcs.WCS(hdulist[0].header)
+
+    pixels = []
+    for point in meteor:
+        skyCoord = SkyCoord(ra=point[0], dec=point[1], unit='deg', frame='fk5')
+        pixels.append(w.world_to_pixel(skyCoord))
+
+    return pixels
 
 def load_meteors(path: str) -> list[Meteor]:
     """Load meteor data from data file
