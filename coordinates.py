@@ -2,20 +2,18 @@ from astropy import wcs
 from astropy.io import fits
 from astropy.coordinates import SkyCoord
 
-from meteor import Meteor
-
 from main import AstrometryClient
 import logging
 
 from time import sleep
 from modules import ConfigLoader
 
-def pixels_to_world(path: str, meteor: Meteor) -> list[list[float]]:
+def pixels_to_world(path: str, meteor: list[list[float]]) -> list[list[float]]:
     """Convert pixel data to RA and Dec
     
     Args:
         path (str): WCS file path
-        meteor (Meteor): Meteor instance containing path in pixel coordinates
+        meteor (list[list[float]]): Meteor path in pixel coordinates
 
     Returns:
         list[list[float]]: Meteor path in RA and Dec coordinates
@@ -27,7 +25,7 @@ def pixels_to_world(path: str, meteor: Meteor) -> list[list[float]]:
 
     # Convert pixel coordinates to world coordinates
     world = []
-    for point in meteor.pixels:
+    for point in meteor:
         skyCoord = w.pixel_to_world(point[0], point[1])
         world.append([skyCoord.ra.degree,skyCoord.dec.degree])
 
@@ -55,14 +53,14 @@ def world_to_pixel(path: str, meteor: list[list[float]]):
 
     return pixels
 
-def load_meteors(path: str) -> list[Meteor]:
+def load_meteors(path: str) -> list[list[list[float]]]:
     """Load meteor data from data file
     
     Args:
         path (str): data.txt file path
 
     Returns:
-        list[Meteor]: list of Meteor instances
+        list[lsit[list[float]]]: List of meteor paths
     """
 
     file = open(path, 'r').read().split('\n')
@@ -85,8 +83,7 @@ def load_meteors(path: str) -> list[Meteor]:
             pixels.append([float(data[6]), float(data[11])])
             j += 1
 
-        meteory.append(Meteor(pixels))
-
+        meteory.append(pixels)
         file = file[j:]
 
     return meteory
