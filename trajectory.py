@@ -2,7 +2,7 @@ from math import sin, cos, radians, sqrt, asin, atan
 
 from coordinates import *
 
-def calculateRadiant(pointsA: list[list[float]], stationA: list[float], pointsB: list[list[float]], stationB: list[float]) -> list[float]:
+def calculate_radiant(pointsA: list[list[float]], stationA: list[float], pointsB: list[list[float]], stationB: list[float]) -> list[float]:
     """Calculates the radiant of the meteor according to Ceplecha (1987)
 
     Arguments:
@@ -15,8 +15,8 @@ def calculateRadiant(pointsA: list[list[float]], stationA: list[float], pointsB:
         list[float]: right ascension and declination of meteor radiant
     """
 
-    aa, ba, ca, xa, ya, za = calculateStation(pointsA, stationA[0], stationA[1], stationA[2])
-    ab, bb, cb, xb, yb, zb = calculateStation(pointsB, stationB[0], stationB[1], stationB[2])
+    aa, ba, ca, xa, ya, za = calculate_station(pointsA, stationA[0], stationA[1], stationA[2])
+    ab, bb, cb, xb, yb, zb = calculate_station(pointsB, stationB[0], stationB[1], stationB[2])
     
     d = sqrt((ba * cb - bb * ca) ** 2 + (ab * ca - aa * cb) ** 2 + (aa * bb - ab * ba) ** 2)
 
@@ -29,7 +29,7 @@ def calculateRadiant(pointsA: list[list[float]], stationA: list[float], pointsB:
 
     return [ra, dec]
 
-def calculateStation(points: float, latitude: float, height: float, localSiderialTime: float) -> list[float]:
+def calculate_station(points: float, latitude: float, height: float, localSiderialTime: float) -> list[float]:
     """Calculates station related variables according to Ceplecha (1987)
 
     Arguments:
@@ -54,7 +54,7 @@ def calculateStation(points: float, latitude: float, height: float, localSideria
     # Calculate equation 9 for all meteor points
     XiEta, EtaZeta, EtaEta, XiZeta, XiXi = 0, 0, 0, 0, 0
     for point in points:
-        Xi, Eta, Zeta = calculateMeteorPoint(point[0], point[1])
+        Xi, Eta, Zeta = calculate_meteor_point(point[0], point[1])
 
         XiEta += Xi * Eta
         EtaZeta += Eta * Zeta
@@ -74,7 +74,7 @@ def calculateStation(points: float, latitude: float, height: float, localSideria
     
     return [a, b, c, X, Y, Z]
 
-def calculateMeteorPoint(ra: float, dec: float):
+def calculate_meteor_point(ra: float, dec: float):
     """Calculates Xi, Eta and Zeta values from ra and dec values of meteor point
 
     Attributes:
@@ -101,4 +101,4 @@ if __name__ == '__main__':
     ondrejov = [14.784264, 467, 349.153338135]
     kunzak = [15.190299, 575, 349.558611371]
 
-    print(calculateRadiant(meteorOndrejov, ondrejov, meteorKunzak, kunzak))
+    print(calculate_radiant(meteorOndrejov, ondrejov, meteorKunzak, kunzak))
