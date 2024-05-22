@@ -2,22 +2,21 @@ from math import sin, cos, radians, sqrt, asin, acos, atan, degrees
 
 from coordinates import *
 
-# TODO: Change station format to dict
-def calculate_radiant(pointsA: list[list[float]], stationA: list[float], pointsB: list[list[float]], stationB: list[float]) -> list[float]:
+def calculate_radiant(pointsA: list[list[float]], stationA: dict, pointsB: list[list[float]], stationB: dict) -> list[float]:
     """Calculates the radiant of the meteor according to Ceplecha (1987)
 
     Arguments:
         pointsA (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station A
-        stationA (list[float]): latitude, height and local siderial time of station B
+        stationA dict: latitude, height and local siderial time of station B
         pointsB (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station A
-        stationB (list[float]): latitude, height and local siderial time of station B
+        stationB dict: latitude, height and local siderial time of station B
 
     Returns:
         list[float]: right ascension and declination of meteor radiant
     """
 
-    aa, ba, ca, xa, ya, za = calculate_station(pointsA, stationA[0], stationA[2], stationA[3])
-    ab, bb, cb, xb, yb, zb = calculate_station(pointsB, stationB[0], stationB[2], stationB[3])
+    aa, ba, ca, xa, ya, za = calculate_station(pointsA, stationA['lat'], stationA['height'], stationA['time'])
+    ab, bb, cb, xb, yb, zb = calculate_station(pointsB, stationB['lat'], stationB['height'], stationB['time'])
     
     d = sqrt((ba * cb - bb * ca) ** 2 + (ab * ca - aa * cb) ** 2 + (aa * bb - ab * ba) ** 2)
 
@@ -138,13 +137,13 @@ if __name__ == '__main__':
     meteorKunzak = [[328.1597069832155, 37.053787325732166], [328.3402383901155, 36.90708235404924], [328.4617709161041, 36.74411186962826], [328.55103654515426, 36.67097761814034], [328.6975465924236, 36.61427570399938], [328.72863854978453, 36.52486571142832], [328.9050094249381, 36.378967973255754], [328.9355636507618, 36.28985657919], [329.08015858838144, 36.23329074576101], [329.19720589814045, 36.07171650554443], [329.283816819975, 35.999118028951216], [329.3995362487815, 35.838064408089295], [329.48534557167426, 35.765683429444415], [329.65032484537335, 35.638738174672206], [329.6847729317717, 35.533000887804505], [329.8256319495132, 35.47677332577176], [329.9940206042571, 35.332696530535664], [330.0219257591962, 35.245000183573445], [330.1887676420967, 35.101389083590796], [330.21618432460895, 35.0140119748251], [330.3679939909516, 34.91444608478159], [330.5190273750478, 34.81497228029015], [330.55897237616466, 34.684576998880715], [330.7218458147565, 34.54209923937315], [330.77271457857, 34.483324369189155], [330.8965036556135, 34.356711060376256], [331.0569801128769, 34.21491470918202], [331.2288747917939, 34.03046332726654]]
     meteorKunzak = [[328.1597069832155, 37.053787325732166], [328.3402383901155, 36.90708235404924]]
 
-    # Latitude, longitude, height above sea level, sidereal time
-    ondrejov = [14.784264, 49.904682, 467, 349.153338135]
-    kunzak = [15.190299, 49.121249, 575, 349.558611371]
+    # Latitude, longitude, height above sea level
+    ondrejov = {'lat': 14.784264, 'lon': 49.904682, 'height': 467, 'time': 349.153338135}
+    kunzak = {'lat': 15.190299, 'lon': 49.121249, 'height': 575, 'time': 349.558611371}
 
     # Xi: -0.03140376343675359, Eta: -0.03140376343675359, Zeta: 0.8292512506749482
     # Expected values: Ra: 266.7788, Dec: 56.0219
     radiant = calculate_radiant(meteorOndrejov, ondrejov, meteorKunzak, kunzak)
     print(radiant)
 
-    print(world_to_altaz(radiant[0], radiant[1], ondrejov[0], ondrejov[1], ondrejov[2], '2018-10-8 23:03:54', 1))
+    print(world_to_altaz(radiant[0], radiant[1], ondrejov[0], ondrejov['lat'], ondrejov['lon'], '2018-10-8 23:03:54', 1))
