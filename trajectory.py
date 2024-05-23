@@ -1,4 +1,6 @@
 from math import sin, cos, radians, sqrt, asin, acos, atan, degrees
+import astropy.units as u
+from astropy.time import Time
 
 from coordinates import *
 
@@ -7,53 +9,51 @@ def calculate_radiant(pointsA: list[list[float]], stationA: dict, pointsB: list[
 
     Arguments:
         pointsA (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station A
-        stationA dict: latitude, height and local siderial time of station B
+        stationA dict: latitude, height and time of station B
         pointsB (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station A
-        stationB dict: latitude, height and local siderial time of station B
+        stationB dict: latitude, height and time of station B
 
     Returns:
         list[float]: right ascension and declination of meteor radiant
     """
 
-    aa, ba, ca, xa, ya, za = calculate_station(pointsA, stationA['lat'], stationA['height'], stationA['time'])
-    ab, bb, cb, xb, yb, zb = calculate_station(pointsB, stationB['lat'], stationB['height'], stationB['time'])
+    aa, ba, ca, xa, ya, za = calculate_station(pointsA, stationA['lat'], stationA['lon'], stationA['height'], stationA['time'])
+    ab, bb, cb, xb, yb, zb = calculate_station(pointsB, stationB['lat'], stationB['lon'], stationB['height'], stationB['time'])
     
     d = sqrt((ba * cb - bb * ca) ** 2 + (ab * ca - aa * cb) ** 2 + (aa * bb - ab * ba) ** 2)
 
     Xi = (ba * cb - bb * ca) / d
     Eta = (ab * ca - aa * cb) / d
     Zeta = (aa * bb - ab * ba) / d
-
+    
+    # TODO: Rewrite solver to account for signs of different quadrants
     dec = asin(Zeta)
     ra = acos(Xi / cos(dec))
 
-    # Different calculations for ra
-    print(degrees(ra))
-    print(degrees(asin(Eta/cos(asin(Zeta)))))
-    print(degrees(atan(Eta/Xi)))
-
     return [degrees(ra), degrees(dec)]
 
-def calculate_station(points: float, latitude: float, height: float, localSiderialTime: float) -> list[float]:
+def calculate_station(points: float, latitude: float, longitude: float, height: float, time: float) -> list[float]:
     """Calculates station related variables according to Ceplecha (1987)
 
     Arguments:
         points (list[list[float]]): points of the given meteor
         latitude (float): latitude of the observatory in decimal degrees
         height (float): height of the observatory above sea level
-        localSiderialTime (float): local siderial time in decimal degrees
+        time (float): time of observation
 
     Returns:
         list[float]: values a, b and c
     """
+
+    localSiderealTime = calculate_sidereal_time(time, latitude, longitude, 'utc')
 
     # Calculate equation 7
     geocentricLatitude = latitude - 0.1924240867 * sin(radians(2 * latitude)) + 0.000323122 * sin(radians(4 * latitude)) - 0.0000007235 * sin(radians(6 * latitude))
     R = sqrt(40680669.86 * (1 - 0.0133439554 * pow(sin(radians(latitude)), 2)) / (1 - 0.006694385096 * pow(sin(radians(latitude)), 2)))
 
     # Calculate equation 8
-    X = (R + height) * cos(radians(geocentricLatitude)) * cos(radians(localSiderialTime))
-    Y = (R + height) * cos(radians(geocentricLatitude)) * sin(radians(localSiderialTime))
+    X = (R + height) * cos(radians(geocentricLatitude)) * cos(radians(localSiderealTime))
+    Y = (R + height) * cos(radians(geocentricLatitude)) * sin(radians(localSiderealTime))
     Z = (R + height) * sin(radians(geocentricLatitude))
 
     # Calculate equation 9 for all meteor points
@@ -97,6 +97,10 @@ def calculate_meteor_point(ra: float, dec: float) -> list[float]:
 
     return [Xi, Eta, Zeta]
 
+def calculate_sidereal_time(time, latitude, longitude, time_zone):
+    t = Time(time, scale=time_zone, location=(latitude, longitude))
+    return t.sidereal_time('apparent').degree
+
 def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
     """Image preprocessing for astrometry. Masks out space around sky view and meteor
     
@@ -137,13 +141,13 @@ if __name__ == '__main__':
     meteorKunzak = [[328.1597069832155, 37.053787325732166], [328.3402383901155, 36.90708235404924], [328.4617709161041, 36.74411186962826], [328.55103654515426, 36.67097761814034], [328.6975465924236, 36.61427570399938], [328.72863854978453, 36.52486571142832], [328.9050094249381, 36.378967973255754], [328.9355636507618, 36.28985657919], [329.08015858838144, 36.23329074576101], [329.19720589814045, 36.07171650554443], [329.283816819975, 35.999118028951216], [329.3995362487815, 35.838064408089295], [329.48534557167426, 35.765683429444415], [329.65032484537335, 35.638738174672206], [329.6847729317717, 35.533000887804505], [329.8256319495132, 35.47677332577176], [329.9940206042571, 35.332696530535664], [330.0219257591962, 35.245000183573445], [330.1887676420967, 35.101389083590796], [330.21618432460895, 35.0140119748251], [330.3679939909516, 34.91444608478159], [330.5190273750478, 34.81497228029015], [330.55897237616466, 34.684576998880715], [330.7218458147565, 34.54209923937315], [330.77271457857, 34.483324369189155], [330.8965036556135, 34.356711060376256], [331.0569801128769, 34.21491470918202], [331.2288747917939, 34.03046332726654]]
     meteorKunzak = [[328.1597069832155, 37.053787325732166], [328.3402383901155, 36.90708235404924]]
 
-    # Latitude, longitude, height above sea level
-    ondrejov = {'lat': 14.784264, 'lon': 49.904682, 'height': 467, 'time': 349.153338135}
-    kunzak = {'lat': 15.190299, 'lon': 49.121249, 'height': 575, 'time': 349.558611371}
+    # Latitude, longitude, height above sea level, time of observation
+    ondrejov = {'lat': 14.784264, 'lon': 49.904682, 'height': 467, 'time': '2018-10-8 22:03:54'}
+    kunzak = {'lat': 15.190299, 'lon': 49.121249, 'height': 575, 'time': '2018-10-8 22:03:54'}
 
     # Xi: -0.03140376343675359, Eta: -0.03140376343675359, Zeta: 0.8292512506749482
     # Expected values: Ra: 266.7788, Dec: 56.0219
     radiant = calculate_radiant(meteorOndrejov, ondrejov, meteorKunzak, kunzak)
     print(radiant)
 
-    print(world_to_altaz(radiant[0], radiant[1], ondrejov[0], ondrejov['lat'], ondrejov['lon'], '2018-10-8 23:03:54', 1))
+    # print(world_to_altaz(radiant[0], radiant[1], ondrejov['lat'], ondrejov['lon'], ondrejov['height'], ondrejov['time'], 1))
