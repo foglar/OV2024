@@ -55,7 +55,7 @@ def world_to_pixel(path: str, meteor: list[list[float]]):
 
     return pixels
 
-def world_to_altaz(ra: float, dec: float, lat: float, lon: float, height, time, time_zone: int):
+def world_to_altaz(ra: float, dec: float, lat: float, lon: float, height, time, time_zone: int) -> list[float]:
     """Converts RA and Dec to Alt and Az.
     
     Args:

@@ -7,7 +7,7 @@ from coordinates import *
 def calculate_radiant(pointsA: list[list[float]], stationA: dict, pointsB: list[list[float]], stationB: dict) -> list[float]:
     """Calculates the radiant of the meteor according to Ceplecha (1987)
 
-    Arguments:
+    Args:
         pointsA (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station A
         stationA dict: latitude, height and time of station B
         pointsB (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station A
@@ -35,7 +35,7 @@ def calculate_radiant(pointsA: list[list[float]], stationA: dict, pointsB: list[
 def calculate_station(points: float, latitude: float, longitude: float, height: float, time: float) -> list[float]:
     """Calculates station related variables according to Ceplecha (1987)
 
-    Arguments:
+    Args:
         points (list[list[float]]): points of the given meteor
         latitude (float): latitude of the observatory in decimal degrees
         height (float): height of the observatory above sea level
@@ -45,7 +45,7 @@ def calculate_station(points: float, latitude: float, longitude: float, height: 
         list[float]: values a, b and c
     """
 
-    localSiderealTime = calculate_sidereal_time(time, latitude, longitude, 'utc')
+    localSiderealTime = calculate_sidereal_time(latitude, longitude, time, 1)
 
     # Calculate equation 7
     geocentricLatitude = latitude - 0.1924240867 * sin(radians(2 * latitude)) + 0.000323122 * sin(radians(4 * latitude)) - 0.0000007235 * sin(radians(6 * latitude))
@@ -82,7 +82,7 @@ def calculate_station(points: float, latitude: float, longitude: float, height: 
 def calculate_meteor_point(ra: float, dec: float) -> list[float]:
     """Calculates Xi, Eta and Zeta values from ra and dec values of meteor point
 
-    Attributes:
+    Args:
         ra (float): right ascension in decimal degrees
         dec (float): declination in decimal degrees
 
@@ -97,8 +97,20 @@ def calculate_meteor_point(ra: float, dec: float) -> list[float]:
 
     return [Xi, Eta, Zeta]
 
-def calculate_sidereal_time(time, latitude, longitude, time_zone):
-    t = Time(time, scale=time_zone, location=(latitude, longitude))
+def calculate_sidereal_time(lat: float, lon: float, time, time_zone: int) -> float:
+    """Calculates sidereal time in degrees.
+
+    Args:
+        time: Time at the observatory
+        lat (float): Latitude of observatory
+        lon (float): Longitude of observatory
+        time_zone (int): Offset in hours from GMT
+
+    Returns:
+        float: Sidereal time in degrees
+    """
+
+    t = Time(time, location=(lat, lon)) - u.hour * time_zone
     return t.sidereal_time('apparent').degree
 
 def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
