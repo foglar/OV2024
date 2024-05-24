@@ -17,8 +17,8 @@ def calculate_radiant(pointsA: list[list[float]], stationA: dict, pointsB: list[
         list[float]: right ascension and declination of meteor radiant
     """
 
-    aa, ba, ca, xa, ya, za = calculate_station(pointsA, stationA['lat'], stationA['lon'], stationA['height'], stationA['time'])
-    ab, bb, cb, xb, yb, zb = calculate_station(pointsB, stationB['lat'], stationB['lon'], stationB['height'], stationB['time'])
+    aa, ba, ca, xa, ya, za = calculate_station(pointsA, stationA)
+    ab, bb, cb, xb, yb, zb = calculate_station(pointsB, stationB)
     
     d = sqrt((ba * cb - bb * ca) ** 2 + (ab * ca - aa * cb) ** 2 + (aa * bb - ab * ba) ** 2)
 
@@ -32,29 +32,27 @@ def calculate_radiant(pointsA: list[list[float]], stationA: dict, pointsB: list[
 
     return [degrees(ra), degrees(dec)]
 
-def calculate_station(points: float, latitude: float, longitude: float, height: float, time: float) -> list[float]:
+def calculate_station(points: float, station) -> list[float]:
     """Calculates station related variables according to Ceplecha (1987)
 
     Args:
         points (list[list[float]]): points of the given meteor
-        latitude (float): latitude of the observatory in decimal degrees
-        height (float): height of the observatory above sea level
-        time (float): time of observation
+        station (list[float]): lat, lon, height and time at station
 
     Returns:
-        list[float]: values a, b and c
+        list[float]: vectors (a, b, c) and (X, Y, Z)
     """
 
-    localSiderealTime = calculate_sidereal_time(latitude, longitude, time, 1)
+    localSiderealTime = calculate_sidereal_time(station['lat'], station['lon'], station['time'], station['time_zone'])
 
     # Calculate equation 7
-    geocentricLatitude = latitude - 0.1924240867 * sin(radians(2 * latitude)) + 0.000323122 * sin(radians(4 * latitude)) - 0.0000007235 * sin(radians(6 * latitude))
-    R = sqrt(40680669.86 * (1 - 0.0133439554 * pow(sin(radians(latitude)), 2)) / (1 - 0.006694385096 * pow(sin(radians(latitude)), 2)))
+    geocentricLatitude = station['lat'] - 0.1924240867 * sin(radians(2 * station['lat'])) + 0.000323122 * sin(radians(4 * station['lat'])) - 0.0000007235 * sin(radians(6 * station['lat']))
+    R = sqrt(40680669.86 * (1 - 0.0133439554 * pow(sin(radians(station['lat'])), 2)) / (1 - 0.006694385096 * pow(sin(radians(station['lat'])), 2)))
 
     # Calculate equation 8
-    X = (R + height) * cos(radians(geocentricLatitude)) * cos(radians(localSiderealTime))
-    Y = (R + height) * cos(radians(geocentricLatitude)) * sin(radians(localSiderealTime))
-    Z = (R + height) * sin(radians(geocentricLatitude))
+    X = (R + station['height']) * cos(radians(geocentricLatitude)) * cos(radians(localSiderealTime))
+    Y = (R + station['height']) * cos(radians(geocentricLatitude)) * sin(radians(localSiderealTime))
+    Z = (R + station['height']) * sin(radians(geocentricLatitude))
 
     # Calculate equation 9 for all meteor points
     XiEta, EtaZeta, EtaEta, XiZeta, XiXi = 0, 0, 0, 0, 0
@@ -117,9 +115,9 @@ def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
     """Image preprocessing for astrometry. Masks out space around sky view and meteor
     
     Args:
-        img_path (str): The path to the image to mask.
-        data_path (str): The path to data.txt file describing meteor.
-        tmp_path (str): Path, where the masked image should be saved.
+        img_path (str): The path to the image to mask
+        data_path (str): The path to data.txt file describing meteor
+        tmp_path (str): Path, where the masked image should be saved
 
     Retruns:
         None
@@ -154,8 +152,8 @@ if __name__ == '__main__':
     meteorKunzak = [[328.1597069832155, 37.053787325732166], [328.3402383901155, 36.90708235404924]]
 
     # Latitude, longitude, height above sea level, time of observation
-    ondrejov = {'lat': 14.784264, 'lon': 49.904682, 'height': 467, 'time': '2018-10-8 22:03:54'}
-    kunzak = {'lat': 15.190299, 'lon': 49.121249, 'height': 575, 'time': '2018-10-8 22:03:54'}
+    ondrejov = {'lat': 14.784264, 'lon': 49.904682, 'height': 467, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
+    kunzak = {'lat': 15.190299, 'lon': 49.121249, 'height': 575, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
 
     # Xi: -0.03140376343675359, Eta: -0.03140376343675359, Zeta: 0.8292512506749482
     # Expected values: Ra: 266.7788, Dec: 56.0219
