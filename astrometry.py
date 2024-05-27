@@ -146,10 +146,10 @@ class AstrometryClient:
         url = f"http://nova.astrometry.net/api/submissions/{job_id}"
         response = requests.get(url)
         if response.json().get("job_calibrations") != []:
-            logging.info(f"Job is done, Job_ID: {job_id}")
+            logging.debug(f"Job is done, Job_ID: {job_id}")
             return response.json().get("job_calibrations")
         else:
-            logging.info(f"Job is not done, Job_ID: {job_id}")
+            logging.debug(f"Job is not done, Job_ID: {job_id}")
             return False
 
     def get_calibration(self, job_id):

@@ -45,7 +45,7 @@ home_dir = "/home/foglar/Documents/Programming/Projects/OV2024-Project/meteory"
 - `compare.py` - finds and compares same meteors from two observatories
 - `modules.py` - modules for loading config and etc...
 - `main.py` - runs astrometry for each observation from both observatories in file tree
-- `coodrinates.py` - converts coordinates from pixels to **ra** and **dec**
+- `coordinates.py` - converts coordinates from pixels to **ra** and **dec**
 - `trajectory.py` - calculates meteor trajectory
 
 [astrometryapi]: https://nova.astrometry.net/api_help

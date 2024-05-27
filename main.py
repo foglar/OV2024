@@ -57,6 +57,9 @@ class MeteorsList:
             self.location_a, self.location_b
         )
 
+        # Remove time difference and data.txt file existence
+        comparator = [(item[0][0], item[1][0]) for item in comparator]
+
         data = []
 
         # Get same meteors from two folders
