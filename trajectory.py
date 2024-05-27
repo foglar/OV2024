@@ -1,6 +1,7 @@
-from math import sin, cos, radians, sqrt, asin, acos, atan, degrees
+from math import sin, cos, radians, sqrt, asin, acos, degrees, pi
 import astropy.units as u
 from astropy.time import Time
+import numpy
 
 from coordinates import *
 
@@ -26,11 +27,7 @@ def calculate_radiant(pointsA: list[list[float]], stationA: dict, pointsB: list[
     Eta = (ab * ca - aa * cb) / d
     Zeta = (aa * bb - ab * ba) / d
     
-    # TODO: Rewrite solver to account for signs of different quadrants
-    dec = asin(Zeta)
-    ra = acos(Xi / cos(dec))
-
-    return [degrees(ra), degrees(dec)]
+    return solve_goniometry(-Xi, -Eta, -Zeta)
 
 def calculate_station(points: float, station) -> list[float]:
     """Calculates station related variables according to Ceplecha (1987)
@@ -85,7 +82,7 @@ def calculate_meteor_point(ra: float, dec: float) -> list[float]:
         dec (float): declination in decimal degrees
 
     Returns:
-        list[flaot]:  Geocentric vector Xi, Eta, Zeta
+        list[float]:  Geocentric vector Xi, Eta, Zeta
     """
 
     # Calculate equation 9
@@ -135,6 +132,41 @@ def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
         mask = cv2.circle(mask, (int(point[0]), int(point[1])), 3, (0, 0, 0), -1)
 
     cv2.imwrite(tmp_path, cv2.bitwise_and(mask, image))
+
+def solve_goniometry(Xi: float, Eta: float, Zeta: float) -> list[float]:
+    """Solves equation 9
+    
+    Args:
+        Vector (Xi, Eta, Zeta)
+        
+    Returns:
+        list[float]: RA and Dec in decimal degrees
+    """
+
+    # Calculate dec
+    declinations = [asin(Zeta) if asin(Zeta) > 0 else pi - asin(Zeta),
+                    pi - asin(Zeta) if Zeta >= 0 else 2 * pi - asin(-Zeta)]
+    for dec in declinations:
+        # Check for quadrants
+        # quad 1 2 3 4
+        # sin  + + - -
+        # cos  + - - +
+
+        sinRA = Eta / cos(dec)
+        cosRA = Xi / cos(dec)
+
+        ra = None
+        if sinRA >= 0 and cosRA >= 0:
+            ra = asin(sinRA)
+        if sinRA >= 0 and cosRA < 0:
+            ra = pi - asin(sinRA)
+        if sinRA < 0 and cosRA < 0:
+            ra = pi - asin(sinRA)
+        if sinRA < 0 and cosRA >= 0:
+            ra = 2 * pi - asin(sinRA)
+
+        if numpy.allclose((Xi, Eta, Zeta), (cos(dec)*cos(ra), cos(dec)*sin(ra), sin(dec))):
+            return [degrees(ra), degrees(dec)]
 
 if __name__ == '__main__':
     # Test calculation
