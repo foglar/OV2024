@@ -88,9 +88,9 @@ class MeteorsList:
 
                 if i == 9:
                     raise Exception(f"Job status not successful after {timeout*10} seconds. Status of submission A: {status_a}, Status of submission B: {status_b}. Aborting...")
-
-            calibration_a = obs_a.get_calibration(status_a[0])
-            calibration_b = obs_b.get_calibration(status_b[0])
+            
+            calibration_a = obs_a.get_calibration(status_a[0][0])
+            calibration_b = obs_b.get_calibration(status_b[0][0])
 
             logging.info(f"Calibration A: {calibration_a}")
             logging.info(f"Calibration B: {calibration_b}")
@@ -106,50 +106,6 @@ class MeteorsList:
 
         logging.info(f"Ra and Dec data for each meteor from both stations: {data}")
         return data
-
-
-def main():
-    client = AstrometryClient(api_key=ConfigLoader.get_astrometry_key)
-    client.authenticate()
-    submission_id = client.upload_image("./data/2024-01-08-21-35-44.jpg")
-
-    if not submission_id:
-        logging.error("Image upload failed.")
-        return
-
-    logging.info("Submission ID: %s", submission_id)
-
-    status = client.check_job_status(submission_id)
-    if not status:
-        logging.warning("Failed to check job status.")
-        return
-
-    logging.info("Job status: %s", status)
-
-    if status != "success":
-        logging.warning("Job is not successful. Aborting...")
-        return
-    
-    timeout = ConfigLoader().get_value_from_data("timeout")
-    for i in range(10):
-        status = client.is_job_done(submission_id)
-        if status == True:
-            break
-        sleep(timeout)
-
-        if i == 9:
-            logging.error(f"Job status not successful after {10*timeout} seconds. Aborting...")
-            raise Exception(f"Job status not successful after {timeout*10} seconds. Aborting...")
-        
-
-    client.get_wcs_file(submission_id, "./test.wcs")
-
-    calibration_info = client.get_calibration(submission_id)
-    if calibration_info:
-        print("Calibration information:", calibration_info)
-    else:
-        print("Failed to retrieve calibration information.")
-
 
 if __name__ == "__main__":
     meteors = MeteorsList()
