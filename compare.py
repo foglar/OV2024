@@ -1,5 +1,6 @@
 import os
 import logging
+import datetime
 from modules import ConfigLoader
 
 # Enable or disable logging
@@ -10,6 +11,8 @@ logging.basicConfig(
     datefmt="%d-%b-%y %H:%M:%S",
     level=logging.INFO,
 )
+
+TIME_TOLERANCE = int(ConfigLoader().get_value_from_data("time_tolerance"))
 class FolderComparator:
     """
     A class that compares two folders and finds matching subfolders.
@@ -26,6 +29,50 @@ class FolderComparator:
     def __init__(self):
         self.config = ConfigLoader()
         self.home_dir = self.config.get_home_dir()
+
+    def parse_folder_name(self, folder):
+        """
+        Parses the folder name to extract the date and time information.
+
+        Args:
+            folder (str): The name of the folder.
+
+        Returns:
+            tuple: A tuple containing the date and time information.
+
+        """
+        
+        folder = folder.split("-")
+        
+        year = folder[0]
+        month = folder[1]
+        day = folder[2]
+        hour = folder[3]
+        minute = folder[4]
+        second = folder[5]
+
+        return datetime.datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
+    
+    def compare_folders(self, folder1, folder2):
+        """
+        Compares two folders based on their date and time information.
+
+        Args:
+            folder1 (str): The name of the first folder.
+            folder2 (str): The name of the second folder.
+
+        Returns:
+            bool: True if the folders are within the time tolerance, False otherwise.
+
+        """
+        date1 = self.parse_folder_name(folder1)
+        date2 = self.parse_folder_name(folder2)
+
+        time_difference = abs(date1 - date2).total_seconds()
+        logging.info(f"Time difference: {time_difference}, Time tolerance: {TIME_TOLERANCE} - date1: {date1}, date2: {date2}")
+
+        if time_difference <= TIME_TOLERANCE:
+            return True
 
     def find_matching_folders(self, folder1, folder2):
         """
@@ -56,13 +103,11 @@ class FolderComparator:
 
         logging.info(f"Subfiles in {folder2}: {folders2}")
 
-        # TODO: Add more complex logic to compare folders, tolerance for different timestamps...
         matching_folders = []
         for folder in folders1:
-            if folder in folders2:
-                matching_folders.append(
-                    (os.path.join(path1, folder), os.path.join(path2, folder))
-                )
+            for folder2 in folders2:
+                if self.compare_folders(folder, folder2):
+                    matching_folders.append((os.path.join(path1, folder), os.path.join(path2, folder)))
 
         return matching_folders
 

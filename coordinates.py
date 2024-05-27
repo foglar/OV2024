@@ -1,7 +1,8 @@
 from astropy import wcs
 from astropy.io import fits
-
-from meteor import Meteor
+from astropy.coordinates import SkyCoord, AltAz, EarthLocation
+from astropy.time import Time
+import astropy.units as u
 
 from main import AstrometryClient
 import logging
@@ -9,12 +10,12 @@ import logging
 from time import sleep
 from modules import ConfigLoader
 
-def pixels_to_world(path: str, meteor: Meteor) -> list[list[float]]:
+def pixels_to_world(path: str, meteor: list[list[float]]) -> list[list[float]]:
     """Convert pixel data to RA and Dec
     
     Args:
         path (str): WCS file path
-        meteor (Meteor): Meteor instance containing path in pixel coordinates
+        meteor (list[list[float]]): Meteor path in pixel coordinates
 
     Returns:
         list[list[float]]: Meteor path in RA and Dec coordinates
@@ -26,19 +27,65 @@ def pixels_to_world(path: str, meteor: Meteor) -> list[list[float]]:
 
     # Convert pixel coordinates to world coordinates
     world = []
-    for point in meteor.pixels:
-        world.append(w.pixel_to_world(point[0], point[1]))
+    for point in meteor:
+        skyCoord = w.pixel_to_world(point[0], point[1])
+        world.append([skyCoord.ra.degree,skyCoord.dec.degree])
 
     return world
 
-def load_meteors(path: str) -> list[Meteor]:
+def world_to_pixel(path: str, meteor: list[list[float]]):
+    """Convert RA and Dec to pixel coordinates
+    
+    Args:
+        path (str): WCS file path
+        meteor (list[list[float]]): Meteor path in RA and Dec
+
+    Returns:
+        list[list[float]]: Meteor path in pixel coordinates
+    """
+
+    # Load WCS from file
+    hdulist = fits.open(path)
+    w = wcs.WCS(hdulist[0].header)
+
+    pixels = []
+    for point in meteor:
+        skyCoord = SkyCoord(ra=point[0], dec=point[1], unit='deg', frame='fk5')
+        pixels.append(w.world_to_pixel(skyCoord))
+
+    return pixels
+
+def world_to_altaz(ra: float, dec: float, lat: float, lon: float, height, time, time_zone: int) -> list[float]:
+    """Converts RA and Dec to Alt and Az.
+    
+    Args:
+        ra (float): Right ascension
+        dec (float): Declination
+        lat (float): Latitude of observatory
+        lon (float): Longitude of observatory
+        height (float): Height above sea level
+        time: Time at the observatory in astropy understandeable format
+        time_zone (int): Offset in hours from GMT
+        
+    Returns:
+        list[float]: Altitude and azimuth of the object
+    """
+
+    skyCoord = SkyCoord(ra=ra, dec=dec, unit='deg', frame='fk5')
+    time = Time(time) - u.hour * time_zone
+    observatory = EarthLocation(lat=lat * u.deg, lon=lon * u.deg, height=height * u.m)
+
+    altaz = skyCoord.transform_to(AltAz(obstime=time, location=observatory))
+    return [altaz.alt.degree, altaz.az.degree]
+
+def load_meteors(path: str) -> list[list[list[float]]]:
     """Load meteor data from data file
     
     Args:
         path (str): data.txt file path
 
     Returns:
-        list[Meteor]: list of Meteor instances
+        list[lsit[list[float]]]: List of meteor paths
     """
 
     file = open(path, 'r').read().split('\n')
@@ -61,8 +108,7 @@ def load_meteors(path: str) -> list[Meteor]:
             pixels.append([float(data[6]), float(data[11])])
             j += 1
 
-        meteory.append(Meteor(pixels))
-
+        meteory.append(pixels)
         file = file[j:]
 
     return meteory
