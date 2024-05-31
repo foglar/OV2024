@@ -128,3 +128,7 @@ test.wcs
 data/2024-01-08-21-35-44.mof
 
 data/2024-01-08-21-35-44.mvf
+
+calibration.wcs
+
+.idea/

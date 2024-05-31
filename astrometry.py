@@ -146,10 +146,10 @@ class AstrometryClient:
         url = f"http://nova.astrometry.net/api/submissions/{job_id}"
         response = requests.get(url)
         if response.json().get("job_calibrations") != []:
-            logging.info(f"Job is done, Job_ID: {job_id}")
+            logging.debug(f"Job is done, Job_ID: {job_id}")
             return response.json().get("job_calibrations")
         else:
-            logging.info(f"Job is not done, Job_ID: {job_id}")
+            logging.debug(f"Job is not done, Job_ID: {job_id}")
             return False
 
     def get_calibration(self, job_id):
@@ -236,7 +236,7 @@ def main():
     timeout = ConfigLoader().get_value_from_data("timeout")
     for i in range(10):
         status = client.is_job_done(submission_id)
-        if status == True:
+        if status != False:
             break
         sleep(timeout)
 
@@ -250,14 +250,14 @@ def main():
     # ) == [] or client.check_submission_status(submission_id) == [None]:
     #     sleep(ConfigLoader().get_value_from_data("timeout"))
 
-    wcs_file_url = client.get_wcs_file(submission_id, "./test.wcs")
+    wcs_file_url = client.get_wcs_file(status[0][0], "./test.wcs")
     if not wcs_file_url:
         logging.error("Failed to get WCS file URL.")
         return
 
     logging.info("WCS file URL: %s", wcs_file_url)
 
-    calibration_info = client.get_calibration(submission_id)
+    calibration_info = client.get_calibration(status[0][0])
     if calibration_info:
         print("Calibration information:", calibration_info)
     else:
