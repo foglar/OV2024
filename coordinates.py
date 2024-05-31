@@ -55,25 +55,21 @@ def world_to_pixel(path: str, meteor: list[list[float]]):
 
     return pixels
 
-def world_to_altaz(ra: float, dec: float, lat: float, lon: float, height, time, time_zone: int) -> list[float]:
+def world_to_altaz(ra: float, dec: float, station) -> list[float]:
     """Converts RA and Dec to Alt and Az.
     
     Args:
         ra (float): Right ascension
         dec (float): Declination
-        lat (float): Latitude of observatory
-        lon (float): Longitude of observatory
-        height (float): Height above sea level
-        time: Time at the observatory in astropy understandeable format
-        time_zone (int): Offset in hours from GMT
+        station: Dict containing information about the station
         
     Returns:
         list[float]: Altitude and azimuth of the object
     """
 
     skyCoord = SkyCoord(ra=ra, dec=dec, unit='deg', frame='fk5')
-    time = Time(time) - u.hour * time_zone
-    observatory = EarthLocation(lat=lat * u.deg, lon=lon * u.deg, height=height * u.m)
+    time = Time(time) - u.hour * station['time_zone']
+    observatory = EarthLocation(lat=station['lat'] * u.deg, lon=station['lon'] * u.deg, height=station['height'] * u.m)
 
     altaz = skyCoord.transform_to(AltAz(obstime=time, location=observatory))
     return [altaz.alt.degree, altaz.az.degree]

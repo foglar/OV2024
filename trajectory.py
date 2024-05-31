@@ -31,7 +31,7 @@ def calculate_radiant(pointsA: list[list[float]], stationA: dict, pointsB: list[
 
     ra, dec = solve_goniometry(Xi, Eta, Zeta)
     # If the radiant is under the horizon, change sign of Xi, Eta, Zeta
-    if world_to_altaz(ra, dec, stationA['lat'], stationA['lon'], stationA['height'], stationA['time'], stationA['time_zone'])[0] < 0:
+    if world_to_altaz(ra, dec, stationA)[0] < 0 or world_to_altaz(ra, dec, stationB)[0] < 0:
         ra, dec = solve_goniometry(-Xi, -Eta, -Zeta)
 
     return ra, dec, angle
