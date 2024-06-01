@@ -79,7 +79,7 @@ def calculate_station(points: float, station) -> list[float]:
     b = bdash / ddash
     c = cdash / ddash
 
-    return [a, b, c, X, Y, Z]
+    return a, b, c, X, Y, Z
 
 def calculate_meteor_point(ra: float, dec: float) -> list[float]:
     """Calculates Xi, Eta and Zeta values from ra and dec values of meteor point
@@ -97,7 +97,7 @@ def calculate_meteor_point(ra: float, dec: float) -> list[float]:
     Eta = cos(radians(dec)) * sin(radians(ra))
     Zeta = sin(radians(dec))
 
-    return [Xi, Eta, Zeta]
+    return Xi, Eta, Zeta
 
 def calculate_sidereal_time(lat: float, lon: float, time, time_zone: int) -> float:
     """Calculates sidereal time in degrees.
@@ -236,11 +236,8 @@ def plot_meteor_radiant(radiantA: list[float], radiantB: list[float], meteorA: l
 
     plot.show()
 
-
-if __name__ == '__main__':
-    # Latitude, longitude, height above sea level, time of observation
-    ondrejov = {'lat': 14.784264, 'lon': 49.904682, 'height': 467, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
-    kunzak = {'lat': 15.190299, 'lon': 49.121249, 'height': 575, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
+def test_radiant_calculation() -> None:
+    """Tests the radiant calculation procedure"""
 
     meteoryDir = './meteory/'
 
@@ -271,6 +268,43 @@ if __name__ == '__main__':
     meteorKunzak = [[327.429, 37.968],[327.552, 37.916],[327.615, 37.886],[327.693, 37.811],[327.750, 37.720],[327.846, 37.631],[327.996, 37.529],[328.078, 37.437],[328.177, 37.370],[328.218, 37.286],[328.359, 37.126],[328.477, 37.075],[328.522, 36.974],[328.696, 36.903],[328.745, 36.785],[328.877, 36.721],[328.963, 36.643],[329.058, 36.494],[329.177, 36.427],[329.255, 36.330],[329.355, 36.239],[329.500, 36.117],[329.608, 35.994],[329.625, 35.935],[329.754, 35.820],[329.862, 35.735],[329.980, 35.608],[330.075, 35.520],[330.147, 35.426],[330.316, 35.327],[330.411, 35.232],[330.501, 35.154],[330.626, 35.025],[330.723, 34.916],[330.790, 34.832],[330.878, 34.704],[330.961, 34.643],[331.055, 34.536],[331.152, 34.412],[331.223, 34.299],[331.350, 34.187],[331.414, 34.098],[331.532, 34.018],[331.619, 33.921],[331.651, 33.824],[331.788, 33.695],[331.926, 33.552],[331.983, 33.489],[332.072, 33.420],[332.164, 33.281],[332.254, 33.143],[332.390, 33.100],[332.484, 32.934],[332.523, 32.892],[332.641, 32.760]]
 
     ra, dec, angle = calculate_radiant(meteorOndrejov, ondrejov, meteorKunzak, kunzak)
+    print(ra, dec, angle)
     
     # Plot the meteor trajectory and radiant
     plot_meteor_radiant([ra, dec], radiants[0], meteorOndrejov, meteorKunzak)
+
+def test_plane_intersection_calculation() -> bool:
+    """Tests the plane intersection calculation function"""
+
+    from random import randint
+
+    # Choose random plane slopes
+    planeA = [1, 1, 0] # [randint(-5, 5), randint(-5, 5), randint(-5, 5)]
+    planeB = [1, 0, 1] # [randint(-5, 5), randint(-5, 5), randint(-5, 5)]
+    planeC = [0, 1, 1] # [randint(-5, 5), randint(-5, 5), randint(-5, 5)]
+
+    # Choose random point for planes to intersect in
+    point = [randint(-5, 5), randint(-5, 5), randint(-5, 5)]
+
+    # Calculate d values for planes
+    planeA.append(-(planeA[0]*point[0] + planeA[1]*point[1] + planeA[2]*point[2]))
+    planeB.append(-(planeB[0]*point[0] + planeB[1]*point[1] + planeB[2]*point[2]))
+    planeC.append(-(planeC[0]*point[0] + planeC[1]*point[1] + planeC[2]*point[2]))
+
+    calculatedPoint = solve_plane_intersection(planeA, planeB, planeC)
+
+    if not numpy.allclose(point, calculatedPoint):
+        print(point, calculatedPoint)
+        return False
+    return True
+
+if __name__ == '__main__':
+    # Latitude, longitude, height above sea level, time of observation
+    ondrejov = {'lat': 14.784264, 'lon': 49.904682, 'height': 467, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
+    kunzak = {'lat': 15.190299, 'lon': 49.121249, 'height': 575, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
+
+    count = 0
+    for i in range(1000):
+        if not test_plane_intersection_calculation():
+            count += 1
+    print(count)
