@@ -192,15 +192,11 @@ def solve_plane_intersection(planeA: list[float], planeB: list[float], planeC: l
         list[float]: coordinates X, Y and Z of intersection
     """
 
-    aa, ba, ca, da = planeA
-    ab, bb, cb, db = planeB
-    ac, bc, cc, dc = planeC
+    a = numpy.array([planeA[:3], planeB[:3], planeC[:3]])
+    # Invert d since numpy assumes ax + by + cz = d
+    b = numpy.array([-planeA[3], -planeB[3], -planeC[3]])
 
-    Z = ((-ab*ca-cb*da+aa*db)*(aa*bc-ac*ba)+(aa*dc-ac*da)*(ab*ba-aa*bb))/((aa**2*cb*bc-aa*cb*ac*bc)+(ab*ba-aa*bb)*(ac*ca+aa*cc))
-    Y = (-ab*ca-ab*da+aa*cb*Z+aa*db)/(ab*ba-aa*bb)
-    X = -(ba*Y+ca*Z+da)/aa
-
-    return X, Y, Z
+    return list(numpy.linalg.solve(a, b))
 
 def plot_meteor_radiant(radiantA: list[float], radiantB: list[float], meteorA: list[float], meteorB: list[float]) -> None:
     """Plots calculated meteor radiant, comparison radiant and meteor tracks
@@ -276,15 +272,15 @@ def test_radiant_calculation() -> None:
 def test_plane_intersection_calculation() -> bool:
     """Tests the plane intersection calculation function"""
 
-    from random import randint
+    from random import random
 
     # Choose random plane slopes
-    planeA = [1, 1, 0] # [randint(-5, 5), randint(-5, 5), randint(-5, 5)]
-    planeB = [1, 0, 1] # [randint(-5, 5), randint(-5, 5), randint(-5, 5)]
-    planeC = [0, 1, 1] # [randint(-5, 5), randint(-5, 5), randint(-5, 5)]
+    planeA = [random() - 0.5, random() - 0.5, random() - 0.5]
+    planeB = [random() - 0.5, random() - 0.5, random() - 0.5]
+    planeC = [random() - 0.5, random() - 0.5, random() - 0.5]
 
     # Choose random point for planes to intersect in
-    point = [randint(-5, 5), randint(-5, 5), randint(-5, 5)]
+    point = [random() - 0.5, random() - 0.5, random() - 0.5]
 
     # Calculate d values for planes
     planeA.append(-(planeA[0]*point[0] + planeA[1]*point[1] + planeA[2]*point[2]))
