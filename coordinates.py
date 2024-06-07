@@ -142,7 +142,7 @@ def load_meteors(path: str) -> list[list[list[float]]]:
 
 # TODO: Currently handles only a single meteor from observation, should handle all included in the data.txt file
 # TODO: Separate downloading a WCS file into it's own function
-def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path) -> list[list[float]]:
+def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: str) -> list[list[float]]:
     """Do astrometry and return meteor path in RA and Dec
     
     Args:
