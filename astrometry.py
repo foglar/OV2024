@@ -71,9 +71,9 @@ class AstrometryClient:
         }
         response = requests.post("http://nova.astrometry.net/api/upload", files=files)
 
-        logging.info("Status code: %s", response.json())
+        logging.debug("Status code: %s", response.json())
         if response.status_code == 200:
-            logging.info(
+            logging.debug(
                 "Image upload successful. Submission ID: %s", response.json()["subid"]
             )
             return response.json()["subid"]

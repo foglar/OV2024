@@ -57,6 +57,24 @@ class FolderComparator:
             int(year), int(month), int(day), int(hour), int(minute), int(second)
         )
 
+    def get_dir(self, num):
+        # List all directories in the home directory
+        dirs = [
+            d
+            for d in os.listdir(self.home_dir)
+            if os.path.isdir(os.path.join(self.home_dir, d))
+        ]
+
+        dirs.sort()
+
+        if num > len(dirs):
+            raise ValueError(f"Directory {num} does not exist.")
+        
+        if len(dirs) > 2:
+            logging.warning("More than two directories detected. Using the first two directories.")
+
+        return dirs[num - 1]
+
     def compare_folders(self, folder1, folder2):
         """
         Compares two folders based on their date and time information.
@@ -82,7 +100,11 @@ class FolderComparator:
         else:
             return None
 
-    def find_matching_folders(self, folder1, folder2):
+    def find_matching_folders(
+        self,
+        folder1=None,
+        folder2=None,
+    ):
         """
         Finds matching subfolders between two given folders.
 
@@ -94,6 +116,14 @@ class FolderComparator:
             list: A list of tuples containing the paths of matching subfolders, and whether the data.txt file exists in each folder.
 
         """
+
+        if folder1 is None:
+            logging.debug("No folder1 provided. Using the first directory.")
+            folder1 = self.get_dir(1)
+        if folder2 is None:
+            logging.debug("No folder2 provided. Using the second directory.")
+            folder2 = self.get_dir(2)
+
         path1 = os.path.join(self.home_dir, folder1)
         logging.info(f"Path 1: {path1}")
         path2 = os.path.join(self.home_dir, folder2)
@@ -127,11 +157,19 @@ class FolderComparator:
                         logging.info(f"Data.txt file not found in {folder2}")
                         data_file_exists1 = False
 
+                    date1 = self.parse_folder_name(folder)
+                    date2 = self.parse_folder_name(folder2)
+                    
+                    time1 = date1.strftime("%H:%M:%S")
+                    time2 = date2.strftime("%H:%M:%S")
+                    date1 = date1.strftime("%d.%m.%Y")
+                    date2 = date2.strftime("%d.%m.%Y")
+
                     logging.info(f"Matching folders: {folder}, {folder2}")
                     matching_folders.append(
                         (
-                            (os.path.join(path1, folder), data_file_exists),
-                            (os.path.join(path2, folder2), data_file_exists1),
+                            (os.path.join(path1, folder), data_file_exists, date1, time1,),
+                            (os.path.join(path2, folder2), data_file_exists1, date2, time2,),
                             time_dif,
                         )
                     )
@@ -146,4 +184,6 @@ if __name__ == "__main__":
     for folder in matching_folders:
         print(folder[0][0], folder[1][0])
         print("Time difference:", folder[2])
-    print("Number of meteors observed from both observatories:", len(matching_folders))
+        print(
+            "Number of meteors observed from both observatories:", len(matching_folders)
+        )

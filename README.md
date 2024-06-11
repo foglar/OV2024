@@ -2,7 +2,7 @@
 
 ## Requirements and Installation
 
-```bash
+```shell
 git clone https://github.com/foglar/ov2024.git
 
 cd ov2024

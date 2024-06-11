@@ -10,6 +10,22 @@ import logging
 from time import sleep
 from modules import ConfigLoader
 
+def get_meteor_start_end_coordinates(path: str) -> list[float]:
+    """Get meteor coordinates from data.txt file
+    
+    Args:
+        path (str): data.txt file path
+
+    Returns:
+        list[float]: Meteor coordinates
+    """
+    file = open(path, 'r').read().split('\n')
+    # If line starts with #Meteor 1: it is the first meteor, get the coordinates from the line
+    for line in file:
+        if line.startswith("#Meteor 1:"):
+            return [float(x) for x in line.split(' ')[2:]]  # Return the coordinates of the meteor
+    
+
 def pixels_to_world(path: str, meteor: list[list[float]]) -> list[list[float]]:
     """Convert pixel data to RA and Dec
     
