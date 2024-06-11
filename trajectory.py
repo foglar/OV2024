@@ -26,8 +26,15 @@ def calculate_radiant(pointsA: list[list[float]], stationA: dict, pointsB: list[
     Xi = (ba * cb - bb * ca) / d
     Eta = (ab * ca - aa * cb) / d
     Zeta = (aa * bb - ab * ba) / d
-    
-    return solve_goniometry(-Xi, -Eta, -Zeta)
+
+    angle = degrees(acos(abs(aa*ab + ba*bb + ca*cb)) / sqrt((aa**2+ba**2+ca**2)*(ab**2+bb**2+cb**2)))
+
+    ra, dec = solve_goniometry(Xi, Eta, Zeta)
+    # If the radiant is under the horizon, change sign of Xi, Eta, Zeta
+    if world_to_altaz(ra, dec, stationA)[0] < 0 or world_to_altaz(ra, dec, stationB)[0] < 0:
+        ra, dec = solve_goniometry(-Xi, -Eta, -Zeta)
+
+    return ra, dec, angle
 
 def calculate_station(points: float, station) -> list[float]:
     """Calculates station related variables according to Ceplecha (1987)
@@ -72,7 +79,7 @@ def calculate_station(points: float, station) -> list[float]:
     b = bdash / ddash
     c = cdash / ddash
 
-    return [a, b, c, X, Y, Z]
+    return a, b, c, X, Y, Z
 
 def calculate_meteor_point(ra: float, dec: float) -> list[float]:
     """Calculates Xi, Eta and Zeta values from ra and dec values of meteor point
@@ -90,7 +97,7 @@ def calculate_meteor_point(ra: float, dec: float) -> list[float]:
     Eta = cos(radians(dec)) * sin(radians(ra))
     Zeta = sin(radians(dec))
 
-    return [Xi, Eta, Zeta]
+    return Xi, Eta, Zeta
 
 def calculate_sidereal_time(lat: float, lon: float, time, time_zone: int) -> float:
     """Calculates sidereal time in degrees.
@@ -144,16 +151,20 @@ def solve_goniometry(Xi: float, Eta: float, Zeta: float) -> list[float]:
     """
 
     # Calculate dec
-    declinations = [asin(Zeta) if asin(Zeta) > 0 else pi - asin(Zeta),
-                    pi - asin(Zeta) if Zeta >= 0 else 2 * pi - asin(-Zeta)]
+    declinations = [asin(Zeta), pi - asin(Zeta) if Zeta >= 0 else 2 * pi - asin(-Zeta)]
     for dec in declinations:
+        # Skip if Dec is outside of it's domain
+        if dec > 90 and dec < -90:
+            break
+
         # Check for quadrants
         # quad 1 2 3 4
         # sin  + + - -
         # cos  + - - +
 
-        sinRA = Eta / cos(dec)
-        cosRA = Xi / cos(dec)
+        # Float math can result in values slightly outside domains, round
+        sinRA = round(Eta / cos(dec), 12)
+        cosRA = round(Xi / cos(dec), 12)
 
         ra = None
         if sinRA >= 0 and cosRA >= 0:
@@ -163,44 +174,133 @@ def solve_goniometry(Xi: float, Eta: float, Zeta: float) -> list[float]:
         if sinRA < 0 and cosRA < 0:
             ra = pi - asin(sinRA)
         if sinRA < 0 and cosRA >= 0:
-            ra = 2 * pi - asin(sinRA)
+            ra = 2 * pi + asin(sinRA)
 
         if numpy.allclose((Xi, Eta, Zeta), (cos(dec)*cos(ra), cos(dec)*sin(ra), sin(dec))):
-            return [degrees(ra), degrees(dec)]
+            print()
+            return degrees(ra), degrees(dec)
+
+def solve_plane_intersection(planeA: list[float], planeB: list[float], planeC: list[float]) -> list[float]:
+    """Finds the intersection of three planes defined by (a, b, c) and d by equation 19
+
+    Args:
+        planeA (list[float]): values a, b, c and d of plane A
+        planeB (list[float]): values a, b, c and d of plane B
+        planeC (list[float]): values a, b, c and d of plane C
+
+    Returns:
+        list[float]: coordinates X, Y and Z of intersection
+    """
+
+    a = numpy.array([planeA[:3], planeB[:3], planeC[:3]])
+    # Invert d since numpy assumes ax + by + cz = d
+    b = numpy.array([-planeA[3], -planeB[3], -planeC[3]])
+
+    return list(numpy.linalg.solve(a, b))
+
+def plot_meteor_radiant(radiantA: list[float], radiantB: list[float], meteorA: list[float], meteorB: list[float]) -> None:
+    """Plots calculated meteor radiant, comparison radiant and meteor tracks
+
+    Args:
+        radiantA (list[float]): One of the radiants to be ploted
+        radiantB (list[float]): The other radiant to be ploted
+        meteorA (list[float]): One of the meteor tracks to be ploted
+        meteorB (list[float]): The other meteor track to be ploted
+
+    Returns:
+        None
+    """
+    import matplotlib.pyplot as plot
+    fig, ax = plot.subplots()
+
+    x, y = [], []
+    for point in meteorA:
+        ax.scatter(point[0], point[1], color = 'b')
+        x.append(point[0])
+        y.append(point[1])
+    ax.plot(x, y)
+    
+    x, y = [], []
+    for point in meteorB:
+        ax.scatter(point[0], point[1], color = 'y')
+        x.append(point[0])
+        y.append(point[1])
+    ax.plot(x, y)
+
+    ax.scatter(radiantA[0], radiantA[1], color = 'r')
+    ax.scatter(radiantB[0], radiantB[1], color = 'm')
+
+    plot.show()
+
+def test_radiant_calculation() -> None:
+    """Tests the radiant calculation procedure"""
+
+    meteoryDir = './meteory/'
+
+    meteorPathsOndrejov = [
+        ['18a08183/2018-10-08-23-03-53m.jpg', '18a08183/2018-10-08-23-03-53m.txt'],
+        ['18a08223/2018-10-08-23-29-55m.jpg', '18a08223/2018-10-08-23-29-55m.txt'],
+        ['18A08052/2018-10-08-20-56-01m.jpg', '18A08052/2018-10-08-20-56-01m.txt'],
+        ['18A08085/2018-10-08-21-38-32m.jpg', '18A08085/2018-10-08-21-38-32m.txt'],
+        ['18A08215/2018-10-08-23-21-02m.jpg', '18A08215/2018-10-08-23-21-02m.txt'],
+    ]
+    meteorPathsKunzak = [
+        ['18a08183/2018-10-08-23-03-53n.jpg', '18a08183/2018-10-08-23-03-53n.txt'],
+        ['18a08223/2018-10-08-23-29-55n.jpg', '18a08223/2018-10-08-23-29-55n.txt'],
+        ['18A08052/2018-10-08-20-56-00n.jpg', '18A08052/2018-10-08-20-56-00n.txt'],
+        ['18A08085/2018-10-08-21-38-32n.jpg', '18A08085/2018-10-08-21-38-32n.txt'],
+        ['18A08215/2018-10-08-23-21-02n.jpg', '18A08215/2018-10-08-23-21-02n.txt'],
+    ]
+
+    radiants = [
+        [262.1776, 56.0219],
+        [260.8404, 55.8957],
+        [320.8006, 58.7769],
+        [271.9055, 53.8931],
+        [262.7624, 56.0977],
+    ]
+
+    meteorOndrejov = [[358.647, 8.286], [358.711, 8.142], [358.776, 8.031], [358.838, 7.912], [358.892, 7.772], [359.003, 7.642], [359.094, 7.543], [359.162, 7.386], [359.220, 7.233], [359.304, 7.092], [359.396, 6.971], [359.456, 6.852], [359.559, 6.680], [359.612, 6.599], [359.693, 6.482], [359.777, 6.318], [359.863, 6.188], [359.945, 6.049], [0.027, 5.910], [0.085, 5.792], [0.161, 5.667], [0.243, 5.505], [0.342, 5.359], [0.408, 5.239], [0.471, 5.085], [0.564, 4.954], [0.642, 4.840], [0.707, 4.720], [0.798, 4.612], [0.886, 4.449], [0.948, 4.298], [1.038, 4.168], [1.105, 4.082], [1.169, 3.964], [1.285, 3.824], [1.344, 3.697], [1.360, 3.588], [1.482, 3.468], [1.550, 3.315], [1.654, 3.226], [1.709, 3.068], [1.750, 2.950], [1.793, 2.887], [1.935, 2.749], [1.992, 2.624], [2.048, 2.545], [2.131, 2.343], [2.208, 2.199], [2.285, 2.101], [2.323, 2.029], [2.441, 1.847], [2.542, 1.695], [2.579, 1.669], [2.609, 1.557], [2.676, 1.438], [2.745, 1.380]]
+    meteorKunzak = [[327.429, 37.968],[327.552, 37.916],[327.615, 37.886],[327.693, 37.811],[327.750, 37.720],[327.846, 37.631],[327.996, 37.529],[328.078, 37.437],[328.177, 37.370],[328.218, 37.286],[328.359, 37.126],[328.477, 37.075],[328.522, 36.974],[328.696, 36.903],[328.745, 36.785],[328.877, 36.721],[328.963, 36.643],[329.058, 36.494],[329.177, 36.427],[329.255, 36.330],[329.355, 36.239],[329.500, 36.117],[329.608, 35.994],[329.625, 35.935],[329.754, 35.820],[329.862, 35.735],[329.980, 35.608],[330.075, 35.520],[330.147, 35.426],[330.316, 35.327],[330.411, 35.232],[330.501, 35.154],[330.626, 35.025],[330.723, 34.916],[330.790, 34.832],[330.878, 34.704],[330.961, 34.643],[331.055, 34.536],[331.152, 34.412],[331.223, 34.299],[331.350, 34.187],[331.414, 34.098],[331.532, 34.018],[331.619, 33.921],[331.651, 33.824],[331.788, 33.695],[331.926, 33.552],[331.983, 33.489],[332.072, 33.420],[332.164, 33.281],[332.254, 33.143],[332.390, 33.100],[332.484, 32.934],[332.523, 32.892],[332.641, 32.760]]
+
+    ra, dec, angle = calculate_radiant(meteorOndrejov, ondrejov, meteorKunzak, kunzak)
+    print(ra, dec, angle)
+    
+    # Plot the meteor trajectory and radiant
+    plot_meteor_radiant([ra, dec], radiants[0], meteorOndrejov, meteorKunzak)
+
+def test_plane_intersection_calculation() -> bool:
+    """Tests the plane intersection calculation function"""
+
+    from random import random
+
+    # Choose random plane slopes
+    planeA = [random() - 0.5, random() - 0.5, random() - 0.5]
+    planeB = [random() - 0.5, random() - 0.5, random() - 0.5]
+    planeC = [random() - 0.5, random() - 0.5, random() - 0.5]
+
+    # Choose random point for planes to intersect in
+    point = [random() - 0.5, random() - 0.5, random() - 0.5]
+
+    # Calculate d values for planes
+    planeA.append(-(planeA[0]*point[0] + planeA[1]*point[1] + planeA[2]*point[2]))
+    planeB.append(-(planeB[0]*point[0] + planeB[1]*point[1] + planeB[2]*point[2]))
+    planeC.append(-(planeC[0]*point[0] + planeC[1]*point[1] + planeC[2]*point[2]))
+
+    calculatedPoint = solve_plane_intersection(planeA, planeB, planeC)
+
+    if not numpy.allclose(point, calculatedPoint):
+        print(point, calculatedPoint)
+        return False
+    return True
 
 if __name__ == '__main__':
-    # Test calculation
-    # client = AstrometryClient()
-    # client.authenticate()
-
-    # preprocess('./meteory/18a08183/2018-10-08-23-03-53m.jpg', './meteory/18a08183/2018-10-08-23-03-53m.txt', 'tmp1.jpg')
-    # meteorOndrejov = get_meteor_coordinates(client, 'tmp1.jpg', './meteory/18a08183/2018-10-08-23-03-53m.txt')
-    meteorOndrejov = [[358.5777139871662, 5.971324665640321], [358.6504312221906, 5.831861098827377], [358.77842383123294, 5.6696315174979155], [358.8326082420238, 5.5380380312590445], [358.88678277639434, 5.406525428964242], [358.9787925814164, 5.36857506053104], [359.07884752135516, 5.218294147006351], [359.17881536505325, 5.068182632520112], [359.23284384174826, 4.9370780602415705], [359.3515090246942, 4.833937911378646], [359.42342710878967, 4.659481650665034], [359.5051456255217, 4.5535312170984925], [359.57780382971504, 4.469497558023422], [359.64993561844295, 4.331466943493592], [359.7311527103091, 4.18984945510145], [359.8305438335934, 4.040966253633225], [359.90297404444254, 3.9573387337643506], [0.029050797866034372, 3.7437882320182143]]
-
-    # preprocess('./meteory/18a08183/2018-10-08-23-03-53n.jpg', './meteory/18a08183/2018-10-08-23-03-53n.txt', 'tmp1.jpg')
-    # meteorKunzak = get_meteor_coordinates(client, 'tmp1.jpg', './meteory/18a08183/2018-10-08-23-03-53n.txt')
-    meteorKunzak = [[328.1597069832155, 37.053787325732166], [328.3402383901155, 36.90708235404924], [328.4617709161041, 36.74411186962826], [328.55103654515426, 36.67097761814034], [328.6975465924236, 36.61427570399938], [328.72863854978453, 36.52486571142832], [328.9050094249381, 36.378967973255754], [328.9355636507618, 36.28985657919], [329.08015858838144, 36.23329074576101], [329.19720589814045, 36.07171650554443], [329.283816819975, 35.999118028951216], [329.3995362487815, 35.838064408089295], [329.48534557167426, 35.765683429444415], [329.65032484537335, 35.638738174672206], [329.6847729317717, 35.533000887804505], [329.8256319495132, 35.47677332577176], [329.9940206042571, 35.332696530535664], [330.0219257591962, 35.245000183573445], [330.1887676420967, 35.101389083590796], [330.21618432460895, 35.0140119748251], [330.3679939909516, 34.91444608478159], [330.5190273750478, 34.81497228029015], [330.55897237616466, 34.684576998880715], [330.7218458147565, 34.54209923937315], [330.77271457857, 34.483324369189155], [330.8965036556135, 34.356711060376256], [331.0569801128769, 34.21491470918202], [331.2288747917939, 34.03046332726654]]
-
     # Latitude, longitude, height above sea level, time of observation
     ondrejov = {'lat': 14.784264, 'lon': 49.904682, 'height': 467, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
     kunzak = {'lat': 15.190299, 'lon': 49.121249, 'height': 575, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
 
-    # Xi: -0.03140376343675359, Eta: -0.03140376343675359, Zeta: 0.8292512506749482
-    # Expected values: Ra: 266.7788, Dec: 56.0219
-    radiant = calculate_radiant(meteorOndrejov, ondrejov, meteorKunzak, kunzak)
-    print(radiant)
-
-    # Plot the meteor trajectory and radiant
-    import matplotlib.pyplot as plot
-    fig, ax = plot.subplots()
-
-    for i in meteorOndrejov:
-        ax.scatter(i[0], i[1], color = 'b')
-    
-    for i in meteorKunzak:
-        ax.scatter(i[0], i[1], color = 'y')
-
-    ax.scatter(radiant[0] + 360, radiant[1], color = 'r')
-    ax.scatter(266.7788, 56.0219, color = 'm')
-
-    plot.show()
+    count = 0
+    for i in range(1000):
+        if not test_plane_intersection_calculation():
+            count += 1
+    print(count)
