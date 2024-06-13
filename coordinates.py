@@ -6,6 +6,8 @@ import astropy.units as u
 
 from main import AstrometryClient
 import logging
+import re
+import os
 
 from time import sleep
 from modules import ConfigLoader
@@ -19,11 +21,24 @@ def get_meteor_start_end_coordinates(path: str) -> list[float]:
     Returns:
         list[float]: Meteor coordinates
     """
+
+    if not os.path.exists(path):
+        logging.error(f"File {path} does not exist.")
+        return None
+
     file = open(path, 'r').read().split('\n')
-    # If line starts with #Meteor 1: it is the first meteor, get the coordinates from the line
+
     for line in file:
         if line.startswith("#Meteor 1:"):
-            return [float(x) for x in line.split(' ')[2:]]  # Return the coordinates of the meteor
+            match = re.search(r'start \(([^)]+)\) end \(([^)]+)\)', line)
+            if match:
+                start = tuple(map(float, match.group(1).split(', ')))
+                end = tuple(map(float, match.group(2).split(', ')))
+                return start, end
+    
+    # TODO: Check this function and make sure regex is working correctly
+    # Consider creating a separated file for parsing data.txt
+    return None, None  # Return the coordinates of the meteor
     
 
 def pixels_to_world(path: str, meteor: list[list[float]]) -> list[list[float]]:
