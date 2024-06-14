@@ -100,81 +100,69 @@ class FolderComparator:
         else:
             return None
 
-    def find_matching_folders(
-        self,
-        folder1=None,
-        folder2=None,
-    ):
-        """
-        Finds matching subfolders between two given folders.
+    def find_matching_folders(self, folder1=None, folder2=None):
+            """
+            Finds matching subfolders between two given folders and also lists folders without matches.
 
-        Args:
-            folder1 (str): The name of the first folder.
-            folder2 (str): The name of the second folder.
+            Args:
+                folder1 (str): The name of the first folder.
+                folder2 (str): The name of the second folder.
 
-        Returns:
-            list: A list of tuples containing the paths of matching subfolders, and whether the data.txt file exists in each folder.
+            Returns:
+                tuple: A tuple containing a list of matching folder tuples and a list of non-matching folders.
+            """
+            if folder1 is None:
+                logging.debug("No folder1 provided. Using the first directory.")
+                folder1 = self.get_dir(1)
+            if folder2 is None:
+                logging.debug("No folder2 provided. Using the second directory.")
+                folder2 = self.get_dir(2)
 
-        """
+            path1 = os.path.join(self.home_dir, folder1)
+            logging.info(f"Path 1: {path1}")
+            path2 = os.path.join(self.home_dir, folder2)
+            logging.info(f"Path 2: {path2}")
 
-        if folder1 is None:
-            logging.debug("No folder1 provided. Using the first directory.")
-            folder1 = self.get_dir(1)
-        if folder2 is None:
-            logging.debug("No folder2 provided. Using the second directory.")
-            folder2 = self.get_dir(2)
+            folders1 = [f for f in os.listdir(path1) if os.path.isdir(os.path.join(path1, f))]
+            logging.info(f"Subfolders in {folder1}: {folders1}")
 
-        path1 = os.path.join(self.home_dir, folder1)
-        logging.info(f"Path 1: {path1}")
-        path2 = os.path.join(self.home_dir, folder2)
-        logging.info(f"Path 2: {path2}")
+            folders2 = [f for f in os.listdir(path2) if os.path.isdir(os.path.join(path2, f))]
+            logging.info(f"Subfolders in {folder2}: {folders2}")
 
-        folders1 = [
-            f for f in os.listdir(path1) if os.path.isdir(os.path.join(path1, f))
-        ]
+            matching_folders = []
+            non_matching_folders = []
 
-        logging.info(f"Subfiles in {folder1}: {folders1}")
+            for folder in folders1:
+                matched = False
+                for folder2 in folders2:
+                    time_dif = self.compare_folders(folder, folder2)
+                    if time_dif is not None:
+                        matched = True
+                        data_file_exists1 = os.path.exists(os.path.join(path1, folder, "data.txt"))
+                        data_file_exists2 = os.path.exists(os.path.join(path2, folder2, "data.txt"))
 
-        folders2 = [
-            f for f in os.listdir(path2) if os.path.isdir(os.path.join(path2, f))
-        ]
+                        date1 = self.parse_folder_name(folder)
+                        date2 = self.parse_folder_name(folder2)
 
-        logging.info(f"Subfiles in {folder2}: {folders2}")
+                        time1 = date1.strftime("%H:%M:%S")
+                        time2 = date2.strftime("%H:%M:%S")
+                        date1_str = date1.strftime("%d.%m.%Y")
+                        date2_str = date2.strftime("%d.%m.%Y")
 
-        matching_folders = []
-        for folder in folders1:
-            for folder2 in folders2:
-                time_dif = self.compare_folders(folder, folder2)
-                if time_dif is not None:
-
-                    # Check if data.txt exists in both folders
-                    data_file_exists = True
-                    data_file_exists1 = True
-                    if not os.path.exists(os.path.join(path1, folder, "data.txt")):
-                        logging.info(f"Data.txt file not found in {folder}")
-                        data_file_exists = False
-                    elif not os.path.exists(os.path.join(path2, folder2, "data.txt")):
-                        logging.info(f"Data.txt file not found in {folder2}")
-                        data_file_exists1 = False
-
-                    date1 = self.parse_folder_name(folder)
-                    date2 = self.parse_folder_name(folder2)
-                    
-                    time1 = date1.strftime("%H:%M:%S")
-                    time2 = date2.strftime("%H:%M:%S")
-                    date1 = date1.strftime("%d.%m.%Y")
-                    date2 = date2.strftime("%d.%m.%Y")
-
-                    logging.info(f"Matching folders: {folder}, {folder2}")
-                    matching_folders.append(
-                        (
-                            (os.path.join(path1, folder), data_file_exists, date1, time1,),
-                            (os.path.join(path2, folder2), data_file_exists1, date2, time2,),
-                            time_dif,
+                        logging.info(f"Matching folders: {folder}, {folder2}")
+                        matching_folders.append(
+                            (
+                                (os.path.join(path1, folder), data_file_exists1, date1_str, time1),
+                                (os.path.join(path2, folder2), data_file_exists2, date2_str, time2),
+                                time_dif,
+                            )
                         )
-                    )
+                        break
 
-        return matching_folders
+                if not matched:
+                    non_matching_folders.append(os.path.join(path1, folder))
+
+            return matching_folders, non_matching_folders
 
 
 if __name__ == "__main__":
