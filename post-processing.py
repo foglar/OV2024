@@ -162,7 +162,14 @@ class post_processing:
         ]
 
     def _parse_detection_type(self, meteor_object, index):
-        """Parse detection type from meteor data"""
+        """Parse detection type from meteor data
+        Args:
+            meteor_object: meteor data
+            index: index of the meteor object
+
+        Returns:
+            detection_type: detection type of the meteor
+        """
         # TODO: Revise
         if meteor_object[0] is not None:
             if path.exists(f"{meteor_object[0][index]}/data.txt"):
@@ -173,6 +180,15 @@ class post_processing:
             return "N"
 
     def get_meteor_quadrant_position(self, meteor_coords, meteor_image):
+        """Get the quadrant of the meteor
+        Args:
+            meteor_coords: coordinates of the meteor
+            meteor_image: path to the image
+
+        Returns:
+            start_location: quadrant of the start coordinates
+            end_location: quadrant of the end coordinates
+        """
         img = cv.imread(meteor_image, cv.IMREAD_GRAYSCALE)
         height, width = img.shape
         center_x, center_y = width // 2, height // 2
@@ -189,6 +205,16 @@ class post_processing:
         return start_location, end_location
 
     def get_quadrant_coordinates(self, center_x, center_y, radius, quadrant_size):
+        """Get the coordinates of the quadrants of the image
+        Args:
+            center_x: x coordinate of the center of the image
+            center_y: y coordinate of the center of the image
+            radius: radius of the image
+            quadrant_size: size of the quadrant
+
+        Returns:
+            coordinates: list of quadrant coordinates
+        """
         coordinates = []
         for i in range(3):
             for j in range(3):
@@ -201,6 +227,16 @@ class post_processing:
         return coordinates
 
     def determine_meteor_quadrant(self, start_coords, end_coords, quadrant_coordinates):
+        """Determine the quadrant of the meteor
+        Args:
+            start_coords: start coordinates of the meteor
+            end_coords: end coordinates of the meteor
+            quadrant_coordinates: list of quadrant coordinates
+
+        Returns:
+            start_location: quadrant of the start coordinates
+            end_location: quadrant of the end coordinates
+        """
         start_location = end_location = None
         for i, (top_left, bottom_right) in enumerate(quadrant_coordinates):
             if (
@@ -223,6 +259,13 @@ class post_processing:
         return start_location, end_location
 
     def _reorder_meteor_data(self, meteor_data):
+        """Reorder the meteor data for writing to the CSV file
+        Args:
+            meteor_data: list of meteor data
+
+        Returns:
+            processed_meteors: list of reordered meteor data
+        """
         processed_meteors = []
 
         for meteor in meteor_data:
@@ -252,6 +295,14 @@ class post_processing:
         return processed_meteors
 
     def _create_meteor_figure(self, ax, image_path, coordinates):
+        """Create a figure of the meteor with the coordinates on the image
+        Args:
+            ax: matplotlib axis
+            image_path: path to the image
+            coordinates: start and end coordinates of the meteor
+
+        Returns:
+            ax: matplotlib axis with the meteor plotted on the image"""
         image = cv.imread(image_path, cv.IMREAD_GRAYSCALE)
         height, width = image.shape
         center_x, center_y = width // 2, height // 2
@@ -293,6 +344,14 @@ class post_processing:
         return ax
 
     def plot_meteors(self, images_path, first_coords, second_coords=None):
+        """Plot the meteor on the image
+        Args:
+            images_path: list of paths to the images
+            first_coords: start coordinates of the meteor
+            second_coords: end coordinates of the meteor
+
+        Returns:
+            None"""
         # If matched meteor plot both images
         # If unmatched meteor plot only one image
         try:
@@ -324,7 +383,6 @@ class post_processing:
             leg = ax.legend(fancybox=True, shadow=True)
 
         pickradius = 5
-
 
         plt.show()
 
@@ -359,15 +417,6 @@ class post_processing:
                 ]
             )
             writer.writerows(data)
-
-    # Tasks to be done:
-    # 1. Data processing
-    # - Calculate meteor ID (year, hour, minute, number)
-    # - Print time and date
-    # - Define detection type (manual or automatic + invalid)
-    # - Calculate meteor start and end coordinates
-    # 2. Create function to plot matched or unmatched images
-    # 3. Create function to save all data to a CSV file
 
 
 if __name__ == "__main__":
