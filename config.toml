@@ -7,3 +7,8 @@ token = "ijfeednnvwvojlfb"
 timeout = 7
 home_dir = "/home/foglar/Programming/Projects/OV2024-Project/meteory"
 time_tolerance = 2
+
+[post_processing]
+
+output_file = "overview.csv"
+plt_style = "dark"
