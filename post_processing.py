@@ -28,6 +28,7 @@ compare = FolderComparator()
 # TODO: Simplify the code, ensure that its readable and understandable
 # TODO: Add docstrings to the functions
 # TODO: Change the look of the plots from config file
+# TODO: JSON format instead of list
 
 
 class post_processing:
@@ -124,7 +125,7 @@ class post_processing:
             processed_meteors[-1].append(meteor_position1)
 
         self.meteor_data_table = processed_meteors
-        logging.info(processed_meteors)
+        logging.debug(processed_meteors)
         logging.info("Post processing done.")
 
     def _parse_meteor_id_time(self, meteor, num):
@@ -346,9 +347,9 @@ class post_processing:
     def plot_meteors(self, images_path, first_coords, second_coords=None):
         """Plot the meteor on the image
         Args:
-            images_path: list of paths to the images
-            first_coords: start coordinates of the meteor
-            second_coords: end coordinates of the meteor
+            images_path: list of paths to the images [first_image, second_image]
+            first_coords: start coordinates of the meteor [x, y]
+            second_coords: end coordinates of the meteor [x, y]
 
         Returns:
             None"""
@@ -382,7 +383,8 @@ class post_processing:
             self._create_meteor_figure(ax, images_path, first_coords)
             leg = ax.legend(fancybox=True, shadow=True)
 
-        pickradius = 5
+        #pickradius = 5
+        # TODO: Add ability to toggle the meteor path on and off
 
         plt.show()
 
@@ -413,7 +415,6 @@ class post_processing:
                     "Time",
                     "Detection Type",
                     "Quadrant",
-                    "Time Difference",
                 ]
             )
             writer.writerows(data)
