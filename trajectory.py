@@ -18,8 +18,8 @@ def calculate_radiant(points_a: list[list[float]], station_a: dict, points_b: li
         list[float]: right ascension and declination of meteor radiant
     """
 
-    aa, ba, ca, xa, ya, za = calculate_station(points_a, station_a)
-    ab, bb, cb, xb, yb, zb = calculate_station(points_b, station_b)
+    aa, ba, ca = calculate_meteor_plane(points_a)
+    ab, bb, cb = calculate_meteor_plane(points_b)
     
     d = sqrt((ba * cb - bb * ca) ** 2 + (ab * ca - aa * cb) ** 2 + (aa * bb - ab * ba) ** 2)
 
@@ -36,15 +36,14 @@ def calculate_radiant(points_a: list[list[float]], station_a: dict, points_b: li
 
     return ra, dec, angle
 
-def calculate_station(points: float, station: dict) -> list[float]:
-    """Calculates station related variables according to Ceplecha (1987)
-
+def calculate_geocentric_vector(station: dict) -> list[float]:
+    """Calculates geocentric vector (X, Y, Z) according to equations 7 and 8
+    
     Args:
-        points (list[list[float]]): points of the given meteor
         station (dict): lat, lon, height and time at station
 
     Returns:
-        list[float]: vectors (a, b, c) and (X, Y, Z)
+        list[float]: vector (X, Y, Z)
     """
 
     local_sidereal_time = calculate_sidereal_time(station['lat'], station['lon'], station['time'], station['time_zone'])
@@ -57,6 +56,18 @@ def calculate_station(points: float, station: dict) -> list[float]:
     X = (R + station['height']) * cos(radians(geocentric_latitude)) * cos(radians(local_sidereal_time))
     Y = (R + station['height']) * cos(radians(geocentric_latitude)) * sin(radians(local_sidereal_time))
     Z = (R + station['height']) * sin(radians(geocentric_latitude))
+
+    return X, Y, Z
+
+def calculate_meteor_plane(points: list[float]) -> list[float]:
+    """Calculates meteor path plane according to equations 9 and 11
+    
+    Args:
+        points (list[list[float]]): ra and dec coordinates of meteor points
+        
+    Returns:
+        list[float]: vector (a, b, c) describing meteor path plane
+    """
 
     # Calculate equation 9 for all meteor points
     xi_eta, eta_zeta, eta_eta, xi_zeta, xi_xi = 0, 0, 0, 0, 0
@@ -79,7 +90,7 @@ def calculate_station(points: float, station: dict) -> list[float]:
     b = b_dash / d_dash
     c = c_dash / d_dash
 
-    return a, b, c, X, Y, Z
+    return a, b, c
 
 def calculate_meteor_point(ra: float, dec: float) -> list[float]:
     """Calculates Xi, Eta and Zeta values from ra and dec values of meteor point
@@ -325,10 +336,10 @@ def test_radiant_calculation() -> None:
     print(ra, dec, angle)
     
     # Plot the meteor trajectory and radiant
-    # plot_meteor_radiant([ra, dec], radiants[0], meteor_ondrejov, meteor_kunzak)
+    plot_meteor_radiant([ra, dec], radiants[0], meteor_ondrejov, meteor_kunzak)
 
-    vektor_ondrejov = calculate_station(meteor_ondrejov, ondrejov)
-    vektor_kunzak = calculate_station(meteor_kunzak, kunzak)
+    vektor_ondrejov = calculate_meteor_plane(meteor_ondrejov) + calculate_geocentric_vector(ondrejov)
+    vektor_kunzak = calculate_meteor_plane(meteor_kunzak) + calculate_geocentric_vector(kunzak)
 
     for point in kunzak:
         meteor_point = calculate_meteor_point_vector(point, vektor_kunzak, vektor_ondrejov)
@@ -371,7 +382,7 @@ def test_calculate_meteor_point_coordinates():
         'time_zone': 1,
     }
 
-    # From calculate_station
+    # From calculate_geocentric_vector
     local_sidereal_time = calculate_sidereal_time(station['lat'], station['lon'], station['time'], station['time_zone'])
 
     # Calculate equation 7
@@ -397,10 +408,10 @@ def test_calculate_meteor_point_coordinates():
     return False
 
 if __name__ == '__main__':
-    test_calculate_meteor_point_coordinates()
+    test_radiant_calculation()
 
-    # TODO: Separate station geocentric vector calculation from meteor radiant calculation
     # TODO: Separate tests to own file
+    # TODO: Correct meteor radiant and antiradiant flipping
 
     # TODO: Velocity and deceleration calculation?
     # TODO: Fireball orbit calculation?

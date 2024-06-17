@@ -99,7 +99,7 @@ def world_to_altaz(ra: float, dec: float, station) -> list[float]:
     """
 
     skyCoord = SkyCoord(ra=ra, dec=dec, unit='deg', frame='fk5')
-    time = Time(time) - u.hour * station['time_zone']
+    time = Time(station['time']) - u.hour * station['time_zone']
     observatory = EarthLocation(lat=station['lat'] * u.deg, lon=station['lon'] * u.deg, height=station['height'] * u.m)
 
     altaz = skyCoord.transform_to(AltAz(obstime=time, location=observatory))
