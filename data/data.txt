@@ -1,62 +1,65 @@
-Output file: 2024-01-08-21-35-44.mvf Total time: 2.2459s
+Output file: 2024-01-08-23-52-57.mvf Total time: 2.32787s
 START FRAME
-Input file: f:\data\2024-01-08\2024-01-08-21-35-33-419.mvf
-Time: 10.6066s
+Input file: d:\data\2024-01-08\2024-01-08-23-52-39-771.mvf
+Time: 17.6557s
 END FRAME
-Input file: f:\data\2024-01-08\2024-01-08-21-35-33-419.mvf
-Time: 12.8525s
+Input file: d:\data\2024-01-08\2024-01-08-23-52-39-771.mvf
+Time: 19.9836s
 BEGIN classification-----------------------------------------------------
-Number of stars:32
-#1 position (280, 495.5)
-#2 position (259, 422.5)
-#3 position (271, 343)
-#4 position (500, 297)
-#5 position (456.5, 282)
-#6 position (460, 267)
-#7 position (358, 248)
-#8 position (211, 238)
-#9 position (288, 229)
-#10 position (460, 218)
-#11 position (480.375, 174)
-#12 position (209, 107)
-#13 position (367.5, 102)
-#14 position (233, 100)
-#15 position (326, 64)
-#16 position (362, 122)
-#17 position (439.5, 299)
-#18 position (164, 289.5)
-#19 position (278.5, 106)
-#20 position (334, 159.5)
-#21 position (396, 142)
-#22 position (331, 124.375)
-#23 position (380, 253)
-#24 position (310.5, 299)
-#25 position (303, 59)
-#26 position (324, 375)
-#27 position (493, 261)
-#28 position (207, 260)
-#29 position (524, 269)
-#30 position (469, 432)
-#31 position (456, 232)
-#32 position (356, 200)
+Number of stars:34
+#1 position (228, 124)
+#2 position (114.5, 181)
+#3 position (100, 261)
+#4 position (100.5, 368)
+#5 position (92, 269.5)
+#6 position (315.5, 14)
+#7 position (248, 75)
+#8 position (91, 279.5)
+#9 position (120.8, 168)
+#10 position (250, 55)
+#11 position (238.5, 43.5)
+#12 position (343, 187)
+#13 position (180.5, 86.5)
+#14 position (178, 418)
+#15 position (283, 42)
+#16 position (373, 148.5)
+#17 position (271, 104)
+#18 position (148.5, 177.5)
+#19 position (108.5, 195)
+#20 position (244, 138)
+#21 position (285, 96)
+#22 position (234.5, 224)
+#23 position (408, 208.5)
+#24 position (465, 349.5)
+#25 position (305, 187)
+#26 position (349, 247.5)
+#27 position (465, 349.5)
+#28 position (313.5, 441)
+#29 position (440, 471)
+#30 position (400.5, 488.5)
+#31 position (340.5, 56)
+#32 position (250, 198)
+#33 position (400.5, 488.5)
+#34 position (290, 327.5)
 Number of meteors:1
-#Meteor 1: start (457, 342.5) end (459, 354) frames: 58887-58904 from: 0.983607s to: 1.2623s 
- frame = 58887 x = 457   y = 342.5
- frame = 58888 x = 457   y = 343
- frame = 58889 x = 458   y = 344
- frame = 58890 x = 457   y = 344
- frame = 58891 x = 458   y = 345
- frame = 58892 x = 458   y = 346
- frame = 58893 x = 458   y = 346.5
- frame = 58894 x = 458   y = 347
- frame = 58895 x = 458   y = 348
- frame = 58896 x = 458   y = 348
- frame = 58897 x = 458.5   y = 349
- frame = 58898 x = 458.5   y = 350
- frame = 58899 x = 458.625   y = 350
- frame = 58900 x = 459   y = 351
- frame = 58901 x = 458.625   y = 352
- frame = 58902 x = 459   y = 352.5
- frame = 58903 x = 459   y = 353
- frame = 58904 x = 459   y = 354
+#Meteor 1: start (244, 171) end (260.5, 250.5) frames: 948923-948945 from: 0.983607s to: 1.34426s 
+ frame = 948923 x = 244   y = 171
+ frame = 948924 x = 245   y = 175.5
+ frame = 948925 x = 246   y = 180
+ frame = 948926 x = 247   y = 183.5
+ frame = 948927 x = 247.5   y = 187
+ frame = 948928 x = 248   y = 190
+ frame = 948930 x = 250   y = 198
+ frame = 948931 x = 251   y = 202
+ frame = 948932 x = 251.722   y = 205.722
+ frame = 948933 x = 252.5   y = 209
+ frame = 948934 x = 253   y = 212.5
+ frame = 948935 x = 254   y = 216
+ frame = 948936 x = 255   y = 220.25
+ frame = 948938 x = 256   y = 226.5
+ frame = 948939 x = 257   y = 230.5
+ frame = 948942 x = 259   y = 240
+ frame = 948943 x = 259.5   y = 243.5
+ frame = 948944 x = 260   y = 246.5
+ frame = 948945 x = 260.5   y = 250.5
 END classification-------------------------------------------------------
