@@ -105,6 +105,31 @@ def world_to_altaz(ra: float, dec: float, station) -> list[float]:
     altaz = skyCoord.transform_to(AltAz(obstime=time, location=observatory))
     return [altaz.alt.degree, altaz.az.degree]
 
+def geocentric_to_geodetic(location: list[float]) -> list[float]:
+    """Converts the vector X, Y, Z to latitude, longitude and height
+    
+    Args:
+        location (list[float]): Values X, Y and Z
+
+    Returns:
+        list[float]: latitude, longitude and height values
+    """
+
+    X, Y, Z = location
+    return [x.value for x in EarthLocation.from_geocentric(X, Y, Z, u.m).geodetic]
+
+def geodetic_to_geocentric(location: dict) -> list[float]:
+    """Calculates geocentric vector (X, Y, Z) according to equations 7 and 8
+    
+    Args:
+        location (dict): lat, lon, height of location
+
+    Returns:
+        list[float]: vector (X, Y, Z)
+    """
+
+    return tuple([x.value for x in EarthLocation.from_geodetic(location['lon'], location['lat'], location['height']).geocentric])
+
 def load_meteors(path: str) -> list[list[list[float]]]:
     """Load meteor data from data file
     

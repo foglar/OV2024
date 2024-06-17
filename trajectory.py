@@ -123,31 +123,6 @@ def calculate_meteor_point_vector(point: list[float], station_a: list[float], st
 
     return solve_plane_intersection(plane_a, plane_b, plane_nb)
 
-def calculate_geodetic_coordinates(vector: list[float]) -> list[float]:
-    """Converts the vector X, Y, Z to latitude, longitude and height
-    
-    Args:
-        vector (list[float]): Values X, Y and Z
-
-    Returns:
-        list[float]: latitude, longitude and height values
-    """
-
-    X, Y, Z = vector
-    return [x.value for x in EarthLocation.from_geocentric(X, Y, Z, u.m).geodetic]
-
-def calculate_geocentric_coordinates(station: dict) -> list[float]:
-    """Calculates geocentric vector (X, Y, Z) according to equations 7 and 8
-    
-    Args:
-        station (dict): lat, lon, height and time at station
-
-    Returns:
-        list[float]: vector (X, Y, Z)
-    """
-
-    return tuple([x.value for x in EarthLocation.from_geodetic(station['lon'], station['lat'], station['height']).geocentric])
-
 def calculate_distance(point_a: list[float], point_b: list[float]) -> float:
     """Calculates distance between two points defined with geocentric vectors
     
@@ -339,15 +314,6 @@ def test_radiant_calculation() -> None:
     # Plot the meteor trajectory and radiant
     plot_meteor_radiant([ra, dec], radiants[0], meteor_ondrejov, meteor_kunzak)
 
-    vektor_ondrejov = calculate_meteor_plane(meteor_ondrejov) + calculate_geocentric_coordinates(ondrejov)
-    vektor_kunzak = calculate_meteor_plane(meteor_kunzak) + calculate_geocentric_coordinates(kunzak)
-
-    for point in kunzak:
-        meteor_point = calculate_meteor_point_vector(point, vektor_kunzak, vektor_ondrejov)
-
-    for point in ondrejov:
-        meteor_point = calculate_meteor_point_vector(point, vektor_kunzak, vektor_ondrejov)
-
 def test_solve_plane_intersection() -> bool:
     """Tests the plane intersection calculation function"""
 
@@ -372,41 +338,6 @@ def test_solve_plane_intersection() -> bool:
         print(point, calculated_point)
         return False
     return True
-
-def test_calculate_meteor_point_coordinates():
-    from random import random, randint
-    station = {
-        'lon': random() * 360,
-        'lat': random() * 180 - 90,
-        'height': randint(0,1000),
-        'time': '2018-10-8 22:03:54', 
-        'time_zone': 1,
-    }
-
-    # From calculate_geocentric_vector
-    local_sidereal_time = calculate_sidereal_time(station['lat'], station['lon'], station['time'], station['time_zone'])
-
-    # Calculate equation 7
-    geocentric_latitude = station['lat'] - 0.1924240867 * sin(radians(2 * station['lat'])) + 0.000323122 * sin(radians(4 * station['lat'])) - 0.0000007235 * sin(radians(6 * station['lat']))
-    R = (sqrt(40680669.86 * (1 - 0.0133439554 * pow(sin(radians(station['lat'])), 2)) / (1 - 0.006694385096 * pow(sin(radians(station['lat'])), 2)))) * 1000
-
-    # Calculate equation 8
-    X = (R + station['height']) * cos(radians(geocentric_latitude)) * cos(radians(local_sidereal_time))
-    Y = (R + station['height']) * cos(radians(geocentric_latitude)) * sin(radians(local_sidereal_time))
-    Z = (R + station['height']) * sin(radians(geocentric_latitude))
-
-    calculated = calculate_geodetic_coordinates([X, Y, Z])
-
-    if numpy.allclose([geocentric_latitude, local_sidereal_time, station['height'] + R], calculated):
-        return True
-
-    print(f'GL: {geocentric_latitude}')
-    print(f'LST: {local_sidereal_time}')
-    print(f'(R + h) {R + station["height"]}')
-    
-    print(numpy.subtract([geocentric_latitude, local_sidereal_time, station['height'] + R], calculated))
-    calculated = calculate_geodetic_coordinates([X, Y, Z])
-    return False
 
 if __name__ == '__main__':
     test_radiant_calculation()
