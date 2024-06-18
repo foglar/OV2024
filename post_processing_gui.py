@@ -10,6 +10,7 @@ from post_processing import post_processing
 # TODO: Format the meteor data table in the GUI
 # TODO: Extract all information from data.txt and convert it to json
 # TODO: Configuration window, before
+#https://stackoverflow.com/questions/31401812/matplotlib-rotate-image-file-by-x-degrees
 
 
 class MeteorApp(Gtk.Window):
@@ -40,7 +41,7 @@ class MeteorApp(Gtk.Window):
 
         info_box = Gtk.Box(
             spacing=10,
-            orientation=Gtk.Orientation.HORIZONTAL,
+            orientation=Gtk.Orientation.VERTICAL,
             halign=Gtk.Align.START,
             valign=Gtk.Align.START,
         )
@@ -167,7 +168,7 @@ class MeteorApp(Gtk.Window):
             return None
 
     def on_button_clicked(self, widget):
-        logging.info("Button clicked, processing meteors.")
+        logging.info("Button clicked, plot meteor.")
         self.btn_view_meteor.set_sensitive(False)
 
         def on_close(event):
@@ -178,9 +179,11 @@ class MeteorApp(Gtk.Window):
         try:
             data = self.pp.meteor_data_table
             plt, fig = self.pp.plot_meteors(
-                [data[i][-5], data[i][-4]],
+                [data[i][-6], data[i][-5]],
+                data[i][-4],
                 data[i][-3],
                 data[i][-2],
+                data[i][-1],
             )
             fig.canvas.mpl_connect("close_event", on_close)
 
@@ -195,9 +198,9 @@ class MeteorApp(Gtk.Window):
         self.index += 1
         if self.index > len(self.meteor_data):
             self.index = 1
-            logging.info("End of meteor data table reached. Returning to first meteor.")
+            logging.debug("End of meteor data table reached. Returning to first meteor.")
         else:
-            logging.info(f"Next meteor selected. {self.index}")
+            logging.debug(f"Next meteor selected. {self.index}")
 
         self.update_labels()
         return self.meteor_data[self.index - 1]
@@ -206,11 +209,11 @@ class MeteorApp(Gtk.Window):
         self.index -= 1
         if self.index <= 0:
             self.index = len(self.meteor_data)
-            logging.info(
+            logging.debug(
                 "Start of meteor data table reached. Returning to last meteor."
             )
         else:
-            logging.info(f"Previous meteor selected. {self.index}")
+            logging.debug(f"Previous meteor selected. {self.index}")
 
         self.update_labels()
         return self.meteor_data[self.index - 1]

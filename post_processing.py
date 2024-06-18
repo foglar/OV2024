@@ -130,10 +130,15 @@ class post_processing:
                     f"{meteor_object[0][0]}/data.txt"
                 ).get_stars_coordinates()
                 processed_meteors[-1].append(stars)
+                stars1 = ParseData(
+                    f"{meteor_object[1][0]}/data.txt"
+                ).get_stars_coordinates()
+                processed_meteors[-1].append(stars1)
             else:
                 processed_meteors[-1].append(None)
+                processed_meteors[-1].append(None)
 
-        logging.error(processed_meteors)
+        logging.debug(processed_meteors)
 
         self.meteor_data_table = processed_meteors
         logging.debug(processed_meteors)
@@ -182,10 +187,9 @@ class post_processing:
         Returns:
             detection_type: detection type of the meteor
         """
-        # TODO: Revise
         # TODO: If new day, then new number order
-        if meteor_object[0] is not None:
-            if path.exists(f"{meteor_object[0][index]}/data.txt"):
+        if meteor_object[0] is not None and meteor_object[1] is not None:
+            if path.exists(f"{meteor_object[index][0]}/data.txt"):
                 return "MA"
             else:
                 return "D"
@@ -343,10 +347,13 @@ class post_processing:
                 color="blue",
             )
 
-        if stars != None:
-            for star in stars:
-                ax.plot(star[0], star[1], "ro")
-        
+        if stars is not None:
+            for i, star in enumerate(stars):
+                if i == 0:
+                    ax.plot(star[0], star[1], "ro", label="Star", markersize=3)
+                else:
+                    ax.plot(star[0], star[1], "ro", markersize=3)
+
         # Best cmap for the image is grey, hot, bone
         ax.imshow(image, cmap="grey")
 
@@ -360,7 +367,14 @@ class post_processing:
 
         return ax
 
-    def plot_meteors(self, images_path, first_coords, second_coords=None, stars=None):
+    def plot_meteors(
+        self,
+        images_path,
+        first_coords,
+        second_coords=None,
+        stars=None,
+        second_stars=None,
+    ):
         """Plot the meteor on the image
         Args:
             images_path: list of paths to the images [first_image, second_image]
@@ -389,9 +403,12 @@ class post_processing:
 
         if type(images_path) is list:
             fig, axes = plt.subplots(1, 2, figsize=(16, 8))
-
-            self._create_meteor_figure(axes[0], images_path[0], first_coords, stars=stars)
-            self._create_meteor_figure(axes[1], images_path[1], second_coords)#, stars=second_stars)
+            self._create_meteor_figure(
+                axes[0], images_path[0], first_coords, stars=stars
+            )
+            self._create_meteor_figure(
+                axes[1], images_path[1], second_coords, stars=second_stars
+            )
 
             leg = axes[0].legend(fancybox=True, shadow=True)
             leg = axes[1].legend(fancybox=True, shadow=True)
@@ -412,7 +429,7 @@ class post_processing:
         logging.info(f"Plotting {len(meteors)} meteors.")
         for meteor in meteors:
             plt, fig = self.plot_meteors(
-                [meteor[-5], meteor[-4]], meteor[-3], meteor[-2], meteor[-1]
+                [meteor[-6], meteor[-5]], meteor[-4], meteor[-3], meteor[-2], meteor[-1]
             )
             plt.show()
 
