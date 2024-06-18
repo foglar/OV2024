@@ -12,35 +12,6 @@ import os
 from time import sleep
 from modules import ConfigLoader
 
-def get_meteor_start_end_coordinates(path: str) -> list[float]:
-    """Get meteor coordinates from data.txt file
-    
-    Args:
-        path (str): data.txt file path
-
-    Returns:
-        list[float]: Meteor coordinates
-    """
-
-    if not os.path.exists(path):
-        logging.error(f"File {path} does not exist.")
-        return None
-
-    file = open(path, 'r').read().split('\n')
-
-    for line in file:
-        if line.startswith("#Meteor 1:"):
-            match = re.search(r'start \(([^)]+)\) end \(([^)]+)\)', line)
-            if match:
-                start = tuple(map(float, match.group(1).split(', ')))
-                end = tuple(map(float, match.group(2).split(', ')))
-                return start, end
-    
-    # TODO: Check this function and make sure regex is working correctly
-    # Consider creating a separated file for parsing data.txt
-    return None, None  # Return the coordinates of the meteor
-    
-
 def pixels_to_world(path: str, meteor: list[list[float]]) -> list[list[float]]:
     """Convert pixel data to RA and Dec
     

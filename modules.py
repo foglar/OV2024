@@ -1,7 +1,6 @@
 import os
 import tomli
-
-
+import re
 class ConfigLoader:
     """
     A class for loading and retrieving configuration settings from a TOML file.
@@ -83,3 +82,69 @@ class ConfigLoader:
             return config[category][key]
         else:
             raise KeyError(f"Key '{key}' or Category '{category}' not found in the data section of config.toml")
+        
+
+class ParseData:
+    """Parse from data.txt file, meteor and stars coordinates
+    
+    Args:
+        data_path (str): data.txt file path
+
+    Usage:
+        Create ParseData object and call get_meteor_start_end_coordinates() and get_stars_coordinates() methods
+        ```python
+        PD = ParseData("data/data.txt")
+        meteor = PD.get_meteor_start_end_coordinates()
+        stars = PD.get_stars_coordinates()```
+
+    Returns:
+        list[float]: Meteor and stars coordinates
+        list[float]: Stars coordinates
+    """
+    def __init__ (self, data_path):
+        self.data_path = data_path
+        self.data = self._read_file()
+        self.parsed_data = self.parse_data()
+
+    def parse_data(self):
+        self.get_meteor_start_end_coordinates()
+        self.get_stars_coordinates()
+
+    def get_meteor_start_end_coordinates(self) -> list[float]:
+        """Get meteor coordinates from data.txt file
+        
+        Args:
+            path (str): data.txt file path
+
+        Returns:
+            tuple(): Meteor coordinates
+        """
+        file = open(self.data_path, 'r')
+        for line in file:
+            if line.startswith("#Meteor 1:"):
+                match = re.search(r'start \(([^)]+)\) end \(([^)]+)\)', line)
+                if match:
+                    start = tuple(map(float, match.group(1).split(', ')))
+                    end = tuple(map(float, match.group(2).split(', ')))
+                    return start, end
+        
+        # TODO: Check this function and make sure regex is working correctly
+        return None, None  # Return the coordinates of the meteor
+    
+    def get_stars_coordinates(self):
+        star_pattern = re.compile(r"#\d+ position \((\d+\.?\d*), (\d+\.?\d*)\)")
+        stars = star_pattern.findall(self.data)
+        return [(float(x), float(y)) for x, y in stars]
+
+    def _read_file(self):
+        if not os.path.exists(self.data_path):
+            raise FileNotFoundError(f"File {self.data_path} not found")
+        
+        with open(self.data_path, 'r') as f:
+            data = f.read()
+        return data
+
+
+if __name__ == "__main__":
+    print(ParseData("data/data.txt").get_meteor_start_end_coordinates())
+    print(ParseData("data/data.txt").get_stars_coordinates())
