@@ -1,0 +1,69 @@
+Output file: 2024-01-08-21-35-44.mvf Total time: 2.29508s
+START FRAME
+Input file: d:\data\2024-01-08\2024-01-08-21-35-35-821.mvf
+Time: 8.18033s
+END FRAME
+Input file: d:\data\2024-01-08\2024-01-08-21-35-35-821.mvf
+Time: 10.4754s
+BEGIN classification-----------------------------------------------------
+Number of stars:36
+#1 position (364, 350.5)
+#2 position (228, 124)
+#3 position (261, 114)
+#4 position (403, 41)
+#5 position (155, 197)
+#6 position (390.5, 314)
+#7 position (234, 168)
+#8 position (248, 169)
+#9 position (114.5, 181)
+#10 position (227, 256)
+#11 position (210, 282)
+#12 position (137, 339)
+#13 position (364, 231)
+#14 position (100, 261)
+#15 position (100.5, 368)
+#16 position (427, 198.5)
+#17 position (393, 280)
+#18 position (453, 309)
+#19 position (365, 147)
+#20 position (447, 338)
+#21 position (247, 368)
+#22 position (372, 211)
+#23 position (393.5, 172)
+#24 position (225, 299)
+#25 position (373.5, 214)
+#26 position (473.84, 198.74)
+#27 position (356.177, 220.408)
+#28 position (557, 176)
+#29 position (234, 62)
+#30 position (266, 521)
+#31 position (358.5, 226)
+#32 position (236, 101.2)
+#33 position (525, 272)
+#34 position (92, 270)
+#35 position (394, 169)
+#36 position (316.5, 260)
+Number of meteors:1
+#Meteor 1: start (455, 203) end (449.9, 219.5) frames: 464941-464961 from: 0.983607s to: 1.31148s 
+ frame = 464941 x = 455   y = 203
+ frame = 464942 x = 455   y = 204
+ frame = 464943 x = 454.5   y = 205
+ frame = 464944 x = 454.5   y = 206
+ frame = 464945 x = 455   y = 206
+ frame = 464946 x = 454.5   y = 207
+ frame = 464947 x = 454   y = 208
+ frame = 464948 x = 454   y = 208.5
+ frame = 464949 x = 454   y = 209.2
+ frame = 464950 x = 453.8   y = 210
+ frame = 464951 x = 452.5   y = 211.5
+ frame = 464952 x = 452.8   y = 212
+ frame = 464953 x = 452.5   y = 213
+ frame = 464954 x = 451.5   y = 214
+ frame = 464955 x = 451.5   y = 214.5
+ frame = 464956 x = 452   y = 215
+ frame = 464957 x = 450.7   y = 216.7
+ frame = 464958 x = 451   y = 217
+ frame = 464959 x = 450.5   y = 218.1
+ frame = 464960 x = 450.5   y = 219
+ frame = 464961 x = 449.9   y = 219.5
+END classification-------------------------------------------------------

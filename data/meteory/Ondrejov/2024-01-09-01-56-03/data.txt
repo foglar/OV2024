@@ -1,0 +1,46 @@
+Output file: 2024-01-09-01-56-03.mvf Total time: 2.03279s
+START FRAME
+Input file: d:\data\2024-01-09\2024-01-09-01-55-43-280.mvf
+Time: 19.541s
+END FRAME
+Input file: d:\data\2024-01-09\2024-01-09-01-55-43-280.mvf
+Time: 21.5738s
+BEGIN classification-----------------------------------------------------
+Number of stars:30
+#1 position (108.5, 195)
+#2 position (244, 138)
+#3 position (285, 96)
+#4 position (307, 15.5)
+#5 position (370, 7)
+#6 position (308.375, 81)
+#7 position (349, 79)
+#8 position (164.214, 175.786)
+#9 position (142.214, 204.214)
+#10 position (266, 134)
+#11 position (190.5, 184)
+#12 position (409, 102)
+#13 position (103.5, 378.1)
+#14 position (266.5, 52)
+#15 position (144.81, 126.259)
+#16 position (313.5, 301.5)
+#17 position (485, 371.5)
+#18 position (239, 301)
+#19 position (320, 245.5)
+#20 position (585, 203)
+#21 position (308, 103)
+#22 position (486, 369)
+#23 position (550, 177.625)
+#24 position (599.5, 293)
+#25 position (310.375, 411)
+#26 position (387, 384)
+#27 position (151, 297)
+#28 position (333, 317)
+#29 position (312, 304)
+#30 position (194, 250)
+Number of meteors:1
+#Meteor 1: start (215.5, 120) end (226.5, 133.5) frames: 1383133-1383137 from: 0.983607s to: 1.04918s 
+ frame = 1383133 x = 215.5   y = 120
+ frame = 1383134 x = 218.5   y = 123.5
+ frame = 1383135 x = 221   y = 127
+ frame = 1383137 x = 226.5   y = 133.5
+END classification-------------------------------------------------------

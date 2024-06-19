@@ -1,0 +1,65 @@
+Output file: 2024-01-08-23-52-57.mvf Total time: 2.32787s
+START FRAME
+Input file: f:\data\2024-01-08\2024-01-08-23-52-37-868.mvf
+Time: 19.5246s
+END FRAME
+Input file: f:\data\2024-01-08\2024-01-08-23-52-37-868.mvf
+Time: 21.8525s
+BEGIN classification-----------------------------------------------------
+Number of stars:33
+#1 position (395, 411)
+#2 position (307, 343)
+#3 position (554, 331)
+#4 position (321, 328)
+#5 position (195.5, 289)
+#6 position (448, 280)
+#7 position (420, 276)
+#8 position (379, 268)
+#9 position (274, 255)
+#10 position (351, 251)
+#11 position (501, 177)
+#12 position (271, 126.5)
+#13 position (240, 117)
+#14 position (551, 284)
+#15 position (241, 127)
+#16 position (144, 143.8)
+#17 position (599.5, 349.5)
+#18 position (438.5, 132)
+#19 position (469, 243)
+#20 position (266, 37)
+#21 position (276.5, 230)
+#22 position (297, 150)
+#23 position (351, 255)
+#24 position (353.625, 244)
+#25 position (444, 323)
+#26 position (327, 310)
+#27 position (506, 435.5)
+#28 position (375, 347.5)
+#29 position (258, 318)
+#30 position (239, 360)
+#31 position (380, 170)
+#32 position (374.5, 505)
+#33 position (494, 222)
+Number of meteors:1
+#Meteor 1: start (323.5, 113.5) end (264.5, 176) frames: 404724-404746 from: 0.983607s to: 1.34426s 
+ frame = 404724 x = 323.5   y = 113.5
+ frame = 404725 x = 321   y = 117
+ frame = 404726 x = 318.5   y = 119.5
+ frame = 404728 x = 312.5   y = 125
+ frame = 404729 x = 310   y = 128
+ frame = 404730 x = 307   y = 131
+ frame = 404731 x = 305.4   y = 133.6
+ frame = 404732 x = 302.5   y = 136.5
+ frame = 404733 x = 299.5   y = 139.5
+ frame = 404734 x = 297   y = 143
+ frame = 404735 x = 294   y = 145
+ frame = 404736 x = 291.5   y = 148.5
+ frame = 404737 x = 288.6   y = 151.4
+ frame = 404739 x = 283.5   y = 156.5
+ frame = 404740 x = 280.5   y = 159.5
+ frame = 404742 x = 276   y = 165
+ frame = 404743 x = 272.405   y = 167.881
+ frame = 404744 x = 269.5   y = 170
+ frame = 404745 x = 266.5   y = 173.5
+ frame = 404746 x = 264.5   y = 176
+END classification-------------------------------------------------------
