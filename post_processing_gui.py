@@ -5,20 +5,20 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GdkPixbuf
 
 from post_processing import post_processing
+from modules import EditConfig
 
-# TODO: Image preview of meteor(s) in the GUI
-# TODO: Format the meteor data table in the GUI
-# TODO: Extract all information from data.txt and convert it to json
-# TODO: Configuration window, before
-# TODO: FIx weird bug, rewrite folder in config.toml file when select other folder
-#https://stackoverflow.com/questions/31401812/matplotlib-rotate-image-file-by-x-degrees
+# TODO: Configuration window
+# TODO: Test with only meteor detected from one observatory
+# TODO: Test Other OS
+# TODO: Test how to compile
+# https://stackoverflow.com/questions/31401812/matplotlib-rotate-image-file-by-x-degrees
 
 
 class MeteorApp(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Meteor Plotter")
 
-        #self.welcome_dialog()
+        # self.welcome_dialog()
 
         self.pp = post_processing()
         self.meteor_data = self.pp.meteor_data_table
@@ -84,7 +84,7 @@ class MeteorApp(Gtk.Window):
         self.update_label()
         self.titleLabel.set_justify(Gtk.Justification.LEFT)
         title_box.pack_start(self.titleLabel, True, True, 0)
-        #self.label.set_selectable(True) # - sets text to be selectable
+        # self.label.set_selectable(True) # - sets text to be selectable
 
         self.first_meteor_label = Gtk.Label()
         self.first_meteor_label.set_justify(Gtk.Justification.LEFT)
@@ -103,23 +103,22 @@ class MeteorApp(Gtk.Window):
         self.update_image(False)
         second_meteor_box.pack_start(self.second_image, True, True, 0)
 
-
         self.index_label = Gtk.Label()
         self.update_index_label()
         self.index_label.set_justify(Gtk.Justification.RIGHT)
         index_box.pack_start(self.index_label, True, True, 0)
-
-        self.btn_view_meteor = Gtk.Button(
-            label="Preview Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
-        )
-        self.btn_view_meteor.connect("clicked", self.on_button_clicked)
-        btn_box.pack_start(self.btn_view_meteor, True, True, 0)
 
         btn_select_folder = Gtk.Button(
             label="Select Folder", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
         )
         btn_select_folder.connect("clicked", self.welcome_dialog)
         btn_box.pack_start(btn_select_folder, True, True, 0)
+
+        self.btn_view_meteor = Gtk.Button(
+            label="Preview Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
+        )
+        self.btn_view_meteor.connect("clicked", self.on_button_clicked)
+        btn_box.pack_start(self.btn_view_meteor, True, True, 0)
 
         btn_prev_meteor = Gtk.Button(
             label="Previous Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
@@ -138,6 +137,17 @@ class MeteorApp(Gtk.Window):
         )
         btn_save_meteors.connect("clicked", self.save_to_file)
         btn_box.pack_start(btn_save_meteors, True, True, 0)
+
+    def update_meteor_data(self):
+        try:
+            self.pp = post_processing()
+        except ValueError as e:
+            logging.error(f"Error processing folder: {e}")
+            self.error_dialog(f"Error processing folder: {e}")
+            return
+
+        self.meteor_data = self.pp.meteor_data_table
+        self.index = 1
 
     def welcome_dialog(self, widget=None):
         dialog = Gtk.FileChooserDialog(
@@ -170,16 +180,16 @@ class MeteorApp(Gtk.Window):
             self.meteor_data = self.pp.meteor_data_table
             self.index = 1
             logging.info("Folder selected:")
+            EditConfig().set_value("home_dir", folder)
+            self.update_meteor_data()
         else:
             logging.info("No folder selected. Exiting Meteor Plotter.")
             dialog.destroy()
 
-            Gtk.main_quit()
             return
 
         dialog.destroy()
         self.update_labels()
-
 
         if folder is not None:
             logging.info("Folder selected successfully.")
@@ -218,7 +228,9 @@ class MeteorApp(Gtk.Window):
         self.index += 1
         if self.index > len(self.meteor_data):
             self.index = 1
-            logging.debug("End of meteor data table reached. Returning to first meteor.")
+            logging.debug(
+                "End of meteor data table reached. Returning to first meteor."
+            )
         else:
             logging.debug(f"Next meteor selected. {self.index}")
 
@@ -331,10 +343,12 @@ class MeteorApp(Gtk.Window):
         label_text += (
             f'<span size="20000">Meteor Detection Type: {meteor_info[4]}\n</span>'
         )
-        label_text += f'<span size="20000">Observatory: {meteor_info[9].split("/")[-3]}\n</span>'
-        #label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
-        #label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
-        #label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
+        label_text += (
+            f'<span size="20000">Observatory: {meteor_info[9].split("/")[-3]}\n</span>'
+        )
+        # label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
+        # label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
+        # label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
         label_text += f'<span size="20000">Meteor Position: {meteor_info[11][0][0]} X, {meteor_info[11][0][1]} Y, {meteor_info[11][1][0]} X, {meteor_info[11][1][0]} Y\n</span>'
 
         self.first_meteor_label.set_markup(label_text)
@@ -345,10 +359,12 @@ class MeteorApp(Gtk.Window):
         label_text += (
             f'<span size="20000">Meteor Detection Type: {meteor_info[5]}\n</span>'
         )
-        label_text += f'<span size="20000">Observatory: {meteor_info[10].split("/")[-3]}\n</span>'
-        #label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
-        #label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
-        #label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
+        label_text += (
+            f'<span size="20000">Observatory: {meteor_info[10].split("/")[-3]}\n</span>'
+        )
+        # label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
+        # label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
+        # label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
         label_text += f'<span size="20000">Meteor Position: {meteor_info[12][0][0]} X, {meteor_info[12][0][1]} Y, {meteor_info[12][1][0]} X, {meteor_info[12][1][0]} Y\n</span>'
 
         self.second_meteor_label.set_markup(label_text)

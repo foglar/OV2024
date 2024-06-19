@@ -328,15 +328,27 @@ class post_processing:
 
         # Draw the grid
         for i in range(1, 3):
-
-            ax.plot(
-                [center_x - radius, center_x + radius],
-                [
-                    center_y - radius + i * quadrant_size,
-                    center_y - radius + i * quadrant_size,
-                ],
-                color="blue",
-            )
+            
+            if i == 1:
+                ax.plot(
+                    [center_x - radius, center_x + radius],
+                    [
+                        center_y - radius + i * quadrant_size,
+                        center_y - radius + i * quadrant_size,
+                    ],
+                    color="blue",
+                    label="Grid",
+                )
+            else:
+                ax.plot(
+                    [center_x - radius, center_x + radius],
+                    [
+                        center_y - radius + i * quadrant_size,
+                        center_y - radius + i * quadrant_size,
+                    ],
+                    color="blue",
+                )
+            
             ax.plot(
                 [
                     center_x - radius + i * quadrant_size,

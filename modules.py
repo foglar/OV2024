@@ -1,5 +1,6 @@
 import os
 import tomli
+import tomli_w
 import re
 class ConfigLoader:
     """
@@ -83,6 +84,80 @@ class ConfigLoader:
         else:
             raise KeyError(f"Key '{key}' or Category '{category}' not found in the data section of config.toml")
         
+
+class EditConfig:
+    """
+    A class for editing the configuration settings in a TOML file.
+
+    Args:
+        file_path (str): The path to the TOML configuration file. Default is "config.toml".
+
+    Raises:
+        FileNotFoundError: If the specified configuration file does not exist.
+
+    """
+
+    def __init__(self, file_path="config.toml"):
+        self.file_path = file_path
+
+    def load_config(self):
+        """
+        Loads the configuration settings from the TOML file.
+
+        Returns:
+            dict: The loaded configuration settings.
+
+        Raises:
+            FileNotFoundError: If the specified configuration file does not exist.
+
+        """
+        if os.path.exists(self.file_path):
+            with open(self.file_path, mode="rb") as fp:
+                config = tomli.load(fp)
+            return config
+        else:
+            raise FileNotFoundError(
+                f"Config file '{self.file_path}' not found. Create it and add astrometry token"
+            )
+        
+    def save_config(self, config):
+        """
+        Saves the configuration settings to the TOML file.
+
+        Args:
+            config (dict): The configuration settings to save.
+
+        """
+        with open(self.file_path, mode="wb") as fp:
+            tomli_w.dump(config, fp)
+
+    def remove_key(self, key, category="data"):
+        """
+        Removes a key from the configuration settings.
+
+        Args:
+            key (str): The key to remove.
+
+        """
+        config = self.load_config()
+        if key in config[category]:
+            del config[category][key]
+            self.save_config(config)
+        else:
+            print(f"Key '{key}' not found in the configuration settings.")
+
+    def set_value(self, key, value, category="data"):
+        """
+        Sets a value in the configuration settings.
+
+        Args:
+            key (str): The key to set.
+            value (str): The value to associate with the key.
+
+        """
+        config = self.load_config()
+        config[category][key] = value
+        self.save_config(config)
 
 class ParseData:
     """Parse from data.txt file, meteor and stars coordinates
