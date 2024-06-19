@@ -48,7 +48,7 @@ class MeteorApp(Gtk.Window):
         m_box.pack_start(info_box, True, True, 0)
 
         first_meteor_box = Gtk.Box(
-            spacing=10,
+            spacing=70,
             orientation=Gtk.Orientation.HORIZONTAL,
             halign=Gtk.Align.END,
             valign=Gtk.Align.CENTER,
@@ -56,7 +56,7 @@ class MeteorApp(Gtk.Window):
         info_box.pack_start(first_meteor_box, True, True, 0)
 
         second_meteor_box = Gtk.Box(
-            spacing=10,
+            spacing=70,
             orientation=Gtk.Orientation.HORIZONTAL,
             halign=Gtk.Align.END,
             valign=Gtk.Align.CENTER,
@@ -75,6 +75,15 @@ class MeteorApp(Gtk.Window):
         self.update_label()
         self.label.set_justify(Gtk.Justification.LEFT)
         info_box.pack_start(self.label, True, True, 0)
+        #self.label.set_selectable(True) # - sets text to be selectable
+
+        self.image = Gtk.Image()
+        self.update_image(True)
+        first_meteor_box.pack_start(self.image, True, True, 0)
+
+        self.second_image = Gtk.Image()
+        self.update_image(False)
+        second_meteor_box.pack_start(self.second_image, True, True, 0)
 
         self.first_meteor_label = Gtk.Label()
         self.first_meteor_label.set_justify(Gtk.Justification.LEFT)
@@ -265,16 +274,26 @@ class MeteorApp(Gtk.Window):
         self.update_label()
         self.update_index_label()
         self.update_meteors_labels()
+        self.update_image(True)
+        self.update_image(False)
 
-    # def update_image(self):
+    def update_image(self, first_img=True):
     # # TODO: Image loading from the meteor data
-    # self.image.set_from_file(self.meteor_data[self.index - 1][9])
+        if first_img:
+            img_path = self.meteor_data[self.index - 1][9]
+        else:
+            img_path = self.meteor_data[self.index - 1][10]
+        img = GdkPixbuf.Pixbuf.new_from_file_at_scale(img_path, 250, 250, True)
+        if first_img:
+            self.image.set_from_pixbuf(img)
+        else:
+            self.second_image.set_from_pixbuf(img)
 
     def update_label(self):
-        # TODO: Relevant meteor data to be displayed in the label and split them into two meteor blocks
         meteor_info = self.meteor_data[self.index - 1]
         label_text = f'<span size="30000">Meteor Information\n</span>'
         label_text += f'<span size="20000">Meteor ID: {meteor_info[0]}\n</span>'
+        label_text += f'<span size="20000">Meteor Date: {meteor_info[1]}\n</span>'
         # label_text += f"<span size=\"20000\">Meteor Date: {meteor_info[1]}\n</span>"
         # label_text += f"<span size=\"20000\">Meteor Time: {meteor_info[2]}\n</span>"
         # label_text += f"<span size=\"20000\">Meteor Time: {meteor_info[3]}\n</span>"
@@ -298,30 +317,28 @@ class MeteorApp(Gtk.Window):
 
     def update_first_meteor_label(self):
         meteor_info = self.meteor_data[self.index - 1]
-        label_text = f'<span size="20000">Meteor ID: {meteor_info[0]}\n</span>'
-        label_text += f'<span size="20000">Meteor Date: {meteor_info[1]}\n</span>'
-        label_text += f'<span size="20000">Meteor Time: {meteor_info[2]}\n</span>'
+        label_text = f'<span size="20000">Meteor Time: {meteor_info[2]}\n</span>'
         label_text += (
             f'<span size="20000">Meteor Detection Type: {meteor_info[4]}\n</span>'
         )
-        label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
-        label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
-        label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
+        label_text += f'<span size="20000">Observatory: {meteor_info[9].split("/")[-3]}\n</span>'
+        #label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
+        #label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
+        #label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
         label_text += f'<span size="20000">Meteor Position: {meteor_info[11][0][0]} X, {meteor_info[11][0][1]} Y, {meteor_info[11][1][0]} X, {meteor_info[11][1][0]} Y\n</span>'
 
         self.first_meteor_label.set_markup(label_text)
 
     def update_second_meteor_label(self):
         meteor_info = self.meteor_data[self.index - 1]
-        label_text = f'<span size="20000">Meteor ID: {meteor_info[0]}\n</span>'
-        label_text += f'<span size="20000">Meteor Date: {meteor_info[1]}\n</span>'
-        label_text += f'<span size="20000">Meteor Time: {meteor_info[3]}\n</span>'
+        label_text = f'<span size="20000">Meteor Time: {meteor_info[3]}\n</span>'
         label_text += (
             f'<span size="20000">Meteor Detection Type: {meteor_info[5]}\n</span>'
         )
-        label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
-        label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
-        label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
+        label_text += f'<span size="20000">Observatory: {meteor_info[10].split("/")[-3]}\n</span>'
+        #label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
+        #label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
+        #label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
         label_text += f'<span size="20000">Meteor Position: {meteor_info[12][0][0]} X, {meteor_info[12][0][1]} Y, {meteor_info[12][1][0]} X, {meteor_info[12][1][0]} Y\n</span>'
 
         self.second_meteor_label.set_markup(label_text)

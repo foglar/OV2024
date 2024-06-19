@@ -23,12 +23,11 @@ HOME_DIR = ConfigLoader().get_home_dir()
 compare = FolderComparator()
 
 
-# TODO: Append name of observatory to the meteor array
 # TODO: Add the checks of data in each function
 # TODO: Simplify the code, ensure that its readable and understandable
 # TODO: Add docstrings to the functions
 # TODO: Change the look of the plots from config file
-# TODO: JSON format instead of list
+# TODO: JSON format instead of list, dictionary
 
 
 class post_processing:
