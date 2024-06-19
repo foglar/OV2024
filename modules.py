@@ -127,8 +127,6 @@ class ParseData:
                     start = tuple(map(float, match.group(1).split(', ')))
                     end = tuple(map(float, match.group(2).split(', ')))
                     return start, end
-        
-        # TODO: Check this function and make sure regex is working correctly
         return None, None  # Return the coordinates of the meteor
     
     def get_stars_coordinates(self):

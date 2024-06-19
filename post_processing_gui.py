@@ -10,6 +10,7 @@ from post_processing import post_processing
 # TODO: Format the meteor data table in the GUI
 # TODO: Extract all information from data.txt and convert it to json
 # TODO: Configuration window, before
+# TODO: FIx weird bug, rewrite folder in config.toml file when select other folder
 #https://stackoverflow.com/questions/31401812/matplotlib-rotate-image-file-by-x-degrees
 
 
@@ -17,7 +18,7 @@ class MeteorApp(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Meteor Plotter")
 
-        self.welcome_dialog()
+        #self.welcome_dialog()
 
         self.pp = post_processing()
         self.meteor_data = self.pp.meteor_data_table
@@ -42,10 +43,18 @@ class MeteorApp(Gtk.Window):
         info_box = Gtk.Box(
             spacing=10,
             orientation=Gtk.Orientation.VERTICAL,
-            halign=Gtk.Align.START,
+            halign=Gtk.Align.CENTER,
             valign=Gtk.Align.START,
         )
         m_box.pack_start(info_box, True, True, 0)
+
+        title_box = Gtk.Box(
+            spacing=10,
+            orientation=Gtk.Orientation.HORIZONTAL,
+            halign=Gtk.Align.START,
+            valign=Gtk.Align.START,
+        )
+        info_box.pack_start(title_box, True, True, 0)
 
         first_meteor_box = Gtk.Box(
             spacing=70,
@@ -71,19 +80,11 @@ class MeteorApp(Gtk.Window):
         )
         m_box.pack_start(btn_box, True, True, 0)
 
-        self.label = Gtk.Label()
+        self.titleLabel = Gtk.Label()
         self.update_label()
-        self.label.set_justify(Gtk.Justification.LEFT)
-        info_box.pack_start(self.label, True, True, 0)
+        self.titleLabel.set_justify(Gtk.Justification.LEFT)
+        title_box.pack_start(self.titleLabel, True, True, 0)
         #self.label.set_selectable(True) # - sets text to be selectable
-
-        self.image = Gtk.Image()
-        self.update_image(True)
-        first_meteor_box.pack_start(self.image, True, True, 0)
-
-        self.second_image = Gtk.Image()
-        self.update_image(False)
-        second_meteor_box.pack_start(self.second_image, True, True, 0)
 
         self.first_meteor_label = Gtk.Label()
         self.first_meteor_label.set_justify(Gtk.Justification.LEFT)
@@ -93,6 +94,15 @@ class MeteorApp(Gtk.Window):
         self.second_meteor_label.set_justify(Gtk.Justification.LEFT)
         second_meteor_box.pack_start(self.second_meteor_label, True, True, 0)
         self.update_meteors_labels()
+
+        self.image = Gtk.Image()
+        self.update_image(True)
+        first_meteor_box.pack_start(self.image, True, True, 0)
+
+        self.second_image = Gtk.Image()
+        self.update_image(False)
+        second_meteor_box.pack_start(self.second_image, True, True, 0)
+
 
         self.index_label = Gtk.Label()
         self.update_index_label()
@@ -104,6 +114,12 @@ class MeteorApp(Gtk.Window):
         )
         self.btn_view_meteor.connect("clicked", self.on_button_clicked)
         btn_box.pack_start(self.btn_view_meteor, True, True, 0)
+
+        btn_select_folder = Gtk.Button(
+            label="Select Folder", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
+        )
+        btn_select_folder.connect("clicked", self.welcome_dialog)
+        btn_box.pack_start(btn_select_folder, True, True, 0)
 
         btn_prev_meteor = Gtk.Button(
             label="Previous Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
@@ -123,22 +139,7 @@ class MeteorApp(Gtk.Window):
         btn_save_meteors.connect("clicked", self.save_to_file)
         btn_box.pack_start(btn_save_meteors, True, True, 0)
 
-    def welcome_dialog(self):
-        information_dialog = Gtk.MessageDialog(
-            transient_for=self,
-            flags=0,
-            message_type=Gtk.MessageType.INFO,
-            buttons=Gtk.ButtonsType.OK,
-            text="Welcome to Meteor Plotter!",
-        )
-
-        information_dialog.format_secondary_text(
-            "Please select the folder containing the meteor data."
-        )
-
-        information_dialog.run()
-        information_dialog.destroy()
-
+    def welcome_dialog(self, widget=None):
         dialog = Gtk.FileChooserDialog(
             title="Welcome to Meteor Plotter",
             parent=self,
@@ -158,20 +159,30 @@ class MeteorApp(Gtk.Window):
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             folder = dialog.get_filename()
-            self.pp = post_processing(folder)
+            try:
+                self.pp = post_processing(folder)
+            except ValueError as e:
+                logging.error(f"Error processing folder: {e}")
+                self.error_dialog(f"Error processing folder: {e}")
+                dialog.destroy()
+                return
+
             self.meteor_data = self.pp.meteor_data_table
             self.index = 1
-            logging.info(f"Folder selected: {folder}")
+            logging.info("Folder selected:")
         else:
             logging.info("No folder selected. Exiting Meteor Plotter.")
             dialog.destroy()
+
             Gtk.main_quit()
             return
 
         dialog.destroy()
+        self.update_labels()
+
 
         if folder is not None:
-            logging.info("Folder selected successfully.", f"Folder: {folder}")
+            logging.info("Folder selected successfully.")
             return folder
         else:
             return None
@@ -278,7 +289,6 @@ class MeteorApp(Gtk.Window):
         self.update_image(False)
 
     def update_image(self, first_img=True):
-    # # TODO: Image loading from the meteor data
         if first_img:
             img_path = self.meteor_data[self.index - 1][9]
         else:
@@ -305,7 +315,7 @@ class MeteorApp(Gtk.Window):
         # label_text += f"<span size=\"20000\">Meteor Position: {meteor_info[11][0][0]} X, {meteor_info[11][0][1]} Y, {meteor_info[11][1][0]} X, {meteor_info[11][1][0]} Y\n</span>"
         # label_text += f"<span size=\"20000\">Meteor Position: {meteor_info[12][0][0]} X, {meteor_info[12][0][1]} Y, {meteor_info[12][1][0]} X, {meteor_info[12][1][0]} Y\n</span>"
 
-        self.label.set_markup(label_text)
+        self.titleLabel.set_markup(label_text)
 
     def update_index_label(self):
         label_text = f'<span size="20000" >Meteor <b>{self.index}/{len(self.meteor_data)}</b></span>\n'

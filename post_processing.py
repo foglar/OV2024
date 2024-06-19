@@ -16,8 +16,7 @@ from matplotlib import pyplot as plt
 from os import path
 
 from compare import FolderComparator
-from modules import ConfigLoader
-from modules import ParseData
+from modules import ConfigLoader, ParseData
 
 HOME_DIR = ConfigLoader().get_home_dir()
 compare = FolderComparator()
@@ -27,7 +26,7 @@ compare = FolderComparator()
 # TODO: Simplify the code, ensure that its readable and understandable
 # TODO: Add docstrings to the functions
 # TODO: Change the look of the plots from config file
-# TODO: JSON format instead of list, dictionary
+# TODO: JSON format instead of list/dictionary
 
 
 class post_processing:
@@ -329,6 +328,7 @@ class post_processing:
 
         # Draw the grid
         for i in range(1, 3):
+
             ax.plot(
                 [center_x - radius, center_x + radius],
                 [
