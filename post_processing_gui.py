@@ -17,9 +17,6 @@ from modules import EditConfig
 class MeteorApp(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="Meteor Plotter")
-
-        # self.welcome_dialog()
-
         self.pp = post_processing()
         self.meteor_data = self.pp.meteor_data_table
         self.index = 1
@@ -32,13 +29,16 @@ class MeteorApp(Gtk.Window):
         m_box = Gtk.Box(spacing=10, orientation=Gtk.Orientation.VERTICAL)
         self.add(m_box)
 
-        index_box = Gtk.Box(
+        self.Toolbar = Gtk.Toolbar()
+        m_box.pack_start(self.Toolbar, False, False, 0)
+
+        title_row_box = Gtk.Box(
             spacing=10,
-            orientation=Gtk.Orientation.VERTICAL,
-            halign=Gtk.Align.END,
+            orientation=Gtk.Orientation.HORIZONTAL,
+            halign=Gtk.Align.START,
             valign=Gtk.Align.START,
         )
-        m_box.pack_start(index_box, True, True, 0)
+        m_box.pack_start(title_row_box, True, True, 0)
 
         info_box = Gtk.Box(
             spacing=10,
@@ -54,7 +54,15 @@ class MeteorApp(Gtk.Window):
             halign=Gtk.Align.START,
             valign=Gtk.Align.START,
         )
-        info_box.pack_start(title_box, True, True, 0)
+        title_row_box.pack_start(title_box, True, True, 0)
+
+        index_box = Gtk.Box(
+            spacing=10,
+            orientation=Gtk.Orientation.VERTICAL,
+            halign=Gtk.Align.END,
+            valign=Gtk.Align.START,
+        )
+        title_row_box.pack_start(index_box, True, True, 0)
 
         first_meteor_box = Gtk.Box(
             spacing=70,
@@ -108,11 +116,17 @@ class MeteorApp(Gtk.Window):
         self.index_label.set_justify(Gtk.Justification.RIGHT)
         index_box.pack_start(self.index_label, True, True, 0)
 
-        btn_select_folder = Gtk.Button(
-            label="Select Folder", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
-        )
+        btn_select_folder = Gtk.ToolButton(
+            icon_name="folder-open", label="Select Folder"
+            )
         btn_select_folder.connect("clicked", self.welcome_dialog)
-        btn_box.pack_start(btn_select_folder, True, True, 0)
+        self.Toolbar.insert(btn_select_folder, 1)
+
+        btn_save_to_file = Gtk.ToolButton(
+            icon_name="document-save", label="Save to File"
+        )
+        btn_save_to_file.connect("clicked", self.save_to_file_select)
+        self.Toolbar.insert(btn_save_to_file, 2)
 
         self.btn_view_meteor = Gtk.Button(
             label="Preview Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
@@ -249,6 +263,32 @@ class MeteorApp(Gtk.Window):
 
         self.update_labels()
         return self.meteor_data[self.index - 1]
+    
+    def save_to_file_select(self, widget):
+        dialog = Gtk.FileChooserDialog(
+            title="Save Meteor Data",
+            parent=self,
+            action=Gtk.FileChooserAction.SAVE,
+            buttons=(
+                Gtk.STOCK_CANCEL,
+                Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_SAVE,
+                Gtk.ResponseType.OK,
+            ),
+        )
+
+        dialog.set_default_size(800, 400)
+        dialog.set_select_multiple(False)
+        dialog.set_current_folder(GLib.get_home_dir())
+        dialog.set_current_name("overview.csv")
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            path = dialog.get_filename()
+            dialog.destroy()
+            self.save_to_file(widget, path)
+        else:
+            dialog.destroy()
 
     def save_to_file(self, widget):
         logging.info("Saving meteor data to file.")
@@ -330,7 +370,7 @@ class MeteorApp(Gtk.Window):
         self.titleLabel.set_markup(label_text)
 
     def update_index_label(self):
-        label_text = f'<span size="20000" >Meteor <b>{self.index}/{len(self.meteor_data)}</b></span>\n'
+        label_text = f'<span size="20000" ><b>{self.index}/{len(self.meteor_data)}</b></span>\n'
         self.index_label.set_markup(label_text)
 
     def update_meteors_labels(self):
@@ -339,12 +379,12 @@ class MeteorApp(Gtk.Window):
 
     def update_first_meteor_label(self):
         meteor_info = self.meteor_data[self.index - 1]
-        label_text = f'<span size="20000">Meteor Time: {meteor_info[2]}\n</span>'
+        label_text = (
+            f'<span size="20000">Observatory: {meteor_info[9].split("/")[-3]}\n</span>'
+        )
+        label_text += f'<span size="20000">Meteor Time: {meteor_info[2]}\n</span>'
         label_text += (
             f'<span size="20000">Meteor Detection Type: {meteor_info[4]}\n</span>'
-        )
-        label_text += (
-            f'<span size="20000">Observatory: {meteor_info[9].split("/")[-3]}\n</span>'
         )
         # label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
         # label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
@@ -355,12 +395,12 @@ class MeteorApp(Gtk.Window):
 
     def update_second_meteor_label(self):
         meteor_info = self.meteor_data[self.index - 1]
-        label_text = f'<span size="20000">Meteor Time: {meteor_info[3]}\n</span>'
+        label_text = (
+            f'<span size="20000">Observatory: {meteor_info[10].split("/")[-3]}\n</span>'
+        )
+        label_text += f'<span size="20000">Meteor Time: {meteor_info[3]}\n</span>'
         label_text += (
             f'<span size="20000">Meteor Detection Type: {meteor_info[5]}\n</span>'
-        )
-        label_text += (
-            f'<span size="20000">Observatory: {meteor_info[10].split("/")[-3]}\n</span>'
         )
         # label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
         # label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'

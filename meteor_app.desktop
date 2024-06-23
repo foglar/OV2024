@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Meteor App
+GenericName=View meteors and analysis
+Categories=Distrobox;System;Utility
+Exec=bash -norc -c "cd ~/Programming/Projects/OV2024/ && python post_processing_gui.py"
+Icon=none
+Keywords=meteor;meteors;
+NoDisplay=false
+Terminal=false
+Type=Application
