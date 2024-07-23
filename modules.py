@@ -1,7 +1,7 @@
 import os
 import tomli
-
-
+import tomli_w
+import re
 class ConfigLoader:
     """
     A class for loading and retrieving configuration settings from a TOML file.
@@ -83,3 +83,141 @@ class ConfigLoader:
             return config[category][key]
         else:
             raise KeyError(f"Key '{key}' or Category '{category}' not found in the data section of config.toml")
+        
+
+class EditConfig:
+    """
+    A class for editing the configuration settings in a TOML file.
+
+    Args:
+        file_path (str): The path to the TOML configuration file. Default is "config.toml".
+
+    Raises:
+        FileNotFoundError: If the specified configuration file does not exist.
+
+    """
+
+    def __init__(self, file_path="config.toml"):
+        self.file_path = file_path
+
+    def load_config(self):
+        """
+        Loads the configuration settings from the TOML file.
+
+        Returns:
+            dict: The loaded configuration settings.
+
+        Raises:
+            FileNotFoundError: If the specified configuration file does not exist.
+
+        """
+        if os.path.exists(self.file_path):
+            with open(self.file_path, mode="rb") as fp:
+                config = tomli.load(fp)
+            return config
+        else:
+            raise FileNotFoundError(
+                f"Config file '{self.file_path}' not found. Create it and add astrometry token"
+            )
+        
+    def save_config(self, config):
+        """
+        Saves the configuration settings to the TOML file.
+
+        Args:
+            config (dict): The configuration settings to save.
+
+        """
+        with open(self.file_path, mode="wb") as fp:
+            tomli_w.dump(config, fp)
+
+    def remove_key(self, key, category="data"):
+        """
+        Removes a key from the configuration settings.
+
+        Args:
+            key (str): The key to remove.
+
+        """
+        config = self.load_config()
+        if key in config[category]:
+            del config[category][key]
+            self.save_config(config)
+        else:
+            print(f"Key '{key}' not found in the configuration settings.")
+
+    def set_value(self, key, value, category="data"):
+        """
+        Sets a value in the configuration settings.
+
+        Args:
+            key (str): The key to set.
+            value (str): The value to associate with the key.
+
+        """
+        config = self.load_config()
+        config[category][key] = value
+        self.save_config(config)
+
+class ParseData:
+    """Parse from data.txt file, meteor and stars coordinates
+    
+    Args:
+        data_path (str): data.txt file path
+
+    Usage:
+        Create ParseData object and call get_meteor_start_end_coordinates() and get_stars_coordinates() methods
+        ```python
+        PD = ParseData("data/data.txt")
+        meteor = PD.get_meteor_start_end_coordinates()
+        stars = PD.get_stars_coordinates()```
+
+    Returns:
+        list[float]: Meteor and stars coordinates
+        list[float]: Stars coordinates
+    """
+    def __init__ (self, data_path):
+        self.data_path = data_path
+        self.data = self._read_file()
+        self.parsed_data = self.parse_data()
+
+    def parse_data(self):
+        self.get_meteor_start_end_coordinates()
+        self.get_stars_coordinates()
+
+    def get_meteor_start_end_coordinates(self) -> list[float]:
+        """Get meteor coordinates from data.txt file
+        
+        Args:
+            path (str): data.txt file path
+
+        Returns:
+            tuple(): Meteor coordinates
+        """
+        file = open(self.data_path, 'r')
+        for line in file:
+            if line.startswith("#Meteor 1:"):
+                match = re.search(r'start \(([^)]+)\) end \(([^)]+)\)', line)
+                if match:
+                    start = tuple(map(float, match.group(1).split(', ')))
+                    end = tuple(map(float, match.group(2).split(', ')))
+                    return start, end
+        return None, None  # Return the coordinates of the meteor
+    
+    def get_stars_coordinates(self):
+        star_pattern = re.compile(r"#\d+ position \((\d+\.?\d*), (\d+\.?\d*)\)")
+        stars = star_pattern.findall(self.data)
+        return [(float(x), float(y)) for x, y in stars]
+
+    def _read_file(self):
+        if not os.path.exists(self.data_path):
+            raise FileNotFoundError(f"File {self.data_path} not found")
+        
+        with open(self.data_path, 'r') as f:
+            data = f.read()
+        return data
+
+
+if __name__ == "__main__":
+    print(ParseData("data/data.txt").get_meteor_start_end_coordinates())
+    print(ParseData("data/data.txt").get_stars_coordinates())

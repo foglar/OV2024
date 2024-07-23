@@ -1,0 +1,39 @@
+Output file: 2024-01-09-01-56-03.mvf Total time: 2.04918s
+START FRAME
+Input file: f:\data\2024-01-09\2024-01-09-01-55-41-637.mvf
+Time: 21.1311s
+END FRAME
+Input file: f:\data\2024-01-09\2024-01-09-01-55-41-637.mvf
+Time: 23.1803s
+BEGIN classification-----------------------------------------------------
+Number of stars:21
+#1 position (379, 268)
+#2 position (274, 255)
+#3 position (351, 251)
+#4 position (271, 126.5)
+#5 position (144, 143.8)
+#6 position (438.5, 132)
+#7 position (266, 37)
+#8 position (373, 79)
+#9 position (287, 93)
+#10 position (184, 101)
+#11 position (109.625, 221)
+#12 position (182, 205)
+#13 position (354.5, 376.5)
+#14 position (354.5, 377.5)
+#15 position (464, 198)
+#16 position (422.5, 162)
+#17 position (441, 206)
+#18 position (592.5, 436)
+#19 position (297, 321)
+#20 position (381.5, 337.5)
+#21 position (357, 234)
+Number of meteors:1
+#Meteor 1: start (380, 73.5) end (382, 105) frames: 783749-783754 from: 0.983607s to: 1.06557s 
+ frame = 783749 x = 380   y = 73.5
+ frame = 783750 x = 380   y = 80
+ frame = 783751 x = 381   y = 87
+ frame = 783752 x = 381   y = 92.5
+ frame = 783753 x = 381   y = 99
+ frame = 783754 x = 382   y = 105
+END classification-------------------------------------------------------

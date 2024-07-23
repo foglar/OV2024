@@ -1,0 +1,62 @@
+Output file: 2024-01-08-21-35-44.mvf Total time: 2.2459s
+START FRAME
+Input file: f:\data\2024-01-08\2024-01-08-21-35-33-419.mvf
+Time: 10.6066s
+END FRAME
+Input file: f:\data\2024-01-08\2024-01-08-21-35-33-419.mvf
+Time: 12.8525s
+BEGIN classification-----------------------------------------------------
+Number of stars:32
+#1 position (280, 495.5)
+#2 position (259, 422.5)
+#3 position (271, 343)
+#4 position (500, 297)
+#5 position (456.5, 282)
+#6 position (460, 267)
+#7 position (358, 248)
+#8 position (211, 238)
+#9 position (288, 229)
+#10 position (460, 218)
+#11 position (480.375, 174)
+#12 position (209, 107)
+#13 position (367.5, 102)
+#14 position (233, 100)
+#15 position (326, 64)
+#16 position (362, 122)
+#17 position (439.5, 299)
+#18 position (164, 289.5)
+#19 position (278.5, 106)
+#20 position (334, 159.5)
+#21 position (396, 142)
+#22 position (331, 124.375)
+#23 position (380, 253)
+#24 position (310.5, 299)
+#25 position (303, 59)
+#26 position (324, 375)
+#27 position (493, 261)
+#28 position (207, 260)
+#29 position (524, 269)
+#30 position (469, 432)
+#31 position (456, 232)
+#32 position (356, 200)
+Number of meteors:1
+#Meteor 1: start (457, 342.5) end (459, 354) frames: 58887-58904 from: 0.983607s to: 1.2623s 
+ frame = 58887 x = 457   y = 342.5
+ frame = 58888 x = 457   y = 343
+ frame = 58889 x = 458   y = 344
+ frame = 58890 x = 457   y = 344
+ frame = 58891 x = 458   y = 345
+ frame = 58892 x = 458   y = 346
+ frame = 58893 x = 458   y = 346.5
+ frame = 58894 x = 458   y = 347
+ frame = 58895 x = 458   y = 348
+ frame = 58896 x = 458   y = 348
+ frame = 58897 x = 458.5   y = 349
+ frame = 58898 x = 458.5   y = 350
+ frame = 58899 x = 458.625   y = 350
+ frame = 58900 x = 459   y = 351
+ frame = 58901 x = 458.625   y = 352
+ frame = 58902 x = 459   y = 352.5
+ frame = 58903 x = 459   y = 353
+ frame = 58904 x = 459   y = 354
+END classification-------------------------------------------------------

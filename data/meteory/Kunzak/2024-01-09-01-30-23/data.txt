@@ -1,0 +1,48 @@
+Output file: 2024-01-09-01-30-23.mvf Total time: 2.08197s
+START FRAME
+Input file: f:\data\2024-01-09\2024-01-09-01-30-10-448.mvf
+Time: 12.2951s
+END FRAME
+Input file: f:\data\2024-01-09\2024-01-09-01-30-10-448.mvf
+Time: 14.377s
+BEGIN classification-----------------------------------------------------
+Number of stars:28
+#1 position (321, 328)
+#2 position (420, 276)
+#3 position (379, 268)
+#4 position (274, 255)
+#5 position (351, 251)
+#6 position (271, 126.5)
+#7 position (144, 143.8)
+#8 position (438.5, 132)
+#9 position (266, 37)
+#10 position (373, 79)
+#11 position (287, 93)
+#12 position (184, 101)
+#13 position (109.625, 221)
+#14 position (318, 319.5)
+#15 position (321, 325.5)
+#16 position (576, 279)
+#17 position (344, 196)
+#18 position (359, 381.8)
+#19 position (340.5, 522)
+#20 position (455, 170)
+#21 position (357.714, 304)
+#22 position (428, 445)
+#23 position (431, 367)
+#24 position (432, 176)
+#25 position (278, 284)
+#26 position (433, 379)
+#27 position (417, 127)
+#28 position (167, 172)
+Number of meteors:1
+#Meteor 1: start (336.9, 266.5) end (349.5, 293) frames: 702106-702113 from: 0.983607s to: 1.09836s 
+ frame = 702106 x = 336.9   y = 266.5
+ frame = 702107 x = 338.5   y = 270
+ frame = 702108 x = 340.5   y = 274
+ frame = 702109 x = 342.5   y = 278
+ frame = 702110 x = 344.5   y = 282
+ frame = 702111 x = 346.5   y = 286
+ frame = 702112 x = 347   y = 289.5
+ frame = 702113 x = 349.5   y = 293
+END classification-------------------------------------------------------

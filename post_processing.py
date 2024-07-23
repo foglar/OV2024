@@ -16,19 +16,17 @@ from matplotlib import pyplot as plt
 from os import path
 
 from compare import FolderComparator
-from modules import ConfigLoader
-from coordinates import get_meteor_start_end_coordinates
+from modules import ConfigLoader, ParseData
 
 HOME_DIR = ConfigLoader().get_home_dir()
 compare = FolderComparator()
 
 
-# TODO: Append name of observatory to the meteor array
 # TODO: Add the checks of data in each function
 # TODO: Simplify the code, ensure that its readable and understandable
 # TODO: Add docstrings to the functions
 # TODO: Change the look of the plots from config file
-# TODO: JSON format instead of list
+# TODO: JSON format instead of list/dictionary
 
 
 class post_processing:
@@ -69,14 +67,14 @@ class post_processing:
 
             # Meteor start and end coordinates
             if meteor_object[0] is not None:
-                meteor_position = get_meteor_start_end_coordinates(
+                meteor_position = ParseData(
                     f"{meteor_object[0][0]}/data.txt"
-                )
+                ).get_meteor_start_end_coordinates()
 
             if meteor_object[1] is not None:
-                meteor_position1 = get_meteor_start_end_coordinates(
+                meteor_position1 = ParseData(
                     f"{meteor_object[1][0]}/data.txt"
-                )
+                ).get_meteor_start_end_coordinates()
 
             # Meteor quadrants
 
@@ -123,6 +121,22 @@ class post_processing:
             # Coordinates
             processed_meteors[-1].append(meteor_position)
             processed_meteors[-1].append(meteor_position1)
+
+            # Stars
+            if meteor_object[0] is not None:
+                stars = ParseData(
+                    f"{meteor_object[0][0]}/data.txt"
+                ).get_stars_coordinates()
+                processed_meteors[-1].append(stars)
+                stars1 = ParseData(
+                    f"{meteor_object[1][0]}/data.txt"
+                ).get_stars_coordinates()
+                processed_meteors[-1].append(stars1)
+            else:
+                processed_meteors[-1].append(None)
+                processed_meteors[-1].append(None)
+
+        logging.debug(processed_meteors)
 
         self.meteor_data_table = processed_meteors
         logging.debug(processed_meteors)
@@ -171,9 +185,9 @@ class post_processing:
         Returns:
             detection_type: detection type of the meteor
         """
-        # TODO: Revise
-        if meteor_object[0] is not None:
-            if path.exists(f"{meteor_object[0][index]}/data.txt"):
+        # TODO: If new day, then new number order
+        if meteor_object[0] is not None and meteor_object[1] is not None:
+            if path.exists(f"{meteor_object[index][0]}/data.txt"):
                 return "MA"
             else:
                 return "D"
@@ -280,8 +294,7 @@ class post_processing:
                     meteor[6],  # Quadrant
                     meteor[3],  # Time1
                     meteor[4],  # Detection Type1
-                    meteor[6],  # Quadrant1
-                    meteor[7],  # Time Difference
+                    meteor[7],  # Quadrant1
                 ]
             else:
                 reordered_meteor = [
@@ -295,7 +308,7 @@ class post_processing:
 
         return processed_meteors
 
-    def _create_meteor_figure(self, ax, image_path, coordinates):
+    def _create_meteor_figure(self, ax, image_path, coordinates, stars=None):
         """Create a figure of the meteor with the coordinates on the image
         Args:
             ax: matplotlib axis
@@ -315,14 +328,27 @@ class post_processing:
 
         # Draw the grid
         for i in range(1, 3):
-            ax.plot(
-                [center_x - radius, center_x + radius],
-                [
-                    center_y - radius + i * quadrant_size,
-                    center_y - radius + i * quadrant_size,
-                ],
-                color="blue",
-            )
+            
+            if i == 1:
+                ax.plot(
+                    [center_x - radius, center_x + radius],
+                    [
+                        center_y - radius + i * quadrant_size,
+                        center_y - radius + i * quadrant_size,
+                    ],
+                    color="blue",
+                    label="Grid",
+                )
+            else:
+                ax.plot(
+                    [center_x - radius, center_x + radius],
+                    [
+                        center_y - radius + i * quadrant_size,
+                        center_y - radius + i * quadrant_size,
+                    ],
+                    color="blue",
+                )
+            
             ax.plot(
                 [
                     center_x - radius + i * quadrant_size,
@@ -331,6 +357,14 @@ class post_processing:
                 [center_y - radius, center_y + radius],
                 color="blue",
             )
+
+        if stars is not None:
+            for i, star in enumerate(stars):
+                if i == 0:
+                    ax.plot(star[0], star[1], "ro", label="Star", markersize=3)
+                else:
+                    ax.plot(star[0], star[1], "ro", markersize=3)
+
         # Best cmap for the image is grey, hot, bone
         ax.imshow(image, cmap="grey")
 
@@ -344,12 +378,21 @@ class post_processing:
 
         return ax
 
-    def plot_meteors(self, images_path, first_coords, second_coords=None):
+    def plot_meteors(
+        self,
+        images_path,
+        first_coords,
+        second_coords=None,
+        stars=None,
+        second_stars=None,
+    ):
         """Plot the meteor on the image
         Args:
             images_path: list of paths to the images [first_image, second_image]
             first_coords: start coordinates of the meteor [x, y]
             second_coords: end coordinates of the meteor [x, y]
+            stars: list of star coordinates
+            second_stars: list of star coordinates for the second image
 
         Returns:
             None"""
@@ -371,9 +414,12 @@ class post_processing:
 
         if type(images_path) is list:
             fig, axes = plt.subplots(1, 2, figsize=(16, 8))
-
-            self._create_meteor_figure(axes[0], images_path[0], first_coords)
-            self._create_meteor_figure(axes[1], images_path[1], second_coords)
+            self._create_meteor_figure(
+                axes[0], images_path[0], first_coords, stars=stars
+            )
+            self._create_meteor_figure(
+                axes[1], images_path[1], second_coords, stars=second_stars
+            )
 
             leg = axes[0].legend(fancybox=True, shadow=True)
             leg = axes[1].legend(fancybox=True, shadow=True)
@@ -383,17 +429,20 @@ class post_processing:
             self._create_meteor_figure(ax, images_path, first_coords)
             leg = ax.legend(fancybox=True, shadow=True)
 
-        #pickradius = 5
+        # pickradius = 5
         # TODO: Add ability to toggle the meteor path on and off
-
-        plt.show()
+        # TODO: Consider adding matplotlib window to the gtk window https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_gtk3_sgskip.html#sphx-glr-gallery-user-interfaces-embedding-in-gtk3-sgskip-py
+        return plt, fig
 
     def plot_all_meteors(self):
         # Plot all meteors in the list
         meteors = self.meteor_data_table
         logging.info(f"Plotting {len(meteors)} meteors.")
         for meteor in meteors:
-            self.plot_meteors([meteor[-4], meteor[-3]], meteor[-2], meteor[-1])
+            plt, fig = self.plot_meteors(
+                [meteor[-6], meteor[-5]], meteor[-4], meteor[-3], meteor[-2], meteor[-1]
+            )
+            plt.show()
 
     def write_to_csv(self, data=None):
         # Format the data to be written to the CSV file

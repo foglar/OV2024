@@ -1,0 +1,74 @@
+Output file: 2024-01-08-23-24-54.mvf Total time: 2.32787s
+START FRAME
+Input file: f:\data\2024-01-08\2024-01-08-23-24-36-700.mvf
+Time: 17.5574s
+END FRAME
+Input file: f:\data\2024-01-08\2024-01-08-23-24-36-700.mvf
+Time: 19.8852s
+BEGIN classification-----------------------------------------------------
+Number of stars:39
+#1 position (395, 411)
+#2 position (594, 399)
+#3 position (594, 350)
+#4 position (307, 343)
+#5 position (554, 331)
+#6 position (321, 328)
+#7 position (195.5, 289)
+#8 position (448, 280)
+#9 position (420, 276)
+#10 position (379, 268)
+#11 position (306, 266)
+#12 position (274, 255)
+#13 position (351, 251)
+#14 position (338, 203)
+#15 position (501, 177)
+#16 position (271, 126.5)
+#17 position (240, 117)
+#18 position (288, 93)
+#19 position (335, 454)
+#20 position (466, 401)
+#21 position (351, 309)
+#22 position (551, 284)
+#23 position (457.5, 221.5)
+#24 position (241, 127)
+#25 position (335, 214)
+#26 position (428, 559)
+#27 position (144, 143.8)
+#28 position (361, 269)
+#29 position (422, 293)
+#30 position (449, 226.2)
+#31 position (234, 269)
+#32 position (482, 191)
+#33 position (360, 212)
+#34 position (211, 309)
+#35 position (358.5, 260.5)
+#36 position (474, 382)
+#37 position (388, 290)
+#38 position (437, 105.625)
+#39 position (589, 381.5)
+Number of meteors:1
+#Meteor 1: start (490, 215) end (471, 247) frames: 320443-320465 from: 0.983607s to: 1.34426s 
+ frame = 320443 x = 490   y = 215
+ frame = 320444 x = 489   y = 217
+ frame = 320445 x = 488   y = 218
+ frame = 320446 x = 487   y = 219.5
+ frame = 320447 x = 486   y = 221
+ frame = 320448 x = 486   y = 222
+ frame = 320449 x = 485   y = 224
+ frame = 320450 x = 484   y = 225
+ frame = 320451 x = 483   y = 227
+ frame = 320452 x = 482   y = 228
+ frame = 320453 x = 481   y = 230
+ frame = 320454 x = 480   y = 231
+ frame = 320455 x = 480   y = 232
+ frame = 320456 x = 479   y = 234
+ frame = 320457 x = 478   y = 235
+ frame = 320458 x = 477   y = 237
+ frame = 320459 x = 476   y = 238.5
+ frame = 320460 x = 475   y = 240
+ frame = 320461 x = 474   y = 241
+ frame = 320462 x = 473   y = 242.5
+ frame = 320463 x = 473   y = 244.5
+ frame = 320464 x = 471.625   y = 246
+ frame = 320465 x = 471   y = 247
+END classification-------------------------------------------------------
