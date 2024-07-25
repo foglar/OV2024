@@ -13,6 +13,9 @@ class Meteor:
     observation_a: list[list[float]]
     observation_b: list[list[float]]
 
+    times_a: (list[float])
+    times_b: (list[float])
+
     Q_angle: float
     
     # Radiant information
@@ -28,12 +31,16 @@ class Meteor:
     distance_from_begining_a: list[float]
     distance_from_begining_b: list[float]
 
-    def __init__(self, station_a: dict, station_b: dict, observation_a: list[list[float]], observation_b:list[list[float]]) -> None:
+    def __init__(self, station_a: dict, station_b: dict,
+                 observation_a: list[list[float]], observation_b:list[list[float]],
+                 times_a: (list[float]), times_b: (list[float])) -> None:
         """Args:
             station_a dict: latitude, height and time of station A
             station_b dict: latitude, height and time of station B
             observation_b (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station A
             observation_a (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station B
+            times_a (list[float]): Times in seconds of each point observation
+            times_b (list[float]): Times in seconds of each point observation
         """
         # Station and observation information
         self.station_a = station_a
@@ -41,6 +48,9 @@ class Meteor:
 
         self.observation_a = observation_a
         self.observation_b = observation_b
+
+        self.times_a = times_a
+        self.times_b = times_b
 
         # Define yet uncalculated values
         self.radiant = None
@@ -54,6 +64,9 @@ class Meteor:
 
         self.distance_from_begining_a = None
         self.distance_from_begining_b = None
+
+        self.velocities_a = None
+        self.velocities_b = None
 
     def calculate_radiant(self) -> None:
         """Calculates the radiant of the meteor according to Ceplecha (1987)
@@ -243,6 +256,40 @@ class Meteor:
             self.calculate_distances_along_trajectories()
 
         return self.distance_from_begining_a, self.distance_from_begining_b
+    
+    def calculate_velocities_along_trajectories(self) -> None:
+        """Calculates the velocity of meteor at each point in both trajectories"""
+
+        # If the geocentric trajectories aren't calculated yet, calculate
+        if self.geocentric_trajectory_a == None or self.geocentric_trajectory_b == None:
+            self.calculate_trajectories_geocentric()
+
+        self.velocities_a = []
+        for i in range(1, len(self.geocentric_trajectory_a)):
+            distance_from_last = calculate_distance(self.geocentric_trajectory_a[i], self.geocentric_trajectory_a[i - 1])
+            time_from_last = self.times_a[i] - self.times_a[i - 1]
+
+            self.velocities_a.append(distance_from_last/time_from_last)
+
+        self.velocities_b = []
+        for i in range(1, len(self.geocentric_trajectory_b)):
+            distance_from_last = calculate_distance(self.geocentric_trajectory_b[i], self.geocentric_trajectory_b[i - 1])
+            time_from_last = self.times_b[i] - self.times_b[i - 1]
+
+            self.velocities_b.append(distance_from_last/time_from_last)
+
+    def get_velocities_along_trajectories(self) -> list[list[float]]:
+        """Returns the velocities at all but the first points from both trajectories
+        
+        Returns:
+            list[list[float]]
+        """
+
+        # If the velocities aren't calculated yet, calculate
+        if self.velocities_a == None or self.velocities_b == None:
+            self.calculate_velocities_along_trajectories()
+
+        return self.velocities_a, self.velocities_b
 
 def calculate_meteor_plane(points: list[float]) -> list[float]:
     """Calculates meteor path plane according to equations 9 and 11
@@ -445,9 +492,14 @@ if __name__ == '__main__':
     ondrejov = {'lon': 14.780208, 'lat': 49.910222, 'height':  524, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
     kunzak = {'lon': 15.200930, 'lat': 49.107290, 'height': 656, 'time': '2018-10-8 22:03:54', 'time_zone': 1}
 
-    # Precomputed ra and dec values
-    meteor_ondrejov = [[358.647, 8.286], [358.711, 8.142], [358.776, 8.031], [358.838, 7.912], [358.892, 7.772], [359.003, 7.642], [359.094, 7.543], [359.162, 7.386], [359.220, 7.233], [359.304, 7.092], [359.396, 6.971], [359.456, 6.852], [359.559, 6.680], [359.612, 6.599], [359.693, 6.482], [359.777, 6.318], [359.863, 6.188], [359.945, 6.049], [0.027, 5.910], [0.085, 5.792], [0.161, 5.667], [0.243, 5.505], [0.342, 5.359], [0.408, 5.239], [0.471, 5.085], [0.564, 4.954], [0.642, 4.840], [0.707, 4.720], [0.798, 4.612], [0.886, 4.449], [0.948, 4.298], [1.038, 4.168], [1.105, 4.082], [1.169, 3.964], [1.285, 3.824], [1.344, 3.697], [1.360, 3.588], [1.482, 3.468], [1.550, 3.315], [1.654, 3.226], [1.709, 3.068], [1.750, 2.950], [1.793, 2.887], [1.935, 2.749], [1.992, 2.624], [2.048, 2.545], [2.131, 2.343], [2.208, 2.199], [2.285, 2.101], [2.323, 2.029], [2.441, 1.847], [2.542, 1.695], [2.579, 1.669], [2.609, 1.557], [2.676, 1.438], [2.745, 1.380]]
-    meteor_kunzak = [[327.429, 37.968],[327.552, 37.916],[327.615, 37.886],[327.693, 37.811],[327.750, 37.720],[327.846, 37.631],[327.996, 37.529],[328.078, 37.437],[328.177, 37.370],[328.218, 37.286],[328.359, 37.126],[328.477, 37.075],[328.522, 36.974],[328.696, 36.903],[328.745, 36.785],[328.877, 36.721],[328.963, 36.643],[329.058, 36.494],[329.177, 36.427],[329.255, 36.330],[329.355, 36.239],[329.500, 36.117],[329.608, 35.994],[329.625, 35.935],[329.754, 35.820],[329.862, 35.735],[329.980, 35.608],[330.075, 35.520],[330.147, 35.426],[330.316, 35.327],[330.411, 35.232],[330.501, 35.154],[330.626, 35.025],[330.723, 34.916],[330.790, 34.832],[330.878, 34.704],[330.961, 34.643],[331.055, 34.536],[331.152, 34.412],[331.223, 34.299],[331.350, 34.187],[331.414, 34.098],[331.532, 34.018],[331.619, 33.921],[331.651, 33.824],[331.788, 33.695],[331.926, 33.552],[331.983, 33.489],[332.072, 33.420],[332.164, 33.281],[332.254, 33.143],[332.390, 33.100],[332.484, 32.934],[332.523, 32.892],[332.641, 32.760]]
+    # Precomputed ra, dec and time values
+    ondrejov_18A08052 = [[308.607, 15.553, 1.0164], [308.547, 15.460, 1.0328], [308.541, 15.327, 1.0492], [308.493, 15.207, 1.0656], [308.470, 15.034, 1.0820], [308.480, 14.941, 1.0984], [308.432, 14.821, 1.1148], [308.421, 14.734, 1.1311], [308.378, 14.567, 1.1475], [308.343, 14.419, 1.1639], [308.304, 14.319, 1.1803], [308.262, 14.151, 1.1967], [308.235, 14.023, 1.2131], [308.224, 13.936, 1.2295], [308.181, 13.767, 1.2459], [308.163, 13.659, 1.2623], [308.144, 13.551, 1.2787], [308.105, 13.450, 1.2951], [308.119, 13.308, 1.3115], [308.141, 13.186, 1.3279], [308.074, 13.071, 1.3443], [308.088, 12.928, 1.3607], [308.006, 12.772, 1.3770]]
+    kunzak_18A08052 = [[270.158, 40.947, 0.9632], [270.062, 40.870, 0.9796], [269.927, 40.798, 0.9960], [269.859, 40.762, 1.0124], [269.759, 40.655, 1.0288], [269.709, 40.602, 1.0452], [269.615, 40.525, 1.0616], [269.543, 40.459, 1.0780], [269.432, 40.399, 1.0944], [269.400, 40.329, 1.1108], [269.345, 40.247, 1.1272], [269.175, 40.180, 1.1435], [269.034, 40.050, 1.1599], [268.985, 39.997, 1.1763], [268.812, 39.902, 1.1927], [268.738, 39.808, 1.2091], [268.604, 39.707, 1.2255], [268.501, 39.676, 1.2419], [268.412, 39.600, 1.2583], [268.365, 39.547, 1.2747], [268.377, 39.502, 1.2911], [268.292, 39.454, 1.3075], [268.225, 39.390, 1.3239], [268.170, 39.280, 1.3403], [268.061, 39.192, 1.3567], [267.977, 39.145, 1.3731], [267.927, 39.064, 1.3894], [267.885, 39.040, 1.4058]]
 
-    meteor = Meteor(ondrejov, kunzak, meteor_ondrejov, meteor_kunzak)
-    print(meteor.get_distances_along_trajectories()[0])
+    meteor_a = [(i[0], i[1]) for i in ondrejov_18A08052]
+    time_a = [i[2] for i in ondrejov_18A08052]
+    meteor_b = [(i[0], i[1]) for i in kunzak_18A08052]
+    time_b = [i[2] for i in kunzak_18A08052]
+
+    meteor = Meteor(ondrejov, kunzak, meteor_a, meteor_b, time_a, time_b)
+    print(meteor.get_velocities_along_trajectories()[1])
