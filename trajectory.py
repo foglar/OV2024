@@ -25,6 +25,9 @@ class Meteor:
     geodetic_trajectory_a: list[list[float]]
     geodetic_trajectory_b: list[list[float]]
 
+    distance_from_begining_a: list[float]
+    distance_from_begining_b: list[float]
+
     def __init__(self, station_a: dict, station_b: dict, observation_a: list[list[float]], observation_b:list[list[float]]) -> None:
         """Args:
             station_a dict: latitude, height and time of station A
@@ -48,6 +51,9 @@ class Meteor:
 
         self.geodetic_trajectory_a = None
         self.geodetic_trajectory_b = None
+
+        self.distance_from_begining_a = None
+        self.distance_from_begining_b = None
 
     def calculate_radiant(self) -> None:
         """Calculates the radiant of the meteor according to Ceplecha (1987)
@@ -167,7 +173,7 @@ class Meteor:
         if self.geocentric_trajectory_a == None or self.geocentric_trajectory_b == None:
             self.calculate_trajectories_geocentric()
 
-        return [self.geocentric_trajectory_a, self.geocentric_trajectory_b]
+        return self.geocentric_trajectory_a, self.geocentric_trajectory_b
 
     def calculate_trajectories_geodetic(self) -> None:
         """Calculates meteor trajectories from both stations in geodetic coordinates
@@ -200,7 +206,43 @@ class Meteor:
         if self.geodetic_trajectory_a == None or self.geodetic_trajectory_b == None:
             self.calculate_trajectories_geodetic()
 
-        return [self.geodetic_trajectory_a, self.geodetic_trajectory_b]
+        return self.geodetic_trajectory_a, self.geodetic_trajectory_b
+
+    def calculate_distances_along_trajectories(self) -> None:
+        """Calculates the distance of each point on both trajectories from
+        the first points.
+
+        Returns:
+            None
+        """
+
+        # If the geocentric trajectories aren't calculated yet, calculate
+        if self.geocentric_trajectory_a == None or self.geocentric_trajectory_b == None:
+            self.calculate_trajectories_geocentric()
+
+        self.distance_from_begining_a = []
+        beginning = self.geocentric_trajectory_a[0]
+        for point in self.geocentric_trajectory_a:
+            self.distance_from_begining_a.append(sqrt((beginning[0] - point[0]) ** 2 + (beginning[1] - point[1]) ** 2 + (beginning[2] - point[2]) ** 2))
+
+        self.distance_from_begining_b = []
+        beginning = self.geocentric_trajectory_b[0]
+        for point in self.geocentric_trajectory_b:
+            self.distance_from_begining_b.append(sqrt((beginning[0] - point[0]) ** 2 + (beginning[1] - point[1]) ** 2 + (beginning[2] - point[2]) ** 2))
+
+    def get_distances_along_trajectories(self) -> list[list[float]]:
+        """Returns the distances of points on both trajectories from
+        the first point
+        
+        Returns:
+            list[list[float]]
+        """
+
+        # If the distances aren't calculated yet, calculate
+        if self.distance_from_begining_a == None or self.distance_from_begining_b == None:
+            self.calculate_distances_along_trajectories()
+
+        return self.distance_from_begining_a, self.distance_from_begining_b
 
 def calculate_meteor_plane(points: list[float]) -> list[float]:
     """Calculates meteor path plane according to equations 9 and 11
@@ -408,4 +450,4 @@ if __name__ == '__main__':
     meteor_kunzak = [[327.429, 37.968],[327.552, 37.916],[327.615, 37.886],[327.693, 37.811],[327.750, 37.720],[327.846, 37.631],[327.996, 37.529],[328.078, 37.437],[328.177, 37.370],[328.218, 37.286],[328.359, 37.126],[328.477, 37.075],[328.522, 36.974],[328.696, 36.903],[328.745, 36.785],[328.877, 36.721],[328.963, 36.643],[329.058, 36.494],[329.177, 36.427],[329.255, 36.330],[329.355, 36.239],[329.500, 36.117],[329.608, 35.994],[329.625, 35.935],[329.754, 35.820],[329.862, 35.735],[329.980, 35.608],[330.075, 35.520],[330.147, 35.426],[330.316, 35.327],[330.411, 35.232],[330.501, 35.154],[330.626, 35.025],[330.723, 34.916],[330.790, 34.832],[330.878, 34.704],[330.961, 34.643],[331.055, 34.536],[331.152, 34.412],[331.223, 34.299],[331.350, 34.187],[331.414, 34.098],[331.532, 34.018],[331.619, 33.921],[331.651, 33.824],[331.788, 33.695],[331.926, 33.552],[331.983, 33.489],[332.072, 33.420],[332.164, 33.281],[332.254, 33.143],[332.390, 33.100],[332.484, 32.934],[332.523, 32.892],[332.641, 32.760]]
 
     meteor = Meteor(ondrejov, kunzak, meteor_ondrejov, meteor_kunzak)
-    print(meteor.get_trajectories_geodetic()[0])
+    print(meteor.get_distances_along_trajectories()[0])
