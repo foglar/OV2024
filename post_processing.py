@@ -53,6 +53,8 @@ class post_processing:
         else:
             self.output_file = f"{path}/overview.csv"
 
+        self.HOME_DIR = path
+
         processed_meteors = []
         id = 0
         for meteor_object in meteors_list:
@@ -444,13 +446,16 @@ class post_processing:
             )
             plt.show()
 
-    def write_to_csv(self, data=None):
+    def write_to_csv(self, data=None, output_file=None):
         # Format the data to be written to the CSV file
         if data is None:
             data = self.meteor_data_table
             logging.warning("No data provided. Using the data from the class.")
 
         data = self._reorder_meteor_data(data)
+
+        if output_file is not None:
+            self.output_file = output_file
 
         with open(self.output_file, "w", newline="") as file:
             writer = csv.writer(file)

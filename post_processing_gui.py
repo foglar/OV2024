@@ -23,7 +23,7 @@ class MeteorApp(Gtk.Window):
 
         self.set_border_width(10)
         self.set_default_size(800, 600)
-        header_bar = Gtk.HeaderBar(title="Meteor Plotter")
+        header_bar = Gtk.HeaderBar(title=f"Meteor Plotter - {self.pp.HOME_DIR}")
         header_bar.set_show_close_button(True)
         self.set_titlebar(header_bar)
         m_box = Gtk.Box(spacing=10, orientation=Gtk.Orientation.VERTICAL)
@@ -92,11 +92,12 @@ class MeteorApp(Gtk.Window):
         self.update_label()
         self.titleLabel.set_justify(Gtk.Justification.LEFT)
         title_box.pack_start(self.titleLabel, True, True, 0)
-        # self.label.set_selectable(True) # - sets text to be selectable
 
         self.first_meteor_label = Gtk.Label()
         self.first_meteor_label.set_justify(Gtk.Justification.LEFT)
+        self.first_meteor_label.set_selectable(True) # - sets text to be selectable
         first_meteor_box.pack_start(self.first_meteor_label, True, True, 0)
+
 
         self.second_meteor_label = Gtk.Label()
         self.second_meteor_label.set_justify(Gtk.Justification.LEFT)
@@ -290,10 +291,13 @@ class MeteorApp(Gtk.Window):
         else:
             dialog.destroy()
 
-    def save_to_file(self, widget):
+    def save_to_file(self, widget, path=None):
         logging.info("Saving meteor data to file.")
         try:
-            self.pp.write_to_csv()
+            if path is None:
+                self.pp.write_to_csv()
+            else:
+                self.pp.write_to_csv(output_file=path)
             logging.info("Meteor data saved successfully.")
             self.info_dialog(
                 "Meteor data saved successfully.",
