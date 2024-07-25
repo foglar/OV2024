@@ -6,11 +6,12 @@ from gi.repository import Gtk, GLib, GdkPixbuf
 
 from post_processing import post_processing
 from modules import EditConfig
+from configuration_gui import ConfigurationWindow as ConfigApp
 
-# TODO: Configuration window
 # TODO: Test with only meteor detected from one observatory
 # TODO: Test Other OS
 # TODO: Test how to compile
+# TODO: Save meteor observatories folders in configuration files
 # https://stackoverflow.com/questions/31401812/matplotlib-rotate-image-file-by-x-degrees
 
 
@@ -23,9 +24,9 @@ class MeteorApp(Gtk.Window):
 
         self.set_border_width(10)
         self.set_default_size(800, 600)
-        header_bar = Gtk.HeaderBar(title=f"Meteor Plotter - {self.pp.HOME_DIR}")
-        header_bar.set_show_close_button(True)
-        self.set_titlebar(header_bar)
+        self.header_bar = Gtk.HeaderBar(title=f"Meteor Plotter - {self.pp.HOME_DIR}")
+        self.header_bar.set_show_close_button(True)
+        self.set_titlebar(self.header_bar)
         m_box = Gtk.Box(spacing=10, orientation=Gtk.Orientation.VERTICAL)
         self.add(m_box)
 
@@ -35,9 +36,9 @@ class MeteorApp(Gtk.Window):
         title_row_box = Gtk.Box(
             spacing=10,
             orientation=Gtk.Orientation.HORIZONTAL,
-            halign=Gtk.Align.START,
+            halign=Gtk.Align.CENTER,
             valign=Gtk.Align.START,
-        )
+            )
         m_box.pack_start(title_row_box, True, True, 0)
 
         info_box = Gtk.Box(
@@ -60,7 +61,7 @@ class MeteorApp(Gtk.Window):
             spacing=10,
             orientation=Gtk.Orientation.VERTICAL,
             halign=Gtk.Align.END,
-            valign=Gtk.Align.START,
+            valign=Gtk.Align.END,
         )
         title_row_box.pack_start(index_box, True, True, 0)
 
@@ -95,7 +96,7 @@ class MeteorApp(Gtk.Window):
 
         self.first_meteor_label = Gtk.Label()
         self.first_meteor_label.set_justify(Gtk.Justification.LEFT)
-        self.first_meteor_label.set_selectable(True) # - sets text to be selectable
+        #self.first_meteor_label.set_selectable(True) # - sets text to be selectable
         first_meteor_box.pack_start(self.first_meteor_label, True, True, 0)
 
 
@@ -128,6 +129,12 @@ class MeteorApp(Gtk.Window):
         )
         btn_save_to_file.connect("clicked", self.save_to_file_select)
         self.Toolbar.insert(btn_save_to_file, 2)
+
+        btn_settings_observatory = Gtk.ToolButton(
+            icon_name="preferences-system", label="Settings"
+        )
+        btn_settings_observatory.connect("clicked", self.setup_observatories)
+        self.Toolbar.insert(btn_settings_observatory, 3)
 
         self.btn_view_meteor = Gtk.Button(
             label="Preview Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
@@ -166,7 +173,7 @@ class MeteorApp(Gtk.Window):
 
     def welcome_dialog(self, widget=None):
         dialog = Gtk.FileChooserDialog(
-            title="Welcome to Meteor Plotter",
+            title="Choose a observation folder",
             parent=self,
             action=Gtk.FileChooserAction.SELECT_FOLDER,
             buttons=(
@@ -206,11 +213,25 @@ class MeteorApp(Gtk.Window):
         dialog.destroy()
         self.update_labels()
 
+        self.header_bar.set_title(f"Meteor Plotter - {folder}")
+        self.set_titlebar(self.header_bar)
+
         if folder is not None:
             logging.info("Folder selected successfully.")
             return folder
         else:
             return None
+        
+    def setup_observatories(self, widget):
+        logging.info("Opening observatory settings.")
+        win = ConfigApp()
+        win.connect("destroy", self.on_observatory_settings_closed)
+        win.show_all()
+        Gtk.main()
+
+    def on_observatory_settings_closed(self, widget):
+        logging.info("Observatory settings closed.")
+        widget.destroy()
 
     def on_button_clicked(self, widget):
         logging.info("Button clicked, plot meteor.")
@@ -301,7 +322,6 @@ class MeteorApp(Gtk.Window):
             logging.info("Meteor data saved successfully.")
             self.info_dialog(
                 "Meteor data saved successfully.",
-                "Output file is saved at home directory of the observation filetree named overview.csv.",
             )
         except Exception as e:
             logging.error(f"Error saving meteor data: {e}")

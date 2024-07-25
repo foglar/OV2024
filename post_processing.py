@@ -23,10 +23,12 @@ compare = FolderComparator()
 
 
 # TODO: Add the checks of data in each function
+# TODO: Now it expects the data to be from the same night, add checks for different nights, etc...
 # TODO: Simplify the code, ensure that its readable and understandable
 # TODO: Add docstrings to the functions
 # TODO: Change the look of the plots from config file
 # TODO: JSON format instead of list/dictionary
+# TODO: Rewrite the config.toml file observatories in [data] section, so the configuration_gui.py can read it when its ran.
 
 
 class post_processing:
