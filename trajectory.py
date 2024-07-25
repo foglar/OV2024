@@ -120,7 +120,7 @@ class Meteor:
 
         return self.Q_angle
     
-    def plot__radiant(self) -> None:
+    def plot_radiant(self) -> None:
         """Plots calculated meteor radiant and meteor tracks
 
         Returns:
