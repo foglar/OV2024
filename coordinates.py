@@ -63,7 +63,7 @@ def world_to_altaz(ra: float, dec: float, station) -> list[float]:
     Args:
         ra (float): Right ascension
         dec (float): Declination
-        station: Dict containing information about the station
+        station (dict): Information about the station
         
     Returns:
         list[float]: Altitude and azimuth of the object
@@ -74,7 +74,26 @@ def world_to_altaz(ra: float, dec: float, station) -> list[float]:
     observatory = EarthLocation(lat=station['lat'] * u.deg, lon=station['lon'] * u.deg, height=station['height'] * u.m)
 
     altaz = skyCoord.transform_to(AltAz(obstime=time, location=observatory))
-    return [altaz.alt.degree, altaz.az.degree]
+    return altaz.alt.degree, altaz.az.degree
+
+def altaz_to_world(alt: float, az: float, station: dict) -> list[float]:
+    """Converts Alt and Az to RA and Dec
+    
+    Args:
+        alt (float): Altitude
+        az (float): Azimuth
+        station (dict): Information about the station
+
+    Returns:
+        list[float]: Right ascension and declination of object
+    """
+
+    time = Time(station['time']) - u.hour * station['time_zone']
+    observatory = EarthLocation(lat=station['lat'] * u.deg, lon=station['lon'] * u.deg, height=station['height'] * u.m)
+    altaz = SkyCoord(alt=alt * u.deg, az=az * u.deg, frame='altaz', obstime=time, location=observatory)
+
+    sky_coord = altaz.icrs
+    return sky_coord.ra.degree, sky_coord.dec.degree
 
 def geocentric_to_geodetic(location: list[float]) -> list[float]:
     """Converts the vector X, Y, Z to latitude, longitude and height
