@@ -132,3 +132,5 @@ data/2024-01-08-21-35-44.mvf
 calibration.wcs
 
 .idea/
+
+.vscode/launch.json

@@ -3,8 +3,18 @@ token = "ijfeednnvwvojlfb"
 
 [data]
 timeout = 7
-home_dir = "/home/foglar/Programming/Projects/OV2024/data/meteory/"
+home_dir = "/home/foglar/Programming/Projects/OV2024/data/meteory"
+first_observatory = "Kunzak"
+second_observatory = "Ondrejov"
 time_tolerance = 2
+first_longitude = "14.784264"
+first_latitude = "49.904682"
+first_sealevel = 467.0
+first_timezone = 1.0
+second_longitude = "15.190299"
+second_latitude = "49.121249"
+second_sealevel = 575.0
+second_timezone = 1.0
 
 [post_processing]
 output_file = "overview.csv"

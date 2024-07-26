@@ -23,10 +23,12 @@ compare = FolderComparator()
 
 
 # TODO: Add the checks of data in each function
+# TODO: Now it expects the data to be from the same night, add checks for different nights, etc...
 # TODO: Simplify the code, ensure that its readable and understandable
 # TODO: Add docstrings to the functions
 # TODO: Change the look of the plots from config file
 # TODO: JSON format instead of list/dictionary
+# TODO: Rewrite the config.toml file observatories in [data] section, so the configuration_gui.py can read it when its ran.
 
 
 class post_processing:
@@ -52,6 +54,8 @@ class post_processing:
             self.output_file = f"{path}/{OUTPUT_FILNAME}"
         else:
             self.output_file = f"{path}/overview.csv"
+
+        self.HOME_DIR = path
 
         processed_meteors = []
         id = 0
@@ -444,13 +448,16 @@ class post_processing:
             )
             plt.show()
 
-    def write_to_csv(self, data=None):
+    def write_to_csv(self, data=None, output_file=None):
         # Format the data to be written to the CSV file
         if data is None:
             data = self.meteor_data_table
             logging.warning("No data provided. Using the data from the class.")
 
         data = self._reorder_meteor_data(data)
+
+        if output_file is not None:
+            self.output_file = output_file
 
         with open(self.output_file, "w", newline="") as file:
             writer = csv.writer(file)
