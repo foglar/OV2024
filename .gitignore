@@ -134,3 +134,6 @@ calibration.wcs
 .idea/
 
 .vscode/launch.json
+
+# Debug files
+*.gpx
