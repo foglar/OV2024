@@ -86,10 +86,10 @@ class Meteor:
 
         angle = degrees(acos(abs(aa*ab + ba*bb + ca*cb)) / sqrt((aa**2+ba**2+ca**2)*(ab**2+bb**2+cb**2)))
 
-        ra, dec = solve_goniometry(Xi, Eta, Zeta)
+        ra, dec = solve_goniometry((Xi, Eta, Zeta))
         # If the radiant is under the horizon, change sign of Xi, Eta, Zeta
         if world_to_altaz(ra, dec, self.station_a)[0] < 0 or world_to_altaz(ra, dec, self.station_b)[0] < 0:
-            ra, dec = solve_goniometry(-Xi, -Eta, -Zeta)
+            ra, dec = solve_goniometry((-Xi, -Eta, -Zeta))
 
         self.radiant = [ra, dec]
         self.Q_angle = angle
@@ -340,7 +340,7 @@ def calculate_meteor_plane(points: list[float]) -> list[float]:
     # Calculate equation 9 for all meteor points
     xi_eta, eta_zeta, eta_eta, xi_zeta, xi_xi = 0, 0, 0, 0, 0
     for point in points:
-        Xi, Eta, Zeta = calculate_meteor_point(point[0], point[1])
+        Xi, Eta, Zeta = calculate_meteor_point(point)
 
         xi_eta += Xi * Eta
         eta_zeta += Eta * Zeta
@@ -360,21 +360,20 @@ def calculate_meteor_plane(points: list[float]) -> list[float]:
 
     return a, b, c
 
-def calculate_meteor_point(ra: float, dec: float) -> list[float]:
+def calculate_meteor_point(point: list[float]) -> list[float]:
     """Calculates Xi, Eta and Zeta values from ra and dec values of meteor point
 
     Args:
-        ra (float): right ascension in decimal degrees
-        dec (float): declination in decimal degrees
+        point (list[float]): ra and dec coordinates in decimal degrees
 
     Returns:
-        list[float]:  Geocentric vector Xi, Eta, Zeta
+        list[float]: Geocentric vector Xi, Eta, Zeta
     """
 
     # Calculate equation 9
-    xi = cos(radians(dec)) * cos(radians(ra))
-    eta = cos(radians(dec)) * sin(radians(ra))
-    zeta = sin(radians(dec))
+    xi = cos(radians(point[1])) * cos(radians(point[0]))
+    eta = cos(radians(point[1])) * sin(radians(point[0]))
+    zeta = sin(radians(point[1]))
 
     return xi, eta, zeta
 
@@ -392,7 +391,7 @@ def calculate_meteor_point_vector(point: list[float], station_a: list[float], st
 
     aa, ba, ca, xa, ya, za = station_a
     ab, bb, cb, xb, yb, zb = station_b
-    xi, eta, zeta = calculate_meteor_point(point[0], point[1])
+    xi, eta, zeta = calculate_meteor_point(point)
 
     # Plane definitions and equation 13
     plane_a = [aa, ba, ca, -(aa * xa + ba * ya + ca * za)]
@@ -465,21 +464,21 @@ def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
 
     cv2.imwrite(tmp_path, cv2.bitwise_and(mask, image))
 
-def solve_goniometry(xi: float, eta: float, zeta: float) -> list[float]:
+def solve_goniometry(vector: list[float]) -> list[float]:
     """Solves equation 9
     
     Args:
-        Vector (Xi, Eta, Zeta)
+        vector (list[float]): Vector (Xi, Eta, Zeta)
         
     Returns:
         list[float]: RA and Dec in decimal degrees
     """
 
     # Calculate dec
-    declinations = [asin(zeta), pi - asin(zeta) if zeta >= 0 else 2 * pi - asin(-zeta)]
+    declinations = [asin(vector[2]), pi - asin(vector[2]) if vector[2] >= 0 else 2 * pi - asin(-vector[2])]
     for dec in declinations:
         # Skip if Dec is outside of it's domain
-        if dec > 90 and dec < -90:
+        if degrees(dec) > 90 or degrees(dec) < -90:
             break
 
         # Check for quadrants
@@ -488,8 +487,8 @@ def solve_goniometry(xi: float, eta: float, zeta: float) -> list[float]:
         # cos  + - - +
 
         # Float math can result in values slightly outside domains, round
-        sin_ra = round(eta / cos(dec), 12)
-        cos_ra = round(xi / cos(dec), 12)
+        sin_ra = round(vector[1] / cos(dec), 12)
+        cos_ra = round(vector[0] / cos(dec), 12)
 
         ra = None
         if sin_ra >= 0 and cos_ra >= 0:
@@ -501,7 +500,7 @@ def solve_goniometry(xi: float, eta: float, zeta: float) -> list[float]:
         if sin_ra < 0 and cos_ra >= 0:
             ra = 2 * pi + asin(sin_ra)
 
-        if numpy.allclose((xi, eta, zeta), (cos(dec)*cos(ra), cos(dec)*sin(ra), sin(dec))):
+        if numpy.allclose(vector, (cos(dec)*cos(ra), cos(dec)*sin(ra), sin(dec)), atol=0.001):
             return degrees(ra), degrees(dec)
 
 def solve_plane_intersection(plane_a: list[float], plane_b: list[float], plane_c: list[float]) -> list[float]:
@@ -536,7 +535,7 @@ if __name__ == '__main__':
         ['18A08183', [[358.647, 8.286, 1.0046], [358.711, 8.142, 1.0210], [358.776, 8.031, 1.0374], [358.838, 7.912, 1.0538], [358.892, 7.772, 1.0702], [359.003, 7.642, 1.0866], [359.094, 7.543, 1.1030], [359.162, 7.386, 1.1194], [359.220, 7.233, 1.1358], [359.304, 7.092, 1.1522], [359.396, 6.971, 1.1686], [359.456, 6.852, 1.1850], [359.559, 6.680, 1.2014], [359.612, 6.599, 1.2178], [359.693, 6.482, 1.2342], [359.777, 6.318, 1.2505], [359.863, 6.188, 1.2669], [359.945, 6.049, 1.2833], [0.027, 5.910, 1.2997], [0.085, 5.792, 1.3161], [0.161, 5.667, 1.3325], [0.243, 5.505, 1.3489], [0.342, 5.359, 1.3653], [0.408, 5.239, 1.3817], [0.471, 5.085, 1.3981], [0.564, 4.954, 1.4145], [0.642, 4.840, 1.4309], [0.707, 4.720, 1.4473], [0.798, 4.612, 1.4637], [0.886, 4.449, 1.4801], [0.948, 4.298, 1.4964], [1.038, 4.168, 1.5128], [1.105, 4.082, 1.5292], [1.169, 3.964, 1.5456], [1.285, 3.824, 1.5620], [1.344, 3.697, 1.5784], [1.360, 3.588, 1.5948], [1.482, 3.468, 1.6112], [1.550, 3.315, 1.6276], [1.654, 3.226, 1.6440], [1.709, 3.068, 1.6604], [1.750, 2.950, 1.6768], [1.793, 2.887, 1.6932], [1.935, 2.749, 1.7096], [1.992, 2.624, 1.7260], [2.048, 2.545, 1.7423], [2.131, 2.343, 1.7587], [2.208, 2.199, 1.7751], [2.285, 2.101, 1.7915], [2.323, 2.029, 1.8079], [2.441, 1.847, 1.8243], [2.542, 1.695, 1.8407], [2.579, 1.669, 1.8571], [2.609, 1.557, 1.8735], [2.676, 1.438, 1.8899], [2.745, 1.380, 1.9063]], [[327.429, 37.968, 0.9655], [327.552, 37.916, 0.9819], [327.615, 37.886, 0.9982], [327.693, 37.811, 1.0146], [327.750, 37.720, 1.0310], [327.846, 37.631, 1.0474], [327.996, 37.529, 1.0638], [328.078, 37.437, 1.0802], [328.177, 37.370, 1.0966], [328.218, 37.286, 1.1130], [328.359, 37.126, 1.1294], [328.477, 37.075, 1.1458], [328.522, 36.974, 1.1622], [328.696, 36.903, 1.1786], [328.745, 36.785, 1.1950], [328.877, 36.721, 1.2114], [328.963, 36.643, 1.2278], [329.058, 36.494, 1.2441], [329.177, 36.427, 1.2605], [329.255, 36.330, 1.2769], [329.355, 36.239, 1.2933], [329.500, 36.117, 1.3097], [329.608, 35.994, 1.3261], [329.625, 35.935, 1.3425], [329.754, 35.820, 1.3589], [329.862, 35.735, 1.3753], [329.980, 35.608, 1.3917], [330.075, 35.520, 1.4081], [330.147, 35.426, 1.4245], [330.316, 35.327, 1.4409], [330.411, 35.232, 1.4573], [330.501, 35.154, 1.4737], [330.626, 35.025, 1.4900], [330.723, 34.916, 1.5064], [330.790, 34.832, 1.5228], [330.878, 34.704, 1.5392], [330.961, 34.643, 1.5556], [331.055, 34.536, 1.5720], [331.152, 34.412, 1.5884], [331.223, 34.299, 1.6048], [331.350, 34.187, 1.6212], [331.414, 34.098, 1.6376], [331.532, 34.018, 1.6540], [331.619, 33.921, 1.6704], [331.651, 33.824, 1.6868], [331.788, 33.695, 1.7032], [331.926, 33.552, 1.7196], [331.983, 33.489, 1.7360], [332.072, 33.420, 1.7523], [332.164, 33.281, 1.7687], [332.254, 33.143, 1.7851], [332.390, 33.100, 1.8015], [332.484, 32.934, 1.8179], [332.523, 32.892, 1.8343], [332.641, 32.760, 1.8507]], [14.06785, 49.20714, 108162.4], [14.27193, 49.00960, 91210.7]]
     ]
     
-    for meteor in meteory:
+    for meteor in meteory[:1]:
         meteor_a = [(i[0], i[1]) for i in meteor[1]]
         time_a = [i[2] for i in meteor[1]]
 
@@ -544,6 +543,7 @@ if __name__ == '__main__':
         time_b = [i[2] for i in meteor[2]]
 
         calculation = Meteor(ondrejov, kunzak, meteor_a, meteor_b, time_a, time_b)
-        print(f'Radiant: {calculation.get_radiant()}, Q: {calculation.get_Q_angle()}')
+        # print(f'Radiant: {calculation.get_radiant()}, Q: {calculation.get_Q_angle()}')
+        
         calculation.save_trajectory_gpx(meteor[0], meteor[3], meteor[4])
         print(f'{meteor[0]} finnished')

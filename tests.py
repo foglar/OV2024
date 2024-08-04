@@ -56,8 +56,8 @@ def test_goniometry_solver():
         ra, dec = round(random() * 360, 4), round(random() * 180 - 90, 4)
 
         # Calculate xi, eta and zeta values and back
-        xi, eta, zeta = calculate_meteor_point(ra, dec)
-        calculated = solve_goniometry(xi, eta, zeta)
+        xi, eta, zeta = calculate_meteor_point((ra, dec))
+        calculated = solve_goniometry((xi, eta, zeta))
 
         # Test
         assert numpy.allclose((ra, dec), calculated), \
