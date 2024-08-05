@@ -57,7 +57,7 @@ def world_to_pixel(path: str, meteor: list[list[float]]):
 
     return pixels
 
-def world_to_altaz(ra: float, dec: float, station) -> list[float]:
+def world_to_altaz(ra: float, dec: float, station: dict, time: Time) -> list[float]:
     """Converts RA and Dec to Alt and Az.
     
     Args:
@@ -70,13 +70,13 @@ def world_to_altaz(ra: float, dec: float, station) -> list[float]:
     """
 
     skyCoord = SkyCoord(ra=ra, dec=dec, unit='deg', frame='fk5')
-    time = Time(station['time']) - u.hour * station['time_zone']
+    time = time - u.hour * station['time_zone']
     observatory = EarthLocation(lat=station['lat'] * u.deg, lon=station['lon'] * u.deg, height=station['height'] * u.m)
 
     altaz = skyCoord.transform_to(AltAz(obstime=time, location=observatory))
     return altaz.alt.degree, altaz.az.degree
 
-def altaz_to_world(alt: float, az: float, station: dict) -> list[float]:
+def altaz_to_world(alt: float, az: float, station: dict, time: Time) -> list[float]:
     """Converts Alt and Az to RA and Dec
     
     Args:
@@ -88,7 +88,7 @@ def altaz_to_world(alt: float, az: float, station: dict) -> list[float]:
         list[float]: Right ascension and declination of object
     """
 
-    time = Time(station['time']) - u.hour * station['time_zone']
+    time = time - u.hour * station['time_zone']
     observatory = EarthLocation(lat=station['lat'] * u.deg, lon=station['lon'] * u.deg, height=station['height'] * u.m)
     altaz = SkyCoord(alt=alt * u.deg, az=az * u.deg, frame='altaz', obstime=time, location=observatory)
 
