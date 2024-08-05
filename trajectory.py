@@ -482,7 +482,7 @@ def solve_goniometry(vector: list[float]) -> list[float]:
     declinations = [asin(vector[2]), pi - asin(vector[2]) if vector[2] >= 0 else 2 * pi - asin(-vector[2])]
     for dec in declinations:
         # Skip if Dec is outside of it's domain
-        if degrees(dec) > 90 or degrees(dec) < -90:
+        if dec > 0.5 * pi or dec < -0.5 * pi:
             break
 
         # Check for quadrants
@@ -490,9 +490,9 @@ def solve_goniometry(vector: list[float]) -> list[float]:
         # sin  + + - -
         # cos  + - - +
 
-        # Float math can result in values slightly outside domains, round
-        sin_ra = round(vector[1] / cos(dec), 12)
-        cos_ra = round(vector[0] / cos(dec), 12)
+        # Float math can result in values slightly outside domains, clamp
+        sin_ra = min(max(vector[1] / cos(dec), -1), 1)
+        cos_ra = min(max(vector[0] / cos(dec), -1), 1)
 
         ra = None
         if sin_ra >= 0 and cos_ra >= 0:
