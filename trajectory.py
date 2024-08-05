@@ -32,25 +32,23 @@ class Meteor:
     distance_from_begining_b: list[float]
 
     def __init__(self, station_a: dict, station_b: dict,
-                 observation_a: list[list[float]], observation_b:list[list[float]],
-                 times_a: (list[float]), times_b: (list[float])) -> None:
+                 observation_a: list[list[float]], observation_b:list[list[float]],) -> None:
         """Args:
             station_a dict: latitude, height and time of station A
             station_b dict: latitude, height and time of station B
-            observation_b (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station A
-            observation_a (list[list[float]]): meteor coordinates in ra and dec in decimal degrees from station B
-            times_a (list[float]): Times in seconds of each point observation
-            times_b (list[float]): Times in seconds of each point observation
+            observation_a (list[list[float]]): Measured coordinates of meteor points in decimal ra and dec with time values form station A
+            observation_b (list[list[float]]): Measured coordinates of meteor points in decimal ra and dec with time values form station B
         """
         # Station and observation information
         self.station_a = station_a
         self.station_b = station_b
 
-        self.observation_a = observation_a
-        self.observation_b = observation_b
+        # Separate coordinate and time values
+        self.observation_a = [(i[0], i[1]) for i in observation_a]
+        self.times_a = [i[2] for i in observation_a]
 
-        self.times_a = times_a
-        self.times_b = times_b
+        self.observation_b = [(i[0], i[1]) for i in observation_b]
+        self.times_b = [i[2] for i in observation_b]
 
         # Define yet uncalculated values
         self.radiant = None
@@ -536,14 +534,5 @@ if __name__ == '__main__':
     ]
     
     for meteor in meteory[:1]:
-        meteor_a = [(i[0], i[1]) for i in meteor[1]]
-        time_a = [i[2] for i in meteor[1]]
-
-        meteor_b = [(i[0], i[1]) for i in meteor[2]]
-        time_b = [i[2] for i in meteor[2]]
-
-        calculation = Meteor(ondrejov, kunzak, meteor_a, meteor_b, time_a, time_b)
-        # print(f'Radiant: {calculation.get_radiant()}, Q: {calculation.get_Q_angle()}')
-        
-        calculation.save_trajectory_gpx(meteor[0], meteor[3], meteor[4])
-        print(f'{meteor[0]} finnished')
+        calculation = Meteor(ondrejov, kunzak, meteor[1], meteor[2])
+        print(calculation.get_velocities_along_trajectories())
