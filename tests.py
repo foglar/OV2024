@@ -22,7 +22,8 @@ def test_solve_plane_intersection():
     # Calculate the intersection
     calculated_point = solve_plane_intersection(plane_a, plane_b, plane_c)
 
-    assert numpy.allclose(point, calculated_point), f'Should be {point}'
+    assert numpy.allclose(point, calculated_point), \
+           f'Should be {point}, not {calculated_point}'
 
 def test_radiant_calculation() -> None:
     """Tests the radiant calculation procedure"""
@@ -45,10 +46,14 @@ def test_radiant_calculation() -> None:
     angle = meteor.get_Q_angle()
 
     # Check result
-    assert numpy.allclose([ra, dec],radiant), f'Should be {radiant}'
-    assert numpy.isclose(angle, Q), f'Should be {Q}'
+    assert numpy.allclose((ra, dec), radiant), \
+           f'Should be {radiant}, not {(ra, dec)}'
+    assert numpy.isclose(angle, Q),\
+           f'Should be {Q}, not {angle}'
 
 def test_goniometry_solver():
+    """Tests calculate_meteor_point and solve_goniometry functions"""
+
     from random import random
 
     # Test a couple of values
