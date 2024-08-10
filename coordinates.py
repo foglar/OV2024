@@ -127,7 +127,7 @@ def load_meteors(path: str) -> list[list[list[float]]]:
         path (str): data.txt file path
 
     Returns:
-        list[lsit[list[float]]]: List of meteor paths
+        list[list[list[float]]]: List of meteor paths
     """
 
     file = open(path, 'r').read().split('\n')

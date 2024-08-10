@@ -30,8 +30,8 @@ class Meteor:
     geodetic_trajectory_a: list[list[float]]
     geodetic_trajectory_b: list[list[float]]
 
-    distance_from_begining_a: list[float]
-    distance_from_begining_b: list[float]
+    distance_from_beginning_a: list[float]
+    distance_from_beginning_b: list[float]
 
     def __init__(self, station_a: dict, station_b: dict,
                  observation_a: list[list[float]], observation_b:list[list[float]],
@@ -66,8 +66,8 @@ class Meteor:
         self.geodetic_trajectory_a = None
         self.geodetic_trajectory_b = None
 
-        self.distance_from_begining_a = None
-        self.distance_from_begining_b = None
+        self.distance_from_beginning_a = None
+        self.distance_from_beginning_b = None
 
         self.velocities_a = None
         self.velocities_b = None
@@ -102,7 +102,7 @@ class Meteor:
         """Returns radiant coordinates in decimal degrees
         
         Returns:
-            list[float]: Radiant RA and Dec coordiantes
+            list[float]: Radiant RA and Dec coordinates
         """
 
         # If radiant isn't calculated yet, calculate
@@ -219,7 +219,7 @@ class Meteor:
             list[list[list[float]]]
         """
 
-        # If the geodetic trajectories aren't calculated yet, calcualte
+        # If the geodetic trajectories aren't calculated yet, calculate
         if self.geodetic_trajectory_a == None or self.geodetic_trajectory_b == None:
             self.calculate_trajectories_geodetic()
 
@@ -228,7 +228,7 @@ class Meteor:
     def save_trajectory_gpx(self, id, correct_start, correct_end) -> None:
         """Returns the trajectory in a GPX format"""
 
-        # If the geodetic trajectories aren't calculated yet, calcualte
+        # If the geodetic trajectories aren't calculated yet, calculate
         if self.geodetic_trajectory_a == None or self.geodetic_trajectory_b == None:
             self.calculate_trajectories_geodetic()
 
@@ -249,7 +249,7 @@ class Meteor:
             gpx += f'<trkpt lat="{point[1]}" lon="{point[0]}"><ele>{point[2]}</ele></trkpt>'
         gpx += '</trkseg></trk>'
 
-        #Write the correct trajectry
+        #Write the correct trajectory
         gpx += '<trk><name>Correct solution</name><trkseg>'
         gpx += f'<trkpt lat="{correct_start[1]}" lon="{correct_start[0]}"><ele>{correct_start[2]}</ele></trkpt>'
         gpx += f'<trkpt lat="{correct_end[1]}" lon="{correct_end[0]}"><ele>{correct_end[2]}</ele></trkpt>'
@@ -273,15 +273,15 @@ class Meteor:
         if self.geocentric_trajectory_a == None or self.geocentric_trajectory_b == None:
             self.calculate_trajectories_geocentric()
 
-        self.distance_from_begining_a = []
+        self.distance_from_beginning_a = []
         beginning = self.geocentric_trajectory_a[0]
         for point in self.geocentric_trajectory_a:
-            self.distance_from_begining_a.append(sqrt((beginning[0] - point[0]) ** 2 + (beginning[1] - point[1]) ** 2 + (beginning[2] - point[2]) ** 2))
+            self.distance_from_beginning_a.append(sqrt((beginning[0] - point[0]) ** 2 + (beginning[1] - point[1]) ** 2 + (beginning[2] - point[2]) ** 2))
 
-        self.distance_from_begining_b = []
+        self.distance_from_beginning_b = []
         beginning = self.geocentric_trajectory_b[0]
         for point in self.geocentric_trajectory_b:
-            self.distance_from_begining_b.append(sqrt((beginning[0] - point[0]) ** 2 + (beginning[1] - point[1]) ** 2 + (beginning[2] - point[2]) ** 2))
+            self.distance_from_beginning_b.append(sqrt((beginning[0] - point[0]) ** 2 + (beginning[1] - point[1]) ** 2 + (beginning[2] - point[2]) ** 2))
 
     def get_distances_along_trajectories(self) -> list[list[float]]:
         """Returns the distances of points on both trajectories from
@@ -292,10 +292,10 @@ class Meteor:
         """
 
         # If the distances aren't calculated yet, calculate
-        if self.distance_from_begining_a == None or self.distance_from_begining_b == None:
+        if self.distance_from_beginning_a == None or self.distance_from_beginning_b == None:
             self.calculate_distances_along_trajectories()
 
-        return self.distance_from_begining_a, self.distance_from_begining_b
+        return self.distance_from_beginning_a, self.distance_from_beginning_b
     
     def calculate_velocities_along_trajectories(self) -> None:
         """Calculates the velocity of meteor at each point in both trajectories"""
@@ -419,7 +419,7 @@ def calculate_distance(point_a: list[float], point_b: list[float]) -> float:
         point_b (list[float]): Vector (X, Y, Z) B
         
     Returns:
-        float: disctance between points A and B
+        float: distance between points A and B
     """
 
     xa, ya, za = point_a
@@ -451,7 +451,7 @@ def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
         data_path (str): The path to data.txt file describing meteor
         tmp_path (str): Path, where the masked image should be saved
 
-    Retruns:
+    Returns:
         None
     """
 
