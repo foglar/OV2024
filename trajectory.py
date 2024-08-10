@@ -4,11 +4,12 @@ from astropy.time import Time
 import numpy
 
 from coordinates import *
-
+from station import Station
+    
 class Meteor:
     # Station and observation information
-    station_a: dict
-    station_b: dict
+    station_a: Station
+    station_b: Station
 
     time: Time
 
@@ -33,12 +34,12 @@ class Meteor:
     distance_from_beginning_a: list[float]
     distance_from_beginning_b: list[float]
 
-    def __init__(self, station_a: dict, station_b: dict,
+    def __init__(self, station_a: Station, station_b: Station,
                  observation_a: list[list[float]], observation_b:list[list[float]],
                  time: str) -> None:
         """Args:
-            station_a (dict): latitude, height and time of station A
-            station_b (dict): latitude, height and time of station B
+            station_a (Station): Station instance describing station A
+            station_b (Station): Station instance describing station B
             observation_a (list[list[float]]): Measured coordinates of meteor points in decimal ra and dec with time values form station A
             observation_b (list[list[float]]): Measured coordinates of meteor points in decimal ra and dec with time values form station B
             time: (str): Time and date from which the measurements are related
@@ -167,8 +168,8 @@ class Meteor:
         """
 
         # Solve the station planes
-        vector_a = calculate_meteor_plane(self.observation_a) + geodetic_to_geocentric(self.station_a)
-        vector_b = calculate_meteor_plane(self.observation_b) + geodetic_to_geocentric(self.station_b)
+        vector_a = calculate_meteor_plane(self.observation_a) + self.station_a.geocentric
+        vector_b = calculate_meteor_plane(self.observation_b) + self.station_b.geocentric
 
         # Solve the intersection with the meteor plane
         self.geocentric_trajectory_a = []
@@ -235,8 +236,8 @@ class Meteor:
         gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd http://www.topografix.com/GPX/gpx_style/0/2 http://www.topografix.com/GPX/gpx_style/0/2/gpx_style.xsd" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpx_style="http://www.topografix.com/GPX/gpx_style/0/2" version="1.1" creator="https://gpx.studio"><metadata>    <name>Meteory</name>    <author>        <name>gpx.studio</name>        <link href="https://gpx.studio"></link>    </author></metadata>'
 
         # Add stations
-        gpx += f'<wpt lat="{self.station_a["lat"]}" lon="{self.station_a["lon"]}"><ele>{self.station_a["height"]}</ele><name>Station A</name></wpt>'
-        gpx += f'<wpt lat="{self.station_b["lat"]}" lon="{self.station_b["lon"]}"><ele>{self.station_b["height"]}</ele><name>Station B</name></wpt>'
+        gpx += f'<wpt lat="{self.station_a.geodetic["lat"]}" lon="{self.station_a.geodetic["lon"]}"><ele>{self.station_a.geodetic["height"]}</ele><name>Station A</name></wpt>'
+        gpx += f'<wpt lat="{self.station_b.geodetic["lat"]}" lon="{self.station_b.geodetic["lon"]}"><ele>{self.station_b.geodetic["height"]}</ele><name>Station B</name></wpt>'
 
         # Add trajectories
         gpx += '<trk><name>Trajectory A</name><trkseg>'
@@ -527,8 +528,8 @@ def solve_plane_intersection(plane_a: list[float], plane_b: list[float], plane_c
 
 if __name__ == '__main__':
     # Latitude, longitude, height above sea level, time of observation
-    ondrejov = {'lon': 14.780208, 'lat': 49.910222, 'height':  524, 'time_zone': 1}
-    kunzak = {'lon': 15.200930, 'lat': 49.107290, 'height': 656, 'time_zone': 1}
+    ondrejov = Station(lat=49.970222, lon=14.780208, height=524, time_zone=1)
+    kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=1)
 
     # Precomputed ra, dec and time values
     meteory = [

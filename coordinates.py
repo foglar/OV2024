@@ -12,6 +12,8 @@ import os
 from time import sleep
 from modules import ConfigLoader
 
+from station import Station
+
 def pixels_to_world(path: str, meteor: list[list[float]]) -> list[list[float]]:
     """Convert pixel data to RA and Dec
     
@@ -57,39 +59,39 @@ def world_to_pixel(path: str, meteor: list[list[float]]):
 
     return pixels
 
-def world_to_altaz(ra: float, dec: float, station: dict, time: Time) -> list[float]:
+def world_to_altaz(ra: float, dec: float, station: Station, time: Time) -> list[float]:
     """Converts RA and Dec to Alt and Az.
     
     Args:
         ra (float): Right ascension
         dec (float): Declination
-        station (dict): Information about the station
+        station (Station): Information about the station
         
     Returns:
         list[float]: Altitude and azimuth of the object
     """
 
     skyCoord = SkyCoord(ra=ra, dec=dec, unit='deg', frame='fk5')
-    time = time - u.hour * station['time_zone']
-    observatory = EarthLocation(lat=station['lat'] * u.deg, lon=station['lon'] * u.deg, height=station['height'] * u.m)
+    time = time - u.hour * station.time_zone
+    observatory = EarthLocation(lat=station.lat * u.deg, lon=station.lon * u.deg, height=station.height * u.m)
 
     altaz = skyCoord.transform_to(AltAz(obstime=time, location=observatory))
     return altaz.alt.degree, altaz.az.degree
 
-def altaz_to_world(alt: float, az: float, station: dict, time: Time) -> list[float]:
+def altaz_to_world(alt: float, az: float, station: Station, time: Time) -> list[float]:
     """Converts Alt and Az to RA and Dec
     
     Args:
         alt (float): Altitude
         az (float): Azimuth
-        station (dict): Information about the station
+        station (Station): Information about the station
 
     Returns:
         list[float]: Right ascension and declination of object
     """
 
-    time = time - u.hour * station['time_zone']
-    observatory = EarthLocation(lat=station['lat'] * u.deg, lon=station['lon'] * u.deg, height=station['height'] * u.m)
+    time = time - u.hour * station.time_zone
+    observatory = EarthLocation(lat=station.lat * u.deg, lon=station.lon * u.deg, height=station.height * u.m)
     altaz = SkyCoord(alt=alt * u.deg, az=az * u.deg, frame='altaz', obstime=time, location=observatory)
 
     sky_coord = altaz.icrs

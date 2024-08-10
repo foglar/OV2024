@@ -32,8 +32,8 @@ def test_radiant_calculation() -> None:
     Q = 7.06
 
     # Latitude, longitude, height above sea level, time of observation
-    ondrejov = {'lon': 14.784264, 'lat': 49.904682, 'height': 467, 'time_zone': 1}
-    kunzak = {'lon': 15.190299, 'lat': 49.121249, 'height': 575, 'time_zone': 1}
+    ondrejov = Station(lat=49.970222, lon=14.780208, height=524, time_zone=1)
+    kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=1)
 
     time = '2018-10-8 22:03:54'
 
