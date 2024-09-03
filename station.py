@@ -1,5 +1,3 @@
-from coordinates import geodetic_to_geocentric
-
 class Station:
     # Geodetic position information
     lat: float
@@ -31,5 +29,6 @@ class Station:
         self.time_zone = time_zone
 
         # Calculate geocentric coordinates
+        from coordinates import geodetic_to_geocentric
         self.geocentric = geodetic_to_geocentric(self.geodetic)
         self.X, self.Y, self.Z = self.geocentric
