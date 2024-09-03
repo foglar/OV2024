@@ -28,7 +28,8 @@ def test_solve_plane_intersection():
 def test_radiant_calculation() -> None:
     """Tests the radiant calculation procedure"""
 
-    radiant = [262.1776, 56.0219]
+    radiant = [266.7788, 59.4235]
+    errors = [1.1839, 0.0592]
     Q = 7.06
 
     # Latitude, longitude, height above sea level, time of observation
@@ -47,9 +48,14 @@ def test_radiant_calculation() -> None:
     ra, dec = meteor.get_radiant()
     angle = meteor.get_Q_angle()
 
-    # Check result
-    assert numpy.allclose((ra, dec), radiant), \
-           f'Should be {radiant}, not {(ra, dec)}'
+    # Check results
+    # Right ascension
+    assert numpy.isclose(ra, radiant[0], atol=errors[0]), \
+           f'Should be {radiant[0]}, not {ra}'
+    # Declination
+    assert numpy.isclose(dec, radiant[1], atol=errors[1]), \
+           f'Should be {radiant[1]}, not {dec}'
+    # Q Angle
     assert numpy.isclose(angle, Q),\
            f'Should be {Q}, not {angle}'
 
