@@ -3,6 +3,8 @@ import astropy.units as u
 from astropy.coordinates import EarthLocation
 
 class Station:
+    label: str
+
     # Geodetic position information
     lat: float
     lon: float
@@ -16,13 +18,14 @@ class Station:
     # Time information
     time_zone: float
 
-    def __init__(self, lat: float, lon: float, height: float, time_zone: float, time: str = None):
+    def __init__(self, lat: float, lon: float, height: float, time_zone: float, time: str = None, label: str = ''):
         """Args:
             lat (float): Latitude of station in decimal degrees
             lon (float): Longitude of station in decimal degrees
             height (float): Height above see in metres
             time_zone (float): Offset in hours from UTC
             time (str): time at the station at the time of observation
+            label (str): Label describing the station
         """
 
         self.lat = lat
@@ -36,6 +39,7 @@ class Station:
         self.geodetic = {'lat': self.lat,'lon': self.lon, 'height': self.height}
 
         self.time_zone = time_zone
+        self.label = label
 
         # Calculate geocentric coordinates
         from coordinates import geodetic_to_geocentric

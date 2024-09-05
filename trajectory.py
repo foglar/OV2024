@@ -7,6 +7,8 @@ from coordinates import *
 from station import Station
     
 class Meteor:
+    label: str
+
     # Station and observation information
     station_a: Station
     station_b: Station
@@ -34,16 +36,21 @@ class Meteor:
     distance_from_beginning_a: list[float]
     distance_from_beginning_b: list[float]
 
-    def __init__(self, station_a: Station, station_b: Station,
+    def __init__(self, label: str,
+                 station_a: Station, station_b: Station,
                  observation_a: list[list[float]], observation_b:list[list[float]],
                  time: str) -> None:
         """Args:
+            label (str): Meteor label
             station_a (Station): Station instance describing station A
             station_b (Station): Station instance describing station B
             observation_a (list[list[float]]): Measured coordinates of meteor points in decimal ra and dec with time values form station A
             observation_b (list[list[float]]): Measured coordinates of meteor points in decimal ra and dec with time values form station B
             time: (str): Time and date from which the measurements are related
         """
+
+        self.label = label
+
         # Station and observation information
         self.station_a = station_a
         self.station_b = station_b
@@ -229,7 +236,7 @@ class Meteor:
 
         return self.geodetic_trajectory_a, self.geodetic_trajectory_b
     
-    def save_trajectory_gpx(self, id, correct_start, correct_end) -> None:
+    def save_trajectory_gpx(self, correct_start, correct_end) -> None:
         """Returns the trajectory in a GPX format"""
 
         # If the geodetic trajectories aren't calculated yet, calculate
@@ -243,12 +250,12 @@ class Meteor:
         gpx += f'<wpt lat="{self.station_b.geodetic["lat"]}" lon="{self.station_b.geodetic["lon"]}"><ele>{self.station_b.geodetic["height"]}</ele><name>Station B</name></wpt>'
 
         # Add trajectories
-        gpx += '<trk><name>Trajectory A</name><trkseg>'
+        gpx += f'<trk><name>{self.station_a.label}</name><trkseg>'
         for point in self.geodetic_trajectory_a:
             gpx += f'<trkpt lat="{point[1]}" lon="{point[0]}"><ele>{point[2]}</ele></trkpt>'
         gpx += '</trkseg></trk>'
 
-        gpx += '<trk><name>Trajectory B</name><trkseg>'
+        gpx += f'<trk><name>{self.station_b.label}</name><trkseg>'
         for point in self.geodetic_trajectory_b:
             gpx += f'<trkpt lat="{point[1]}" lon="{point[0]}"><ele>{point[2]}</ele></trkpt>'
         gpx += '</trkseg></trk>'
@@ -263,7 +270,54 @@ class Meteor:
         gpx += '</gpx>'
 
         # Write the gpx to a file
-        open(f'{id}.gpx', 'w').write(gpx)
+        open(f'{self.label}.gpx', 'w').write(gpx)
+
+    def plot_trajectory_geodetic(self) -> None:
+        """Plots the geodetic trajectories with matplotlib
+        
+        Returns:
+            None
+        """
+
+        # TODO: Move all imports to top
+        from mpl_toolkits.basemap import Basemap
+        import matplotlib.pyplot as plot
+
+        fig = plot.figure(figsize=(8,8))
+        ax = fig.add_axes([0.1,0.1,0.8,0.8])
+
+        # Set up the background map
+        m = Basemap(projection = 'stere', rsphere = 6371200.,
+                    resolution = 'i', area_thresh = 10000,
+                    lat_0 = 50, lon_0 = 15,
+                    width=1200000, height=800000)
+    
+        m.drawcoastlines()
+        m.drawcountries()
+
+        # Draw stations
+        m.scatter(latlon = True, x = self.station_a.lon, y = self.station_a.lat,
+                  color='red')
+
+        m.scatter(latlon = True, x = self.station_b.lon, y = self.station_b.lat,
+                  color='red')
+        
+        # TODO: Draw the first and last points with a different marker
+        # Draw meteor trajectories
+        x, y = [], []
+        for point in self.geodetic_trajectory_a:
+            x.append(point[0])
+            y.append(point[1])
+        m.plot(x, y, latlon = True, linewidth=3, color='blue')
+
+        x, y = [], []
+        for point in self.geodetic_trajectory_b:
+            x.append(point[0])
+            y.append(point[1])
+        m.plot(x, y, latlon = True, linewidth=3, color='blue')
+            
+        plot.title(f'Meteor {self.label}')
+        plot.show()
 
     def calculate_distances_along_trajectories(self) -> None:
         """Calculates the distance of each point on both trajectories from
@@ -541,8 +595,10 @@ if __name__ == '__main__':
     
     for meteor in meteory:
         # Latitude, longitude, height above sea level, time of observation
-        ondrejov = Station(lat=49.970222, lon=14.780208, height=524, time_zone=1, time=meteor[1])
-        kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=1, time=meteor[1])
+        ondrejov = Station(lat=49.970222, lon=14.780208, height=524, time_zone=1, time=meteor[1], label='Ondřejov')
+        kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=1, time=meteor[1], label='Kunžak')
 
-        calculation = Meteor(ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
-        calculation.save_trajectory_gpx(meteor[0], meteor[4], meteor[5])
+        calculation = Meteor(meteor[0], ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
+        # calculation.save_trajectory_gpx(meteor[4], meteor[5])
+        calculation.calculate_trajectories_geodetic()
+        calculation.plot_trajectory_geodetic()
