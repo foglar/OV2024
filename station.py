@@ -50,7 +50,8 @@ class Station:
         if time == None:
             return
         
-        self.lst = Time(time, location=self.earth_location).sidereal_time('mean')
+        t = Time(time, location=self.earth_location)
+        self.lst = t.sidereal_time('mean')
 
         self.geodetic_lst = {'lat': self.lat, 'lon': self.lst, 'height': self.height}
         self.geocentric_lst = geodetic_to_geocentric(self.geodetic_lst)
