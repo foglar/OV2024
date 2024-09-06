@@ -229,8 +229,6 @@ class Meteor:
             self.geocentric_trajectory.append(self.geocentric_trajectory_b[j])
             j += 1
 
-        # TODO: Convert from LST to longitude
-
     def get_trajectories_geocentric(self) -> list[list[list[float]]]:
         """Returns the separate trajectories from both stations in geocentric coordinates
         
