@@ -5,8 +5,10 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GdkPixbuf
 
 from post_processing import post_processing
-from modules import EditConfig
+from trajectory import *
+from modules import EditConfig, ConfigLoader
 from configuration_gui import ConfigurationWindow as ConfigApp
+from main import MeteorsList as MeteorsData
 
 # TODO: Test with only meteor detected from one observatory
 # TODO: Test Other OS
@@ -124,8 +126,14 @@ class MeteorApp(Gtk.Window):
         btn_select_folder.connect("clicked", self.welcome_dialog)
         self.Toolbar.insert(btn_select_folder, 1)
 
+        btn_save_meteors = Gtk.ToolButton(
+            icon_name="document-save", label="Save Meteors"
+        )
+        btn_save_meteors.connect("clicked", self.save_to_file)
+        self.Toolbar.insert(btn_save_meteors, 2)
+
         btn_save_to_file = Gtk.ToolButton(
-            icon_name="document-save", label="Save to File"
+            icon_name="document-save-as", label="Save to File"
         )
         btn_save_to_file.connect("clicked", self.save_to_file_select)
         self.Toolbar.insert(btn_save_to_file, 2)
@@ -142,23 +150,34 @@ class MeteorApp(Gtk.Window):
         self.btn_view_meteor.connect("clicked", self.on_button_clicked)
         btn_box.pack_start(self.btn_view_meteor, True, True, 0)
 
-        btn_prev_meteor = Gtk.Button(
-            label="Previous Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
+        btn_location = Gtk.Button(
+            label="Meteor Location", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
         )
+        btn_location.connect("clicked", self.location_dialog)
+        btn_box.pack_start(btn_location, True, True, 0)
+
+        # btn_prev_meteor = Gtk.Button(
+        #     label="Previous Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
+        # )
+        # btn_prev_meteor.connect("clicked", self.previous_meteor)
+        # btn_box.pack_start(btn_prev_meteor, True, True, 0)
+
+        btn_prev_meteor = Gtk.Button()
+        btn_prev_meteor.set_image(Gtk.Image.new_from_icon_name("go-previous", Gtk.IconSize.BUTTON))
         btn_prev_meteor.connect("clicked", self.previous_meteor)
         btn_box.pack_start(btn_prev_meteor, True, True, 0)
 
-        btn_next_meteor = Gtk.Button(
-            label="Next Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
-        )
+        #btn_next_meteor = Gtk.Button(
+        #    label="Next Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
+        #)
+        #btn_next_meteor.connect("clicked", self.next_meteor)
+        #btn_box.pack_start(btn_next_meteor, True, True, 0)
+
+        # Button with next meteor icon and text
+        btn_next_meteor = Gtk.Button()
+        btn_next_meteor.set_image(Gtk.Image.new_from_icon_name("go-next", Gtk.IconSize.BUTTON))
         btn_next_meteor.connect("clicked", self.next_meteor)
         btn_box.pack_start(btn_next_meteor, True, True, 0)
-
-        btn_save_meteors = Gtk.Button(
-            label="Save Meteors", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
-        )
-        btn_save_meteors.connect("clicked", self.save_to_file)
-        btn_box.pack_start(btn_save_meteors, True, True, 0)
 
     def update_meteor_data(self):
         try:
@@ -258,6 +277,44 @@ class MeteorApp(Gtk.Window):
             logging.info("Meteors processed successfully.")
         except Exception as e:
             logging.error(f"Error processing meteors: {e}")
+
+    def location_dialog(self, widget):
+        location_data = self.location_data()
+
+    def location_data(self):
+        # Get time in this format '2018-10-8 21:38:32'
+        data = self.pp.meteor_data_table
+        logging.info("Opening meteor location dialog.")
+        i = self.index - 1
+
+        try:
+            name = ConfigLoader().get_value_from_data("first_observatory", "data")
+            latitude = float(ConfigLoader().get_value_from_data("first_latitude", "data"))
+            longitude = float(ConfigLoader().get_value_from_data("first_longitude", "data"))
+            height = float(ConfigLoader().get_value_from_data("first_sealevel", "data"))
+            timezone = int(ConfigLoader().get_value_from_data("first_timezone", "data"))
+
+            second_name = ConfigLoader().get_value_from_data("second_observatory", "data")
+            second_latitude = float(ConfigLoader().get_value_from_data("second_latitude", "data"))
+            second_longitude = float(ConfigLoader().get_value_from_data("second_longitude", "data"))
+            second_height = float(ConfigLoader().get_value_from_data("second_sealevel", "data"))
+            second_timezone = int(ConfigLoader().get_value_from_data("second_timezone", "data"))
+
+            times = [data[i][1] + " " + data[i][2], data[i][1] + " " + data[i][3]]
+        except Exception as e:
+            logging.error(f"Error getting observatory data: {e}")
+            return
+
+        print(data)
+        
+        first_obs = Station(lat=latitude, lon=longitude, height=height, time_zone=timezone, time=times[0], label=name)
+        second_obs = Station(lat=second_latitude, lon=second_longitude, height=second_height, time_zone=second_timezone, time=times[1], label=second_name)
+
+        #calculation = Meteor(meteor[0], ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
+        ##calculation.save_trajectory_gpx(meteor[4], meteor[5])
+        #calculation.calculate_trajectories_geodetic()
+        #calculation.plot_trajectory_geodetic()
+        #return calculation
 
     def next_meteor(self, widget):
 
