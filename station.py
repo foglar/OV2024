@@ -51,7 +51,7 @@ class Station:
             return
         
         t = Time(time, location=self.earth_location) + self.time_zone * u.hour
-        self.lst = t.sidereal_time('mean')
+        self.lst = t.sidereal_time('mean').value / 24 * 360
 
         self.geodetic_lst = {'lat': self.lat, 'lon': self.lst, 'height': self.height}
         self.geocentric_lst = geodetic_to_geocentric(self.geodetic_lst)
