@@ -145,7 +145,6 @@ class Meteor:
         if self.radiant == None:
             self.calculate_radiant()
 
-        import matplotlib.pyplot as plot
         fig, ax = plot.subplots()
 
         # Plot the path from station A
@@ -309,7 +308,7 @@ class Meteor:
         m = Basemap(projection = 'stere', rsphere = 6371200.,
                     resolution = 'i', area_thresh = 10000,
                     lat_0 = 50, lon_0 = 15,
-                    width=12000000, height=8000000)
+                    width=1200000, height=800000)
     
         m.drawcoastlines()
         m.drawcountries()
@@ -353,7 +352,7 @@ class Meteor:
 
         # If the geocentric trajectories aren't calculated yet, calculate
         if self.geocentric_trajectory_a == None or self.geocentric_trajectory_b == None:
-            self.calculate_trajectories_geocentric()
+            self.calculate_trajectories()
 
         self.distance_from_beginning_a = []
         beginning = self.geocentric_trajectory_a[0]
@@ -384,7 +383,7 @@ class Meteor:
 
         # If the geocentric trajectories aren't calculated yet, calculate
         if self.geocentric_trajectory_a == None or self.geocentric_trajectory_b == None:
-            self.calculate_trajectories_geocentric()
+            self.calculate_trajectories()
 
         self.velocities_a = []
         for i in range(1, len(self.geocentric_trajectory_a)):
@@ -412,6 +411,33 @@ class Meteor:
             self.calculate_velocities_along_trajectories()
 
         return self.velocities_a, self.velocities_b
+    
+    def plot_velocities_along_trajectories(self) -> None:
+        """Plots a velocity vs time graph
+        
+        Returns:
+            None
+        """
+
+        # If the velocities aren't calculated yet, calculate
+        if self.velocities_a == None or self.velocities_b == None:
+            self.calculate_velocities_along_trajectories()
+
+        fig, ax = plot.subplots()
+
+        x, y = [], []
+        for i in range(len(self.velocities_a)):
+            x.append(self.times_a[i + 1])
+            y.append(self.velocities_a[i])
+        ax.plot(x, y)
+
+        x, y = [], []
+        for i in range(len(self.velocities_b)):
+            x.append(self.times_b[i + 1])
+            y.append(self.velocities_b[i])
+        ax.plot(x, y)
+
+        plot.show()
 
 def calculate_meteor_plane(points: list[float]) -> list[float]:
     """Calculates meteor path plane according to equations 9 and 11
@@ -607,6 +633,4 @@ if __name__ == '__main__':
         kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=0, time=meteor[1], label='Kunžak')
 
         calculation = Meteor(meteor[0], ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
-        calculation.calculate_trajectories()
-        calculation.plot_trajectory_geodetic()
-        calculation.save_trajectory_gpx(meteor[4], meteor[5])
+        calculation.plot_velocities_along_trajectories()
