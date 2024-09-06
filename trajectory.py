@@ -528,22 +528,6 @@ def calculate_distance(point_a: list[float], point_b: list[float]) -> float:
 
     return sqrt((xb - xa) ** 2 + (yb - ya) ** 2 + (zb - za) ** 2)
 
-def calculate_sidereal_time(lat: float, lon: float, time, time_zone: int) -> float:
-    """Calculates sidereal time in degrees.
-
-    Args:
-        time: Time at the observatory
-        lat (float): Latitude of observatory
-        lon (float): Longitude of observatory
-        time_zone (int): Offset in hours from GMT
-
-    Returns:
-        float: Sidereal time in degrees
-    """
-
-    t = Time(time, location=(lon, lat)) - u.hour * time_zone
-    return t.sidereal_time('apparent').degree
-
 def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
     """Image preprocessing for astrometry. Masks out space around sky view and meteor
     
@@ -640,10 +624,10 @@ if __name__ == '__main__':
         # TODO: This value was determined experimentally, needs more thought
         offset = 0.135
         # Latitude, longitude, height above sea level, time of observation
-        ondrejov = Station(lat=49.970222, lon=14.780208, height=524, time_zone=offset, time=meteor[1], label='Ondřejov')
-        kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=offset, time=meteor[1], label='Kunžak')
+        ondrejov = Station(lat=49.970222, lon=14.780208, height=524, time_zone=0, time=meteor[1], label='Ondřejov')
+        kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=0, time=meteor[1], label='Kunžak')
 
-        calculation = Meteor(f'{meteor[0]}, offset {offset}', ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
+        calculation = Meteor(meteor[0], ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
         calculation.calculate_trajectories_geodetic()
         calculation.plot_trajectory_geodetic()
         # calculation.save_trajectory_gpx(meteor[4], meteor[5])
