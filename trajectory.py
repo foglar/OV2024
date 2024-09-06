@@ -187,7 +187,33 @@ class Meteor:
         for point in self.observation_b:
             self.geocentric_trajectory_b.append(calculate_meteor_point_vector(point, vector_b, vector_a))
 
-        # TODO: Mesh trajectories together
+        # Mesh trajectories together according to the time value
+        self.times = []
+        self.geocentric_trajectory = []
+
+        # Append the data point with lower time value
+        i, j = 0, 0
+        while i < len(self.times_a) and j < len(self.times_b):
+            if self.times_a[i] < self.times_b[j]:
+                self.times.append(self.times_a[i])
+                self.geocentric_trajectory.append(self.geocentric_trajectory_a[i])
+                i += 1
+            else:
+                self.times.append(self.times_b[j])
+                self.geocentric_trajectory.append(self.geocentric_trajectory_b[j])
+                j += 1
+
+        # Append the rest
+        while i < len(self.times_a):
+            self.times.append(self.times_a[i])
+            self.geocentric_trajectory.append(self.geocentric_trajectory_a[i])
+            i += 1
+
+        while j < len(self.times_b):
+            self.times.append(self.times_b[i])
+            self.geocentric_trajectory.append(self.geocentric_trajectory_b[i])
+            j += 1
+
         # TODO: Convert from LST to longitude
 
     def get_trajectories_geocentric(self) -> list[list[list[float]]]:
