@@ -50,7 +50,7 @@ class Station:
         if time == None:
             return
         
-        t = Time(time, location=self.earth_location)
+        t = Time(time, location=self.earth_location) + self.time_zone * u.hour
         self.lst = t.sidereal_time('mean')
 
         self.geodetic_lst = {'lat': self.lat, 'lon': self.lst, 'height': self.height}
