@@ -210,8 +210,8 @@ class Meteor:
             i += 1
 
         while j < len(self.times_b):
-            self.times.append(self.times_b[i])
-            self.geocentric_trajectory.append(self.geocentric_trajectory_b[i])
+            self.times.append(self.times_b[j])
+            self.geocentric_trajectory.append(self.geocentric_trajectory_b[j])
             j += 1
 
         # TODO: Convert from LST to longitude
@@ -316,7 +316,7 @@ class Meteor:
         m = Basemap(projection = 'stere', rsphere = 6371200.,
                     resolution = 'i', area_thresh = 10000,
                     lat_0 = 50, lon_0 = 15,
-                    width=1200000, height=800000)
+                    width=12000000, height=8000000)
     
         m.drawcoastlines()
         m.drawcountries()
@@ -328,7 +328,6 @@ class Meteor:
         m.scatter(latlon = True, x = self.station_b.lon, y = self.station_b.lat,
                   color='red')
         
-        # TODO: Draw the first and last points with a different marker
         # Draw meteor trajectories
         x, y = [], []
         for point in self.geodetic_trajectory_a:
@@ -336,11 +335,19 @@ class Meteor:
             y.append(point[1])
         m.plot(x, y, latlon = True, linewidth=3, color='blue')
 
+        # Draw the first and last points with special markers
+        m.scatter(x[0], y[0], latlon = True, marker='^', color='blue')
+        m.scatter(x[-1], y[-1], latlon = True, marker='x', color='blue')
+
         x, y = [], []
         for point in self.geodetic_trajectory_b:
             x.append(point[0])
             y.append(point[1])
         m.plot(x, y, latlon = True, linewidth=3, color='blue')
+
+        # Draw the first and last points with special markers
+        m.scatter(x[0], y[0], latlon = True, marker='^', color='blue')
+        m.scatter(x[-1], y[-1], latlon = True, marker='x', color='blue')
             
         plot.title(f'Meteor {self.label}')
         plot.show()
