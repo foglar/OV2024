@@ -273,8 +273,8 @@ class Meteor:
         gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd http://www.topografix.com/GPX/gpx_style/0/2 http://www.topografix.com/GPX/gpx_style/0/2/gpx_style.xsd" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpx_style="http://www.topografix.com/GPX/gpx_style/0/2" version="1.1" creator="https://gpx.studio"><metadata>    <name>Meteory</name>    <author>        <name>gpx.studio</name>        <link href="https://gpx.studio"></link>    </author></metadata>'
 
         # Add stations
-        gpx += f'<wpt lat="{self.station_a.geodetic["lat"]}" lon="{self.station_a.geodetic["lon"]}"><ele>{self.station_a.geodetic["height"]}</ele><name>Station A</name></wpt>'
-        gpx += f'<wpt lat="{self.station_b.geodetic["lat"]}" lon="{self.station_b.geodetic["lon"]}"><ele>{self.station_b.geodetic["height"]}</ele><name>Station B</name></wpt>'
+        gpx += f'<wpt lat="{self.station_a.geodetic["lat"]}" lon="{self.station_a.geodetic["lon"]}"><ele>{self.station_a.geodetic["height"]}</ele><name>{self.station_a.label}</name></wpt>'
+        gpx += f'<wpt lat="{self.station_b.geodetic["lat"]}" lon="{self.station_b.geodetic["lon"]}"><ele>{self.station_b.geodetic["height"]}</ele><name>{self.station_b.label}</name></wpt>'
 
         # Add trajectories
         gpx += f'<trk><name>Trajectory {self.label}</name><trkseg>'
@@ -633,4 +633,10 @@ if __name__ == '__main__':
         kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=0, time=meteor[1], label='Kunžak')
 
         calculation = Meteor(meteor[0], ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
-        calculation.plot_velocities_along_trajectories()
+        calculation.save_trajectory_gpx(meteor[4], meteor[5])
+
+# TODO: Export dat do .rex a JSON
+# TODO: Přepočet radiantu na geocentrický a J2000
+# TODO: Oprava výpočtu rychlosti? Zdroj informací o čase?
+# TODO: Práce s astrometrií? Napevno nastavené informace o směřování kamery?
+# TODO: Přepsat kód na PEP8
