@@ -11,7 +11,7 @@ pip3 install -r requirements.txt
 ```
 
 > [!TIP]
-> It is recommended practice to use a virtual enviroment.
+> It is recommended practice to use a virtual environment.
 > Download **[conda][conda]** and create a venv `conda -n ov2024`.
 > Activate it with a command `conda activate ov2024`
 
@@ -47,6 +47,16 @@ home_dir = "/home/foglar/Documents/Programming/Projects/OV2024-Project/meteory"
 - `main.py` - runs astrometry for each observation from both observatories in file tree
 - `coordinates.py` - converts coordinates from pixels to **ra** and **dec**
 - `trajectory.py` - calculates meteor trajectory
+
+## Usage
+
+## Meteor calculation
+
+Meteor calculation is handled by the `trajectory.py` code using the `Meteor` class.
+
+### Performing calculations
+
+The calculation can be performed automatically - when requesting specific data about the meteor (e. g. the radiant), the Meteor instance will perform all the required calculations to calculate the requested data. (e. g. the `Meteor.get_radiant function` will calculate the radiant), or manually, by using the specific function (e. g. `Meteor.calculate_radiant`).
 
 [astrometryapi]: https://nova.astrometry.net/api_help
 [conda]: https://www.anaconda.com/download/
