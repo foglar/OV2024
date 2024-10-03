@@ -1,6 +1,33 @@
 from trajectory import *
 import numpy
 
+def test_fixed_wcs_astrometry():
+    """Tests the fixed WCS astrometry calculation"""
+
+    from astrometry import AstrometryClient
+    from station import Station
+    from coordinates import download_wcs_file
+
+    client = AstrometryClient()
+    client.authenticate()
+
+    time = Time('2024-01-08 21:35:44')
+    kunzak = Station(lat=49.107290, lon=15.200930, height=656,
+                     time_zone=0, time='2024-01-08 21:35:44', label='Kunžak',
+                     wcs_path='calibration.wcs', wcs_time=Time('2024-01-08 23:24:54'))
+
+    # Calculate meteor coordinates from WCS from the same image
+    world_a = get_meteor_coordinates(client, './data/meteory/Kunzak/2024-01-08-21-35-44/2024-01-08-21-35-44.jpg', './data/meteory/Kunzak/2024-01-08-21-35-44/data.txt', kunzak, time)
+
+    # Calculate meteor coordinates from a different image
+    download_wcs_file(client, './data/meteory/Kunzak/2024-01-08-23-24-54/2024-01-08-23-24-54.jpg')
+    world_b = get_meteor_coordinates_fixed('./data/meteory/Kunzak/2024-01-08-21-35-44/data.txt', kunzak, time)
+
+    # Check the results
+    for i in range(len(world_a)):
+        assert numpy.allclose(world_a[i], world_b[i]), \
+               f'{world_a[i]} is not {world_b[i]}'
+
 def test_solve_plane_intersection():
     """Tests the plane intersection calculation function"""
 
@@ -77,6 +104,7 @@ def test_goniometry_solver():
                f'Should be {(ra, dec)}, not {calculated}'
 
 if __name__ == '__main__':
+    test_fixed_wcs_astrometry()
     test_goniometry_solver()
     test_solve_plane_intersection()
     test_radiant_calculation()
