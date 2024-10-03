@@ -18,7 +18,11 @@ class Station:
     # Time information
     time_zone: float
 
-    def __init__(self, lat: float, lon: float, height: float, time_zone: float, time: str = None, label: str = ''):
+    # Camera alignment
+    wcs_path: str
+    wcs_time: Time
+
+    def __init__(self, lat: float, lon: float, height: float, time_zone: float, time: str = None, label: str = '', wcs_path: str = None, wcs_time: Time = None):
         """Args:
             lat (float): Latitude of station in decimal degrees
             lon (float): Longitude of station in decimal degrees
@@ -40,6 +44,9 @@ class Station:
 
         self.time_zone = time_zone
         self.label = label
+
+        self.wcs_path = wcs_path
+        self.wcs_time = wcs_time
 
         # Calculate geocentric coordinates
         from coordinates import geodetic_to_geocentric
