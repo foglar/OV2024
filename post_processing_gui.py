@@ -9,6 +9,7 @@ from trajectory import *
 from modules import EditConfig, ConfigLoader
 from configuration_gui import ConfigurationWindow as ConfigApp
 from main import MeteorsList as MeteorsData
+from data_window_gui import DataWindow as LoadingWindow
 
 # TODO: Test Other OS
 # TODO: Test how to compile
@@ -40,7 +41,7 @@ class MeteorApp(Gtk.Window):
             orientation=Gtk.Orientation.HORIZONTAL,
             halign=Gtk.Align.CENTER,
             valign=Gtk.Align.START,
-            )
+        )
         m_box.pack_start(title_row_box, True, True, 0)
 
         info_box = Gtk.Box(
@@ -98,9 +99,8 @@ class MeteorApp(Gtk.Window):
 
         self.first_meteor_label = Gtk.Label()
         self.first_meteor_label.set_justify(Gtk.Justification.LEFT)
-        #self.first_meteor_label.set_selectable(True) # - sets text to be selectable
+        # self.first_meteor_label.set_selectable(True) # - sets text to be selectable
         first_meteor_box.pack_start(self.first_meteor_label, True, True, 0)
-
 
         self.second_meteor_label = Gtk.Label()
         self.second_meteor_label.set_justify(Gtk.Justification.LEFT)
@@ -122,7 +122,7 @@ class MeteorApp(Gtk.Window):
 
         btn_select_folder = Gtk.ToolButton(
             icon_name="folder-open", label="Select Folder"
-            )
+        )
         btn_select_folder.connect("clicked", self.welcome_dialog)
         self.Toolbar.insert(btn_select_folder, 1)
 
@@ -142,7 +142,11 @@ class MeteorApp(Gtk.Window):
             icon_name="preferences-system", label="Settings"
         )
         btn_settings_observatory.connect("clicked", self.setup_observatories)
-        self.Toolbar.insert(btn_settings_observatory, 3)
+        self.Toolbar.insert(btn_settings_observatory, 4)
+
+        btn_load_data = Gtk.ToolButton(icon_name="download", label="Load Data")
+        btn_load_data.connect("clicked", self.open_loading_data)
+        self.Toolbar.insert(btn_load_data, 3)
 
         self.btn_view_meteor = Gtk.Button(
             label="Preview Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
@@ -163,19 +167,23 @@ class MeteorApp(Gtk.Window):
         # btn_box.pack_start(btn_prev_meteor, True, True, 0)
 
         btn_prev_meteor = Gtk.Button()
-        btn_prev_meteor.set_image(Gtk.Image.new_from_icon_name("go-previous", Gtk.IconSize.BUTTON))
+        btn_prev_meteor.set_image(
+            Gtk.Image.new_from_icon_name("go-previous", Gtk.IconSize.BUTTON)
+        )
         btn_prev_meteor.connect("clicked", self.previous_meteor)
         btn_box.pack_start(btn_prev_meteor, True, True, 0)
 
-        #btn_next_meteor = Gtk.Button(
+        # btn_next_meteor = Gtk.Button(
         #    label="Next Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
-        #)
-        #btn_next_meteor.connect("clicked", self.next_meteor)
-        #btn_box.pack_start(btn_next_meteor, True, True, 0)
+        # )
+        # btn_next_meteor.connect("clicked", self.next_meteor)
+        # btn_box.pack_start(btn_next_meteor, True, True, 0)
 
         # Button with next meteor icon and text
         btn_next_meteor = Gtk.Button()
-        btn_next_meteor.set_image(Gtk.Image.new_from_icon_name("go-next", Gtk.IconSize.BUTTON))
+        btn_next_meteor.set_image(
+            Gtk.Image.new_from_icon_name("go-next", Gtk.IconSize.BUTTON)
+        )
         btn_next_meteor.connect("clicked", self.next_meteor)
         btn_box.pack_start(btn_next_meteor, True, True, 0)
 
@@ -240,7 +248,7 @@ class MeteorApp(Gtk.Window):
             return folder
         else:
             return None
-        
+
     def setup_observatories(self, widget):
         logging.info("Opening observatory settings.")
         win = ConfigApp()
@@ -278,6 +286,18 @@ class MeteorApp(Gtk.Window):
         except Exception as e:
             logging.error(f"Error processing meteors: {e}")
 
+    def open_loading_data(self, widget):
+        logging.info("Opening data window.")
+        win = LoadingWindow()
+        win.connect("destroy", self.on_loading_data_window_closed)
+        win.show_all()
+        self.thread = win.thread
+        Gtk.main()
+
+    def on_loading_data_window_closed(self, widget):
+        logging.info("Data window closed.")
+        widget.destroy()
+
     def location_dialog(self, widget):
         location_data = self.location_data()
 
@@ -289,16 +309,30 @@ class MeteorApp(Gtk.Window):
 
         try:
             name = ConfigLoader().get_value_from_data("first_observatory", "data")
-            latitude = float(ConfigLoader().get_value_from_data("first_latitude", "data"))
-            longitude = float(ConfigLoader().get_value_from_data("first_longitude", "data"))
+            latitude = float(
+                ConfigLoader().get_value_from_data("first_latitude", "data")
+            )
+            longitude = float(
+                ConfigLoader().get_value_from_data("first_longitude", "data")
+            )
             height = float(ConfigLoader().get_value_from_data("first_sealevel", "data"))
             timezone = int(ConfigLoader().get_value_from_data("first_timezone", "data"))
 
-            second_name = ConfigLoader().get_value_from_data("second_observatory", "data")
-            second_latitude = float(ConfigLoader().get_value_from_data("second_latitude", "data"))
-            second_longitude = float(ConfigLoader().get_value_from_data("second_longitude", "data"))
-            second_height = float(ConfigLoader().get_value_from_data("second_sealevel", "data"))
-            second_timezone = int(ConfigLoader().get_value_from_data("second_timezone", "data"))
+            second_name = ConfigLoader().get_value_from_data(
+                "second_observatory", "data"
+            )
+            second_latitude = float(
+                ConfigLoader().get_value_from_data("second_latitude", "data")
+            )
+            second_longitude = float(
+                ConfigLoader().get_value_from_data("second_longitude", "data")
+            )
+            second_height = float(
+                ConfigLoader().get_value_from_data("second_sealevel", "data")
+            )
+            second_timezone = int(
+                ConfigLoader().get_value_from_data("second_timezone", "data")
+            )
 
             times = [data[i][1] + " " + data[i][2], data[i][1] + " " + data[i][3]]
         except Exception as e:
@@ -306,15 +340,29 @@ class MeteorApp(Gtk.Window):
             return
 
         print(data)
-        
-        first_obs = Station(lat=latitude, lon=longitude, height=height, time_zone=timezone, time=times[0], label=name)
-        second_obs = Station(lat=second_latitude, lon=second_longitude, height=second_height, time_zone=second_timezone, time=times[1], label=second_name)
 
-        #calculation = Meteor(meteor[0], ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
+        first_obs = Station(
+            lat=latitude,
+            lon=longitude,
+            height=height,
+            time_zone=timezone,
+            time=times[0],
+            label=name,
+        )
+        second_obs = Station(
+            lat=second_latitude,
+            lon=second_longitude,
+            height=second_height,
+            time_zone=second_timezone,
+            time=times[1],
+            label=second_name,
+        )
+
+        # calculation = Meteor(meteor[0], ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
         ##calculation.save_trajectory_gpx(meteor[4], meteor[5])
-        #calculation.calculate_trajectories_geodetic()
-        #calculation.plot_trajectory_geodetic()
-        #return calculation
+        # calculation.calculate_trajectories_geodetic()
+        # calculation.plot_trajectory_geodetic()
+        # return calculation
 
     def next_meteor(self, widget):
 
@@ -342,7 +390,7 @@ class MeteorApp(Gtk.Window):
 
         self.update_labels()
         return self.meteor_data[self.index - 1]
-    
+
     def save_to_file_select(self, widget):
         dialog = Gtk.FileChooserDialog(
             title="Save Meteor Data",
@@ -451,7 +499,9 @@ class MeteorApp(Gtk.Window):
         self.titleLabel.set_markup(label_text)
 
     def update_index_label(self):
-        label_text = f'<span size="20000" ><b>{self.index}/{len(self.meteor_data)}</b></span>\n'
+        label_text = (
+            f'<span size="20000" ><b>{self.index}/{len(self.meteor_data)}</b></span>\n'
+        )
         self.index_label.set_markup(label_text)
 
     def update_meteors_labels(self):

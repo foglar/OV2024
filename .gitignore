@@ -137,3 +137,5 @@ calibration.wcs
 
 # Debug files
 *.gpx
+
+.vscode/settings.json
