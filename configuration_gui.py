@@ -24,6 +24,7 @@ class ConfigurationWindow(Gtk.Window):
         self.second_timezone = config().get_value_from_data("second_timezone", "data")
         self.timeout = config().get_value_from_data("timeout", "data")
         self.astrometry_token = config().get_astrometry_key()
+        self.time_tolerance = config().get_value_from_data("time_tolerance", "data")
 
 
         Gtk.Window.__init__(self, title="Configuration")
@@ -43,6 +44,7 @@ class ConfigurationWindow(Gtk.Window):
         self.first_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.second_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.third_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.fourth_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 
         self.first_label = Gtk.Label(label="First observatory configuration")
         self.first_label.set_tooltip_text("First observatory configuration")
@@ -50,6 +52,7 @@ class ConfigurationWindow(Gtk.Window):
         self.second_label.set_tooltip_text("Second observatory configuration")
         self.astrometry_label = Gtk.Label(label="Astrometry configuration")
         self.astrometry_label.set_tooltip_text("Astrometry configuration")
+        self.other_label = Gtk.Label(label="Other configuration")
 
         self.grid = Gtk.Grid()
         self.grid.set_column_spacing(10)
@@ -62,6 +65,10 @@ class ConfigurationWindow(Gtk.Window):
         self.grid3 = Gtk.Grid()
         self.grid3.set_column_spacing(10)
         self.grid3.set_row_spacing(10)
+
+        self.grid4 = Gtk.Grid()
+        self.grid4.set_column_spacing(10)
+        self.grid4.set_row_spacing(10)
 
         # Form for folder, coordinates, sealevel, timezone, etc.
 
@@ -213,17 +220,30 @@ class ConfigurationWindow(Gtk.Window):
         self.grid3.attach(self.timeout_label, 0, 1, 1, 1)
         self.grid3.attach(self.spinner_timeout, 1, 1, 1, 1)
 
+        # Other configuration
+        self.time_tolerance_label = Gtk.Label(label="Time tolerance")
+        self.time_tolerance_label.set_tooltip_text("Time tolerance in seconds")
+        self.time_tolerance_adjustment = Gtk.Adjustment(int(self.time_tolerance), 0, 1000, 1, 10, 0)
+        self.spinner_time_tolerance = Gtk.SpinButton(adjustment=self.time_tolerance_adjustment, numeric=True, climb_rate=0.5)
+        self.spinner_time_tolerance.set_tooltip_text("Time tolerance in seconds")
+        self.grid4.attach(self.time_tolerance_label, 0, 0, 1, 1)
+        self.grid4.attach(self.spinner_time_tolerance, 1, 0, 1, 1)
+
         self.first_box.add(self.first_label)
         self.first_box.add(self.grid)
         self.second_box.add(self.second_label)
         self.second_box.add(self.grid2)
         self.third_box.add(self.astrometry_label)
         self.third_box.add(self.grid3)
+        self.fourth_box.add(self.other_label)
+        self.fourth_box.add(self.grid4)
 
         self.box.add(self.first_box)
         self.box.add(self.second_box)
         self.box.add(self.third_box)
-        self.add(self.box)
+        self.box.add(self.fourth_box)
+
+        # Save button
 
         self.save_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         self.button_save = Gtk.Button(label="Save")
@@ -231,6 +251,8 @@ class ConfigurationWindow(Gtk.Window):
         self.button_save.set_tooltip_text("Save configuration")
         self.save_box.add(self.button_save)
         self.box.add(self.save_box)
+
+        self.add(self.box)
     
     def on_toggle_visibility(self, widget):
         if widget.get_active():
@@ -272,6 +294,8 @@ class ConfigurationWindow(Gtk.Window):
         editconfig().set_value("second_sealevel", self.spinner_sealevel2.get_value(), "data")
         editconfig().set_value("second_timezone", self.spinner_timezone2.get_value(), "data")
         editconfig().set_value("timeout", self.spinner_timeout.get_value(), "data")
+        editconfig().set_value("time_tolerance", self.spinner_time_tolerance.get_value(), "data")
+        editconfig().set_value("astrometry_token", self.entry_token.get_text(), "astrometry")
         self.destroy()
 
     def validate_long(self, widget):

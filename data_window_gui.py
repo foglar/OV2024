@@ -67,13 +67,12 @@ class DataWindow(Gtk.Window):
         self.spinner.stop()
         if hasattr(self, 'ra_dec_list') and self.ra_dec_list:
             print(self.ra_dec_list)
-            self.label.set_text(f"First RA-Dec pair: {self.ra_dec_list[0][0]}")
+            self.label.set_text(f"Data loaded successfully: {len(self.ra_dec_list)} meteors found.")
         else:
             self.label.set_text("Failed to load data.")
 
         # Now that the task is complete, allow the window to close
-        self.disconnect(self.delete_event_id)
-        self.connect("destroy", Gtk.main_quit)
+        self.destroy()
 
 if __name__ == "__main__":
     win = DataWindow()

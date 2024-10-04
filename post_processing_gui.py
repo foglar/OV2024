@@ -291,7 +291,7 @@ class MeteorApp(Gtk.Window):
         win = LoadingWindow()
         win.connect("destroy", self.on_loading_data_window_closed)
         win.show_all()
-        self.thread = win.thread
+        self.astrometry_data = win.ra_dec_list
         Gtk.main()
 
     def on_loading_data_window_closed(self, widget):
