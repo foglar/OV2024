@@ -12,18 +12,17 @@ class Meteor:
     label: str
 
     # Station and observation information
-    station_a: Station
-    station_b: Station
+    stations: list[Station]
 
     time: Time
 
-    observation_a: list[list[float]]
-    observation_b: list[list[float]]
-
-    times_a: (list[float])
-    times_b: (list[float])
+    observations: list[list[float]]
+    times: (list[float])
 
     Q_angle: float
+
+    # Astrometry information
+    job_id: int
     
     # Radiant information
     radiant: list[float]
@@ -39,32 +38,33 @@ class Meteor:
     distance_from_beginning_b: list[float]
 
     def __init__(self, label: str,
-                 station_a: Station, station_b: Station,
-                 observation_a: list[list[float]], observation_b:list[list[float]],
+                 stations: list[Station],
+                 observations: list[list[float]],
                  time: str) -> None:
         """Args:
             label (str): Meteor label
-            station_a (Station): Station instance describing station A
-            station_b (Station): Station instance describing station B
-            observation_a (list[list[float]]): Measured coordinates of meteor points in decimal ra and dec with time values form station A
-            observation_b (list[list[float]]): Measured coordinates of meteor points in decimal ra and dec with time values form station B
-            time: (str): Time and date from which the measurements are related
+            stations (list[Station]): List of Stations from which the meteor
+            was observed
+            observations (list[list[float]]): List of observations of the
+            meteor describing the coordinates and time values
+            time: (str): Time and date to which the measurements are related
         """
 
-        self.label = label
-
         # Station and observation information
-        self.station_a = station_a
-        self.station_b = station_b
-
+        self.label = label
+        self.stations = stations
         self.time = Time(time)
 
         # Separate coordinate and time values
-        self.observation_a = [(i[0], i[1]) for i in observation_a]
-        self.times_a = [i[2] for i in observation_a]
+        self.observations = []
+        self.times = []
 
-        self.observation_b = [(i[0], i[1]) for i in observation_b]
-        self.times_b = [i[2] for i in observation_b]
+        for obs in observations:
+            coords = [(i[0], i[1]) for i in obs]
+            times = [i[2] for i in obs]
+
+            self.observations.append(coords)
+            self.times.append(times)
 
         # Define yet uncalculated values
         self.radiant = None
@@ -89,8 +89,8 @@ class Meteor:
             None
         """
 
-        aa, ba, ca = calculate_meteor_plane(self.observation_a)
-        ab, bb, cb = calculate_meteor_plane(self.observation_b)
+        aa, ba, ca = calculate_meteor_plane(self.observations[0])
+        ab, bb, cb = calculate_meteor_plane(self.observations[1])
         
         d = sqrt((ba * cb - bb * ca) ** 2 + (ab * ca - aa * cb) ** 2 + (aa * bb - ab * ba) ** 2)
 
@@ -102,7 +102,7 @@ class Meteor:
 
         ra, dec = solve_goniometry((Xi, Eta, Zeta))
         # If the radiant is under the horizon, change sign of Xi, Eta, Zeta
-        if world_to_altaz(ra, dec, self.station_a, self.time)[0] < 0 or world_to_altaz(ra, dec, self.station_b, self.time)[0] < 0:
+        if world_to_altaz(ra, dec, self.stations[0], self.time)[0] < 0 or world_to_altaz(ra, dec, self.stations[1], self.time)[0] < 0:
             ra, dec = solve_goniometry((-Xi, -Eta, -Zeta))
 
         self.radiant = [ra, dec]
@@ -149,7 +149,7 @@ class Meteor:
 
         # Plot the path from station A
         x, y = [], []
-        for point in self.observation_a:
+        for point in self.observations[0]:
             ax.scatter(point[0], point[1], color = 'b')
             x.append(point[0])
             y.append(point[1])
@@ -157,7 +157,7 @@ class Meteor:
         
         # Plot the path from station B
         x, y = [], []
-        for point in self.observation_b:
+        for point in self.observations[1]:
             ax.scatter(point[0], point[1], color = 'y')
             x.append(point[0])
             y.append(point[1])
@@ -176,8 +176,8 @@ class Meteor:
         """
 
         # Solve the station planes
-        vector_a = calculate_meteor_plane(self.observation_a) + self.station_a.geocentric_lst
-        vector_b = calculate_meteor_plane(self.observation_b) + self.station_b.geocentric_lst
+        vector_a = calculate_meteor_plane(self.observations[0]) + self.stations[0].geocentric_lst
+        vector_b = calculate_meteor_plane(self.observations[1]) + self.stations[1].geocentric_lst
 
         # Calculate GST
         GST = self.time.sidereal_time('mean', 'greenwich').value / 24 * 360
@@ -185,7 +185,7 @@ class Meteor:
         # Solve the intersection with the meteor plane
         self.geocentric_trajectory_a = []
         self.geodetic_trajectory_a = []
-        for point in self.observation_a:
+        for point in self.observations[0]:
             raw = calculate_meteor_point_vector(point, vector_a, vector_b)
 
             lon, lat, height = geocentric_to_geodetic(raw)
@@ -196,7 +196,7 @@ class Meteor:
 
         self.geocentric_trajectory_b = []
         self.geodetic_trajectory_b = []
-        for point in self.observation_b:
+        for point in self.observations[1]:
             raw = calculate_meteor_point_vector(point, vector_b, vector_a)
 
             lon, lat, height = geocentric_to_geodetic(raw)
@@ -206,33 +206,33 @@ class Meteor:
             self.geocentric_trajectory_b.append(geodetic_to_geocentric(cor))
 
         # Mesh trajectories together according to the height
-        self.times = []
+        self.merged_times = []
         self.geocentric_trajectory = []
         self.geodetic_trajectory = []
 
         # Append the data point with higher height value
         i, j = 0, 0
-        while i < len(self.times_a) and j < len(self.times_b):
+        while i < len(self.times[0]) and j < len(self.times[1]):
             if self.geodetic_trajectory_a[i]['height'] > self.geodetic_trajectory_b[j]['height']:
-                self.times.append(self.times_a[i])
+                self.merged_times.append(self.times[0][i])
                 self.geocentric_trajectory.append(self.geocentric_trajectory_a[i])
                 self.geodetic_trajectory.append(self.geodetic_trajectory_a[i])
                 i += 1
             else:
-                self.times.append(self.times_b[j])
+                self.merged_times.append(self.times[1][j])
                 self.geocentric_trajectory.append(self.geocentric_trajectory_b[j])
                 self.geodetic_trajectory.append(self.geodetic_trajectory_b[j])
                 j += 1
 
         # Append the rest
-        while i < len(self.times_a):
-            self.times.append(self.times_a[i])
+        while i < len(self.times[0]):
+            self.merged_times.append(self.times[0][i])
             self.geocentric_trajectory.append(self.geocentric_trajectory_a[i])
             self.geodetic_trajectory.append(self.geodetic_trajectory_a[i])
             i += 1
 
-        while j < len(self.times_b):
-            self.times.append(self.times_b[j])
+        while j < len(self.times[1]):
+            self.merged_times.append(self.times[1][j])
             self.geocentric_trajectory.append(self.geocentric_trajectory_b[j])
             self.geodetic_trajectory.append(self.geodetic_trajectory_b[j])
             j += 1
@@ -273,8 +273,8 @@ class Meteor:
         gpx = '<?xml version="1.0" encoding="UTF-8"?><gpx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd http://www.topografix.com/GPX/gpx_style/0/2 http://www.topografix.com/GPX/gpx_style/0/2/gpx_style.xsd" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:gpx_style="http://www.topografix.com/GPX/gpx_style/0/2" version="1.1" creator="https://gpx.studio"><metadata>    <name>Meteory</name>    <author>        <name>gpx.studio</name>        <link href="https://gpx.studio"></link>    </author></metadata>'
 
         # Add stations
-        gpx += f'<wpt lat="{self.station_a.geodetic["lat"]}" lon="{self.station_a.geodetic["lon"]}"><ele>{self.station_a.geodetic["height"]}</ele><name>{self.station_a.label}</name></wpt>'
-        gpx += f'<wpt lat="{self.station_b.geodetic["lat"]}" lon="{self.station_b.geodetic["lon"]}"><ele>{self.station_b.geodetic["height"]}</ele><name>{self.station_b.label}</name></wpt>'
+        gpx += f'<wpt lat="{self.stations[0].geodetic["lat"]}" lon="{self.stations[0].geodetic["lon"]}"><ele>{self.stations[0].geodetic["height"]}</ele><name>{self.stations[0].label}</name></wpt>'
+        gpx += f'<wpt lat="{self.stations[1].geodetic["lat"]}" lon="{self.stations[1].geodetic["lon"]}"><ele>{self.stations[1].geodetic["height"]}</ele><name>{self.stations[1].label}</name></wpt>'
 
         # Add trajectories
         gpx += f'<trk><name>Trajectory {self.label}</name><trkseg>'
@@ -314,10 +314,10 @@ class Meteor:
         m.drawcountries()
 
         # Draw stations
-        m.scatter(latlon = True, x = self.station_a.lon, y = self.station_a.lat,
+        m.scatter(latlon = True, x = self.stations[0].lon, y = self.stations[0].lat,
                   color='red')
 
-        m.scatter(latlon = True, x = self.station_b.lon, y = self.station_b.lat,
+        m.scatter(latlon = True, x = self.stations[1].lon, y = self.stations[1].lat,
                   color='red')
         
         # Draw meteor trajectories
@@ -333,7 +333,7 @@ class Meteor:
 
         # Add height marks
         for i in range(len(x)):
-            plot.annotate(f'{self.times[i]} - {round(heights[i] / 1000, 3)} km', (x[i], y[i]))
+            plot.annotate(f'{self.merged_times[i]} - {round(heights[i] / 1000, 3)} km', (x[i], y[i]))
 
         # Draw the first and last points with special markers
         m.scatter(x[0], y[0], marker='^', color='blue')
@@ -388,14 +388,14 @@ class Meteor:
         self.velocities_a = []
         for i in range(1, len(self.geocentric_trajectory_a)):
             distance_from_last = calculate_distance(self.geocentric_trajectory_a[i], self.geocentric_trajectory_a[i - 1])
-            time_from_last = self.times_a[i] - self.times_a[i - 1]
+            time_from_last = self.times[0][i] - self.times[0][i - 1]
 
             self.velocities_a.append(distance_from_last/time_from_last)
 
         self.velocities_b = []
         for i in range(1, len(self.geocentric_trajectory_b)):
             distance_from_last = calculate_distance(self.geocentric_trajectory_b[i], self.geocentric_trajectory_b[i - 1])
-            time_from_last = self.times_b[i] - self.times_b[i - 1]
+            time_from_last = self.times[1][i] - self.times[1][i - 1]
 
             self.velocities_b.append(distance_from_last/time_from_last)
 
@@ -427,13 +427,13 @@ class Meteor:
 
         x, y = [], []
         for i in range(len(self.velocities_a)):
-            x.append(self.times_a[i + 1])
+            x.append(self.times[0][i + 1])
             y.append(self.velocities_a[i])
         ax.plot(x, y)
 
         x, y = [], []
         for i in range(len(self.velocities_b)):
-            x.append(self.times_b[i + 1])
+            x.append(self.times[1][i + 1])
             y.append(self.velocities_b[i])
         ax.plot(x, y)
 
