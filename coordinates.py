@@ -177,6 +177,32 @@ def load_meteors(path: str) -> list[list[list[float]]]:
 
     return meteory, casy
 
+def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
+    """Image preprocessing for astrometry. Masks out space around sky view
+    and meteor
+    
+    Args:
+        img_path (str): The path to the image to mask
+        data_path (str): The path to data.txt file describing meteor
+        tmp_path (str): Path, where the masked image should be saved
+
+    Returns:
+        None
+    """
+
+    import cv2, numpy
+
+    image = cv2.imread(img_path)
+
+    mask = numpy.zeros(image.shape, dtype=numpy.uint8)
+    mask = cv2.circle(mask, (image.shape[1] // 2, image.shape[0] // 2), image.shape[0] // 2, (255, 255, 255), -1)
+
+    meteor = load_meteors(data_path)
+    for point in meteor[0]:
+        mask = cv2.circle(mask, (int(point[0]), int(point[1])), 3, (0, 0, 0), -1)
+
+    cv2.imwrite(tmp_path, cv2.bitwise_and(mask, image))
+
 def download_wcs_file(client: AstrometryClient, img_path: str, wcs_path: str = 'calibration.wcs') -> bool:
     """Try to get astrometry from an image from nova.astrometry.net
     
@@ -229,7 +255,13 @@ def get_meteor_coordinates_fixed(data_path: str, station: Station, time: Time) -
 
     return world
 
-def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: str, station: Station, time: Time, job_id: int = None) -> list[list[float]]:
+def get_meteor_coordinates(client: AstrometryClient,
+                           img_path: str,
+                           data_path: str,
+                           station: Station,
+                           time: Time,
+                           job_id: int = None,
+                           prep: bool = False) -> list[list[float]]:
     """Do astrometry and return meteor path in RA and Dec with time marks
     
     Args:
@@ -238,6 +270,9 @@ def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: s
         data_path (str): Observation data.txt path
         station (Station): Station to use for backup astrometry
         time (Time): Time to use for fixed camera alignment
+        job_id (int): job_id to use if astrometry was already calculated
+        prep (bool): whether to preprocess the image before attempting
+        to get astrometry
 
     Returns:
         list[list[float]]: Meteor path in RA and Dec and seconds
@@ -246,6 +281,12 @@ def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: s
     # Check, if images have astrometry
     if job_id == None:
         # If no, try doing astrometry on the image
+
+        # Preprocess the image
+        if prep:
+            preprocess(img_path, data_path, 'tmp.jpg')
+            img_path = 'tmp.jpg'
+        
         job_id = download_wcs_file(client, img_path)
     else:
         # If yes, download the WCS file

@@ -90,7 +90,8 @@ class Meteor:
                         img_paths: list[str],
                         data_paths: list[str],
                         time: Time,
-                        job_ids: list[int] = [None, None]):
+                        job_ids: list[int] = [None, None],
+                        prep: bool = False):
         """Constructs a meteor object from astrometry
         
         Args:
@@ -102,6 +103,8 @@ class Meteor:
             time (Time): Time and date to which the measurements are related
             job_ids (list[int]): job_ids to use is astrometry was already done
             for the observations
+            pre (bool): Whether to preprocess the images before attempting
+            astrometry
         """
 
         from astrometry import AstrometryClient
@@ -114,7 +117,8 @@ class Meteor:
                                    data_paths[i],
                                    stations[i],
                                    time,
-                                   job_ids[i]) for i in range(len(stations))
+                                   job_ids[i],
+                                   prep) for i in range(len(stations))
         ]
 
         return Meteor(label, stations, [observations[i][1] for i in range(len(observations))], time, [observations[i][0] for i in range(len(observations))])
@@ -593,31 +597,6 @@ def calculate_distance(point_a: list[float], point_b: list[float]) -> float:
     xb, yb, zb = point_b
 
     return sqrt((xb - xa) ** 2 + (yb - ya) ** 2 + (zb - za) ** 2)
-
-def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
-    """Image preprocessing for astrometry. Masks out space around sky view and meteor
-    
-    Args:
-        img_path (str): The path to the image to mask
-        data_path (str): The path to data.txt file describing meteor
-        tmp_path (str): Path, where the masked image should be saved
-
-    Returns:
-        None
-    """
-
-    import cv2, numpy
-
-    image = cv2.imread(img_path)
-
-    mask = numpy.zeros(image.shape, dtype=numpy.uint8)
-    mask = cv2.circle(mask, (image.shape[1] // 2, image.shape[0] // 2), image.shape[0] // 2, (255, 255, 255), -1)
-
-    meteor = load_meteors(data_path)
-    for point in meteor[0]:
-        mask = cv2.circle(mask, (int(point[0]), int(point[1])), 3, (0, 0, 0), -1)
-
-    cv2.imwrite(tmp_path, cv2.bitwise_and(mask, image))
 
 def solve_goniometry(vector: list[float]) -> list[float]:
     """Solves equation 9

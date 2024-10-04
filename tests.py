@@ -124,16 +124,34 @@ def test_meteor_calculation():
                      label='Kunžak',
                      wcs_path='kunzak.wcs',
                      wcs_time=Time('2024-01-08 21:35:44'))
+    
+    img_paths = [
+        './data/meteory/Ondrejov/2024-01-08-23-52-57/2024-01-08-23-52-57.jpg',
+        './data/meteory/Kunzak/2024-01-08-23-52-57/2024-01-08-23-52-57.jpg',
+    ]
 
     data_paths = [
         './data/meteory/Ondrejov/2024-01-08-23-52-57/data.txt',
         './data/meteory/Kunzak/2024-01-08-23-52-57/data.txt',
     ]
 
-    calculation: Meteor = Meteor.from_astrometry_fixed('test',
-                                                       [ondrejov, kunzak],
-                                                       data_paths,
-                                                       time)
+    job_ids = [
+        None,
+        None,
+    ]
+
+    # calculation: Meteor = Meteor.from_astrometry_fixed('test',
+    #                                                    [ondrejov, kunzak],
+    #                                                    data_paths,
+    #                                                    time,)
+    
+    calculation: Meteor = Meteor.from_astrometry('test',
+                                                 [ondrejov, kunzak],
+                                                 img_paths,
+                                                 data_paths,
+                                                 time,
+                                                 job_ids,
+                                                 prep=True)
 
     calculation.calculate_trajectories()
     calculation.calculate_radiant()
