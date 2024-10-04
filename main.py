@@ -79,7 +79,7 @@ class MeteorsList:
             job_id_b = obs_b.upload_image(self.make_img_path(folder[1]))
             
             timeout = ConfigLoader().get_value_from_data("timeout")
-            for i in range(10):
+            for i in range(51):
                 status_a = obs_a.is_job_done(job_id_a)
                 status_b = obs_b.is_job_done(job_id_b)
 
@@ -89,8 +89,8 @@ class MeteorsList:
                 logging.info(f"Job status after {timeout*(i+1)} seconds: Status of submission A: {status_a}, Status of submission B: {status_b}")
                 sleep(timeout)
 
-                if i == 9:
-                    raise Exception(f"Job status not successful after {timeout*10} seconds. Status of submission A: {status_a}, Status of submission B: {status_b}. Aborting...")
+                if i == 50:
+                    raise Exception(f"Job status not successful after {timeout*50} seconds. Status of submission A: {status_a}, Status of submission B: {status_b}. Aborting...")
             
             calibration_a = obs_a.get_calibration(status_a[0][0])
             calibration_b = obs_b.get_calibration(status_b[0][0])
@@ -113,3 +113,4 @@ class MeteorsList:
 if __name__ == "__main__":
     meteors = MeteorsList()
     ra_dec_list = meteors.compare()
+    print(ra_dec_list)

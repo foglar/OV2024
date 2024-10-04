@@ -10,10 +10,9 @@ from modules import EditConfig, ConfigLoader
 from configuration_gui import ConfigurationWindow as ConfigApp
 from main import MeteorsList as MeteorsData
 
-# TODO: Test with only meteor detected from one observatory
 # TODO: Test Other OS
 # TODO: Test how to compile
-# TODO: Save meteor observatories folders in configuration files
+# TODO: Start loading ra and dec data from astrometry.net when open app (load all), or when view individual meteor (cache data and load only when not cached)
 # https://stackoverflow.com/questions/31401812/matplotlib-rotate-image-file-by-x-degrees
 
 
@@ -26,6 +25,7 @@ class MeteorApp(Gtk.Window):
 
         self.set_border_width(10)
         self.set_default_size(800, 600)
+        self.set_resizable(False)
         self.header_bar = Gtk.HeaderBar(title=f"Meteor Plotter - {self.pp.HOME_DIR}")
         self.header_bar.set_show_close_button(True)
         self.set_titlebar(self.header_bar)
@@ -147,7 +147,7 @@ class MeteorApp(Gtk.Window):
         self.btn_view_meteor = Gtk.Button(
             label="Preview Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
         )
-        self.btn_view_meteor.connect("clicked", self.on_button_clicked)
+        self.btn_view_meteor.connect("clicked", self.sky_image_analysis)
         btn_box.pack_start(self.btn_view_meteor, True, True, 0)
 
         btn_location = Gtk.Button(
@@ -252,7 +252,7 @@ class MeteorApp(Gtk.Window):
         logging.info("Observatory settings closed.")
         widget.destroy()
 
-    def on_button_clicked(self, widget):
+    def sky_image_analysis(self, widget):
         logging.info("Button clicked, plot meteor.")
         self.btn_view_meteor.set_sensitive(False)
 

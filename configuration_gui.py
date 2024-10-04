@@ -4,7 +4,7 @@ import os
 from modules import ConfigLoader as config
 from modules import EditConfig as editconfig
 
-# TODO: Window closes when pressing X, but the application is closed too
+# TODO: When opening the configuration window, the values should be loaded from the config file every time
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GdkPixbuf
@@ -21,7 +21,7 @@ class ConfigurationWindow(Gtk.Window):
         # Header
         self.header = Gtk.HeaderBar()
         self.header.set_show_close_button(True)
-        self.set_titlebar(self.header)
+        self.header.set_title("Configuration")
 
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
 

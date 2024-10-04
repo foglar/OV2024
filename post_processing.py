@@ -17,6 +17,7 @@ from os import path
 
 from compare import FolderComparator
 from modules import ConfigLoader, ParseData
+from main import MeteorsList as MeteorData
 
 HOME_DIR = ConfigLoader().get_home_dir()
 compare = FolderComparator()
@@ -179,6 +180,9 @@ class post_processing:
             meteor_time.strftime("%H:%M:%S"),
             meteor_time1.strftime("%H:%M:%S") if meteor_time1 is not None else None,
         ]
+    
+    def load_rec_data(self, path):
+        load = MeteorData(path)
 
     def _parse_detection_type(self, meteor_object, index):
         """Parse detection type from meteor data
