@@ -6,8 +6,6 @@ import astropy.units as u
 
 from main import AstrometryClient
 import logging
-import re
-import os
 
 from time import sleep
 from modules import ConfigLoader
@@ -157,19 +155,16 @@ def load_meteors(path: str) -> list[list[list[float]]]:
 
     return meteory
 
-# TODO: Currently handles only a single meteor from observation, should handle all included in the data.txt file
-# TODO: Separate downloading a WCS file into it's own function
-def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: str) -> list[list[float]]:
-    """Do astrometry and return meteor path in RA and Dec
+def download_wcs_file(client: AstrometryClient, img_path: str) -> bool:
+    """Try to get astrometry from an image from nova.astrometry.net
     
     Args:
-        client (AstrometryClient): client to use for API communication
         img_path (str): Image to use for astrometry
-        data_path (str): Observation data.txt path
 
     Returns:
-        list[list[float]]: Meteor path in RA and Dec
+        bool: True if successful, false if failed
     """
+
     submission_id = client.upload_image(img_path)
 
     if not submission_id:
@@ -188,20 +183,44 @@ def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: s
         sleep(timeout)
 
         if i == 9:
+            # Astrometry timed out, return False
             logging.error(f"Job status not successful after {10*timeout} seconds. Aborting...")
-            raise Exception(f"Job status not successful after {timeout*10} seconds. Aborting...")
+            return False
 
-    # Get wcs file and convert pixel coordinates to world coordinates
-    wcs_path = 'calibration.wcs'
-    client.get_wcs_file(job_id, wcs_path)
+    # Download the resulting WCS file
+    client.get_wcs_file(job_id, 'calibration.wcs')
 
+    return True
+
+def get_meteor_coordinates_fixed(data_path: str, station: Station, time: Time) -> list[list[float]]:
     meteors = load_meteors(data_path)
-    
-    world = pixels_to_world(wcs_path, meteors[0])
+    world = pixels_to_world(station.wcs_path, meteors[0])
+        
+    for i in range(len(world)):
+        ra, dec = world[i]
+        alt, az = world_to_altaz(ra, dec, station, station.wcs_time)
+        world[i] = altaz_to_world(alt, az, station, time)
+
     return world
 
-if __name__ == '__main__':
-    client = AstrometryClient()
-    client.authenticate()
+def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: str, station: Station, time: Time) -> list[list[float]]:
+    """Do astrometry and return meteor path in RA and Dec
+    
+    Args:
+        client (AstrometryClient): client to use for API communication
+        img_path (str): Image to use for astrometry
+        data_path (str): Observation data.txt path
+        station (Station): Station to use for backup astrometry
 
-    print(get_meteor_coordinates(client, './data/2024-01-08-21-35-44.jpg', './data/data.txt'))
+    Returns:
+        list[list[float]]: Meteor path in RA and Dec
+    """
+    # Try doing astrometry on the image
+    if download_wcs_file(client, img_path):
+        # Astrometry successful, use it to calculate meteor coordinates
+        meteors = load_meteors(data_path)
+        world = pixels_to_world('calibration.wcs', meteors[0])
+        return world
+    else:
+        # Astrometry unsuccessful, use the saved WCS to calculate
+        return get_meteor_coordinates_fixed(data_path, station, time)
