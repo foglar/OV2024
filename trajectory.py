@@ -89,7 +89,8 @@ class Meteor:
                         stations: list[Station],
                         img_paths: list[str],
                         data_paths: list[str],
-                        time: Time):
+                        time: Time,
+                        job_ids: list[int] = [None, None]):
         """Constructs a meteor object from astrometry
         
         Args:
@@ -98,7 +99,9 @@ class Meteor:
             was observed
             img_paths (str): List of image paths to use for astrometry
             data_paths (str): List of data.txt file paths to use for astrometry
-            time: (Time): Time and date to which the measurements are related
+            time (Time): Time and date to which the measurements are related
+            job_ids (list[int]): job_ids to use is astrometry was already done
+            for the observations
         """
 
         from astrometry import AstrometryClient
@@ -110,7 +113,8 @@ class Meteor:
                                    img_paths[i],
                                    data_paths[i],
                                    stations[i],
-                                   time) for i in range(len(stations))
+                                   time,
+                                   job_ids[i]) for i in range(len(stations))
         ]
 
         return Meteor(label, stations, [observations[i][1] for i in range(len(observations))], time, [observations[i][0] for i in range(len(observations))])

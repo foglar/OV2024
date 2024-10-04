@@ -229,7 +229,7 @@ def get_meteor_coordinates_fixed(data_path: str, station: Station, time: Time) -
 
     return world
 
-def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: str, station: Station, time: Time) -> list[list[float]]:
+def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: str, station: Station, time: Time, job_id: int = None) -> list[list[float]]:
     """Do astrometry and return meteor path in RA and Dec with time marks
     
     Args:
@@ -243,8 +243,14 @@ def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: s
         list[list[float]]: Meteor path in RA and Dec and seconds
     """
     world, times = None, None
-    # Try doing astrometry on the image
-    job_id = download_wcs_file(client, img_path)
+    # Check, if images have astrometry
+    if job_id == None:
+        # If no, try doing astrometry on the image
+        job_id = download_wcs_file(client, img_path)
+    else:
+        # If yes, download the WCS file
+        client.get_wcs_file(job_id, 'calibration.wcs')
+    
     if job_id:
         # Astrometry successful, use it to calculate meteor coordinates
         meteors, times = load_meteors(data_path)
