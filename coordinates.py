@@ -184,7 +184,7 @@ def download_wcs_file(client: AstrometryClient, img_path: str, wcs_path: str = '
         img_path (str): Image to use for astrometry
 
     Returns:
-        bool: True if successful, false if failed
+        int: job_id of the astrometry, None if unsuccessful
     """
 
     submission_id = client.upload_image(img_path)
@@ -207,12 +207,12 @@ def download_wcs_file(client: AstrometryClient, img_path: str, wcs_path: str = '
         if i == 9:
             # Astrometry timed out, return False
             logging.error(f"Job status not successful after {10*timeout} seconds. Aborting...")
-            return False
+            return None
 
     # Download the resulting WCS file
     client.get_wcs_file(job_id, wcs_path)
 
-    return True
+    return job_id
 
 def get_meteor_coordinates_fixed(data_path: str, station: Station, time: Time) -> list[list[float]]:
     meteors, times = load_meteors(data_path)
@@ -244,7 +244,8 @@ def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: s
     """
     world, times = None, None
     # Try doing astrometry on the image
-    if download_wcs_file(client, img_path):
+    job_id = download_wcs_file(client, img_path)
+    if job_id:
         # Astrometry successful, use it to calculate meteor coordinates
         meteors, times = load_meteors(data_path)
         world = pixels_to_world('calibration.wcs', meteors[0])
@@ -254,6 +255,6 @@ def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: s
             world[i] = list(world[i]) + [times[0][i]]
     else:
         # Astrometry unsuccessful, use the saved WCS to calculate
-        world =  get_meteor_coordinates_fixed(data_path, station, time)
+        world = get_meteor_coordinates_fixed(data_path, station, time)
 
-    return world
+    return job_id, world
