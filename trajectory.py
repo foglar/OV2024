@@ -22,7 +22,7 @@ class Meteor:
     Q_angle: float
 
     # Astrometry information
-    job_id: int
+    job_ids: int
     
     # Radiant information
     radiant: list[float]
@@ -40,20 +40,23 @@ class Meteor:
     def __init__(self, label: str,
                  stations: list[Station],
                  observations: list[list[float]],
-                 time: str) -> None:
+                 time: Time,
+                 job_ids: int = None) -> None:
         """Args:
             label (str): Meteor label
             stations (list[Station]): List of Stations from which the meteor
             was observed
             observations (list[list[float]]): List of observations of the
             meteor describing the coordinates and time values
-            time: (str): Time and date to which the measurements are related
+            time: (Time): Time and date to which the measurements are related
         """
 
         # Station and observation information
         self.label = label
         self.stations = stations
-        self.time = Time(time)
+        self.time = time
+
+        self.job_ids = job_ids
 
         # Separate coordinate and time values
         self.observations = []
@@ -81,6 +84,58 @@ class Meteor:
 
         self.velocities_a = None
         self.velocities_b = None
+
+    def from_astrometry(label: str,
+                        stations: list[Station],
+                        img_paths: list[str],
+                        data_paths: list[str],
+                        time: Time):
+        """Constructs a meteor object from astrometry
+        
+        Args:
+            label (str): Meteor label
+            stations (list[Station]): List of Stations from which the meteor
+            was observed
+            img_paths (str): List of image paths to use for astrometry
+            data_paths (str): List of data.txt file paths to use for astrometry
+            time: (Time): Time and date to which the measurements are related
+        """
+
+        from astrometry import AstrometryClient
+        client = AstrometryClient()
+        client.authenticate()
+
+        observations = [
+            get_meteor_coordinates(client,
+                                   img_paths[i],
+                                   data_paths[i],
+                                   stations[i],
+                                   time) for i in range(len(stations))
+        ]
+
+        return Meteor(label, stations, [observations[i][1] for i in range(len(observations))], time, [observations[i][0] for i in range(len(observations))])
+    
+    def from_astrometry_fixed(label: str,
+                              stations: list[Station],
+                              data_paths: list[str],
+                              time: Time):
+        """Constructs a meteor object from fixed camera alignment
+        
+        Args:
+            label (str): Meteor label
+            stations (list[Station]): List of Stations from which the meteor
+            was observed
+            data_paths (str): List of data.txt file paths to use for astrometry
+            time: (Time): Time and date to which the measurements are related
+        """
+
+        observations = [
+            get_meteor_coordinates_fixed(data_paths[i],
+                                         stations[i],
+                                         time) for i in range(len(stations))
+        ]
+
+        return Meteor(label, stations, observations, time, [None, None])
 
     def calculate_radiant(self) -> None:
         """Calculates the radiant of the meteor according to Ceplecha (1987)

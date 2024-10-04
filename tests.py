@@ -70,7 +70,7 @@ def test_radiant_calculation() -> None:
     meteor_kunzak = [[327.429, 37.968, 0.9655], [327.552, 37.916, 0.9819], [327.615, 37.886, 0.9982], [327.693, 37.811, 1.0146], [327.750, 37.720, 1.0310], [327.846, 37.631, 1.0474], [327.996, 37.529, 1.0638], [328.078, 37.437, 1.0802], [328.177, 37.370, 1.0966], [328.218, 37.286, 1.1130], [328.359, 37.126, 1.1294], [328.477, 37.075, 1.1458], [328.522, 36.974, 1.1622], [328.696, 36.903, 1.1786], [328.745, 36.785, 1.1950], [328.877, 36.721, 1.2114], [328.963, 36.643, 1.2278], [329.058, 36.494, 1.2441], [329.177, 36.427, 1.2605], [329.255, 36.330, 1.2769], [329.355, 36.239, 1.2933], [329.500, 36.117, 1.3097], [329.608, 35.994, 1.3261], [329.625, 35.935, 1.3425], [329.754, 35.820, 1.3589], [329.862, 35.735, 1.3753], [329.980, 35.608, 1.3917], [330.075, 35.520, 1.4081], [330.147, 35.426, 1.4245], [330.316, 35.327, 1.4409], [330.411, 35.232, 1.4573], [330.501, 35.154, 1.4737], [330.626, 35.025, 1.4900], [330.723, 34.916, 1.5064], [330.790, 34.832, 1.5228], [330.878, 34.704, 1.5392], [330.961, 34.643, 1.5556], [331.055, 34.536, 1.5720], [331.152, 34.412, 1.5884], [331.223, 34.299, 1.6048], [331.350, 34.187, 1.6212], [331.414, 34.098, 1.6376], [331.532, 34.018, 1.6540], [331.619, 33.921, 1.6704], [331.651, 33.824, 1.6868], [331.788, 33.695, 1.7032], [331.926, 33.552, 1.7196], [331.983, 33.489, 1.7360], [332.072, 33.420, 1.7523], [332.164, 33.281, 1.7687], [332.254, 33.143, 1.7851], [332.390, 33.100, 1.8015], [332.484, 32.934, 1.8179], [332.523, 32.892, 1.8343], [332.641, 32.760, 1.8507]]
 
     # Calculate radiant and Q angle
-    meteor = Meteor('test', [ondrejov, kunzak], [meteor_ondrejov, meteor_kunzak], time)
+    meteor = Meteor('test', [ondrejov, kunzak], [meteor_ondrejov, meteor_kunzak], Time(time))
 
     ra, dec = meteor.get_radiant()
     angle = meteor.get_Q_angle()
@@ -107,13 +107,34 @@ def test_meteor_calculation():
     """Tests the fixed astrometry and calculation procedures"""
 
     time = Time('2024-01-08 23:52:57')
-    ondrejov = Station(lat=49.970222, lon=14.780208, height=524, time_zone=0, time='2024-01-08 23:52:57', label='Ondřejov', wcs_path='ondrejov.wcs', wcs_time=Time('2024-01-08 21:35:44'))
-    kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=0, time='2024-01-08 23:52:57', label='Kunžak', wcs_path='kunzak.wcs', wcs_time=Time('2024-01-08 21:35:44'))
-    
-    meteor_a = get_meteor_coordinates_fixed('./data/meteory/Ondrejov/2024-01-08-23-52-57/data.txt', ondrejov, time)
-    meteor_b = get_meteor_coordinates_fixed('./data/meteory/Kunzak/2024-01-08-23-52-57/data.txt', kunzak, time)
+    ondrejov = Station(lat=49.970222,
+                       lon=14.780208,
+                       height=524,
+                       time_zone=0,
+                       time='2024-01-08 23:52:57',
+                       label='Ondřejov',
+                       wcs_path='ondrejov.wcs',
+                       wcs_time=Time('2024-01-08 21:35:44'))
 
-    calculation = Meteor('Test', [ondrejov, kunzak], [meteor_a, meteor_b], '2024-01-08 23:52:57')
+    kunzak = Station(lat=49.107290,
+                     lon=15.200930,
+                     height=656,
+                     time_zone=0,
+                     time='2024-01-08 23:52:57',
+                     label='Kunžak',
+                     wcs_path='kunzak.wcs',
+                     wcs_time=Time('2024-01-08 21:35:44'))
+
+    data_paths = [
+        './data/meteory/Ondrejov/2024-01-08-23-52-57/data.txt',
+        './data/meteory/Kunzak/2024-01-08-23-52-57/data.txt',
+    ]
+
+    calculation: Meteor = Meteor.from_astrometry_fixed('test',
+                                                       [ondrejov, kunzak],
+                                                       data_paths,
+                                                       time)
+
     calculation.calculate_trajectories()
     calculation.calculate_radiant()
     calculation.plot_trajectory_geodetic()
