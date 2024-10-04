@@ -79,6 +79,9 @@ class Meteor:
         self.geodetic_trajectory_a = None
         self.geodetic_trajectory_b = None
 
+        self.geodetic_trajectory = None
+        self.geocentric_trajectory = None
+
         self.distance_from_beginning_a = None
         self.distance_from_beginning_b = None
 
@@ -363,6 +366,9 @@ class Meteor:
         Returns:
             None
         """
+
+        if self.geodetic_trajectory == None:
+            self.calculate_trajectories()
 
         fig = plot.figure(figsize=(8,8))
         ax = fig.add_axes([0.1,0.1,0.8,0.8])
