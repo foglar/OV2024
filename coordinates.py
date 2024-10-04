@@ -177,7 +177,7 @@ def load_meteors(path: str) -> list[list[list[float]]]:
 
     return meteory, casy
 
-def download_wcs_file(client: AstrometryClient, img_path: str) -> bool:
+def download_wcs_file(client: AstrometryClient, img_path: str, wcs_path: str = 'calibration.wcs') -> bool:
     """Try to get astrometry from an image from nova.astrometry.net
     
     Args:
@@ -210,7 +210,7 @@ def download_wcs_file(client: AstrometryClient, img_path: str) -> bool:
             return False
 
     # Download the resulting WCS file
-    client.get_wcs_file(job_id, 'calibration.wcs')
+    client.get_wcs_file(job_id, wcs_path)
 
     return True
 
