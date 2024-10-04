@@ -103,8 +103,24 @@ def test_goniometry_solver():
         assert numpy.allclose((ra, dec), calculated), \
                f'Should be {(ra, dec)}, not {calculated}'
 
+def test_trajectory_calculation():
+    """Tests the fixed astrometry and calculation procedures"""
+
+    time = Time('2024-01-08 23:52:57')
+    ondrejov = Station(lat=49.970222, lon=14.780208, height=524, time_zone=0, time='2024-01-08 23:52:57', label='Ondřejov', wcs_path='ondrejov.wcs', wcs_time=Time('2024-01-08 21:35:44'))
+    kunzak = Station(lat=49.107290, lon=15.200930, height=656, time_zone=0, time='2024-01-08 23:52:57', label='Kunžak', wcs_path='kunzak.wcs', wcs_time=Time('2024-01-08 21:35:44'))
+    
+    meteor_a = get_meteor_coordinates_fixed('./data/meteory/Ondrejov/2024-01-08-23-52-57/data.txt', ondrejov, time)
+    meteor_b = get_meteor_coordinates_fixed('./data/meteory/Kunzak/2024-01-08-23-52-57/data.txt', kunzak, time)
+
+    calculation = Meteor('Test', ondrejov, kunzak, meteor_a, meteor_b, '2024-01-08 23:52:57')
+    calculation.calculate_trajectories()
+    calculation.plot_trajectory_geodetic()
+    calculation.plot_velocities_along_trajectories()
+
 if __name__ == '__main__':
     test_fixed_wcs_astrometry()
+    test_trajectory_calculation()
     test_goniometry_solver()
     test_solve_plane_intersection()
     test_radiant_calculation()

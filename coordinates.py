@@ -138,24 +138,46 @@ def load_meteors(path: str) -> list[list[list[float]]]:
 
     # Loop through meteors
     meteory = []
+    casy = []
     for _ in range(int(file[0][18:])):
-        # Cut off unnecessary meteor data
-        file = file[2:]
+        # Cut off file
+        file = file[1:]
+
+        # Load meteor start and end time
+        data = file[0].split(' ')
+
+        start = float(data[-4][:-1])
+        end = float(data[-2][:-1])
+
+        duration = end - start
+
+        # Cut off file
+        file = file[1:]
         
         # Loop through meteor positions
         pixels = []
+        frames = []
         j = 1
         while file[j].startswith(' frame'):
             data = file[j].split(' ')
+            frames.append(int(data[3]))
             pixels.append([float(data[6]), float(data[11])])
             j += 1
 
+        # Convert frames to time
+        first = frames[0]
+        count = abs(frames[-1] - frames[0])
+        
+        for i in range(len(frames)):
+            frames[i] = (frames[i] - first) * (duration / count)
+
         meteory.append(pixels)
+        casy.append(frames)
         file = file[j:]
 
-    return meteory
+    return meteory, casy
 
-def download_wcs_file(client: AstrometryClient, img_path: str) -> bool:
+def download_wcs_file(client: AstrometryClient, img_path: str, wcs_path: str = 'calibration.wcs') -> bool:
     """Try to get astrometry from an image from nova.astrometry.net
     
     Args:
@@ -188,12 +210,12 @@ def download_wcs_file(client: AstrometryClient, img_path: str) -> bool:
             return False
 
     # Download the resulting WCS file
-    client.get_wcs_file(job_id, 'calibration.wcs')
+    client.get_wcs_file(job_id, wcs_path)
 
     return True
 
 def get_meteor_coordinates_fixed(data_path: str, station: Station, time: Time) -> list[list[float]]:
-    meteors = load_meteors(data_path)
+    meteors, times = load_meteors(data_path)
     world = pixels_to_world(station.wcs_path, meteors[0])
         
     for i in range(len(world)):
@@ -201,26 +223,37 @@ def get_meteor_coordinates_fixed(data_path: str, station: Station, time: Time) -
         alt, az = world_to_altaz(ra, dec, station, station.wcs_time)
         world[i] = altaz_to_world(alt, az, station, time)
 
+    # Merge coordinate and time data
+    for i in range(len(world)):
+        world[i] = list(world[i]) + [times[0][i]]
+
     return world
 
 def get_meteor_coordinates(client: AstrometryClient, img_path: str, data_path: str, station: Station, time: Time) -> list[list[float]]:
-    """Do astrometry and return meteor path in RA and Dec
+    """Do astrometry and return meteor path in RA and Dec with time marks
     
     Args:
         client (AstrometryClient): client to use for API communication
         img_path (str): Image to use for astrometry
         data_path (str): Observation data.txt path
         station (Station): Station to use for backup astrometry
+        time (Time): Time to use for fixed camera alignment
 
     Returns:
-        list[list[float]]: Meteor path in RA and Dec
+        list[list[float]]: Meteor path in RA and Dec and seconds
     """
+    world, times = None, None
     # Try doing astrometry on the image
     if download_wcs_file(client, img_path):
         # Astrometry successful, use it to calculate meteor coordinates
-        meteors = load_meteors(data_path)
+        meteors, times = load_meteors(data_path)
         world = pixels_to_world('calibration.wcs', meteors[0])
-        return world
+
+        # Merge coordinate and time data
+        for i in range(len(world)):
+            world[i] = list(world[i]) + [times[0][i]]
     else:
         # Astrometry unsuccessful, use the saved WCS to calculate
-        return get_meteor_coordinates_fixed(data_path, station, time)
+        world =  get_meteor_coordinates_fixed(data_path, station, time)
+
+    return world

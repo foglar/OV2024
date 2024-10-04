@@ -62,3 +62,9 @@ class Station:
 
         self.geodetic_lst = {'lat': self.lat, 'lon': self.lst, 'height': self.height}
         self.geocentric_lst = geodetic_to_geocentric(self.geodetic_lst)
+
+    def set_wcs(self, wcs_path, wcs_time):
+        """Updates the WCS file path and calculation time"""
+
+        self.wcs_path = wcs_path
+        self.wcs_time = wcs_time
