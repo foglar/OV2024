@@ -193,7 +193,6 @@ class post_processing:
         Returns:
             detection_type: detection type of the meteor
         """
-        # TODO: If new day, then new number order
         if meteor_object[0] is not None and meteor_object[1] is not None:
             if path.exists(f"{meteor_object[index][0]}/data.txt"):
                 return "MA"

@@ -4,28 +4,31 @@ import os
 from modules import ConfigLoader as config
 from modules import EditConfig as editconfig
 
-# TODO: When opening the configuration window, the values should be loaded from the config file every time
-
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GdkPixbuf
 
+
 class ConfigurationWindow(Gtk.Window):
+    def get_config_value(self, key, default=""):
+        return config().get_value_from_data(key, "data") or default
+
     def __init__(self):
 
-        self.first_path = config().get_value_from_data("first_observatory", "data")
-        self.second_path = config().get_value_from_data("second_observatory", "data")
-        self.first_long = config().get_value_from_data("first_longitude", "data")
-        self.first_lat = config().get_value_from_data("first_latitude", "data")
-        self.first_sealevel = config().get_value_from_data("first_sealevel", "data")
-        self.first_timezone = config().get_value_from_data("first_timezone", "data")
-        self.second_long = config().get_value_from_data("second_longitude", "data")
-        self.second_lat = config().get_value_from_data("second_latitude", "data")
-        self.second_sealevel = config().get_value_from_data("second_sealevel", "data")
-        self.second_timezone = config().get_value_from_data("second_timezone", "data")
-        self.timeout = config().get_value_from_data("timeout", "data")
-        self.astrometry_token = config().get_astrometry_key()
-        self.time_tolerance = config().get_value_from_data("time_tolerance", "data")
-
+        self.first_path = self.get_config_value("first_observatory")
+        self.second_path = self.get_config_value("second_observatory")
+        self.first_long = self.get_config_value("first_longitude")
+        self.first_lat = self.get_config_value("first_latitude")
+        self.first_sealevel = self.get_config_value("first_sealevel")
+        self.first_timezone = self.get_config_value("first_timezone")
+        self.second_long = self.get_config_value("second_longitude")
+        self.second_lat = self.get_config_value("second_latitude")
+        self.second_sealevel = self.get_config_value("second_sealevel")
+        self.second_timezone = self.get_config_value("second_timezone")
+        self.timeout = self.get_config_value("timeout")
+        self.time_tolerance = self.get_config_value("time_tolerance")
+        
+        self.astrometry_token = config().get_astrometry_key() or ""
+        
 
         Gtk.Window.__init__(self, title="Configuration")
         self.set_border_width(10)
@@ -93,7 +96,7 @@ class ConfigurationWindow(Gtk.Window):
                 second_folder = home
         except KeyError:
             second_folder = home
-        
+
         self.first_path = os.path.join(home, first_folder)
         self.second_path = os.path.join(home, second_folder)
 
@@ -128,16 +131,24 @@ class ConfigurationWindow(Gtk.Window):
         # Sealevel
         self.label_sealevel = Gtk.Label(label="Sealevel")
         self.label_sealevel.set_tooltip_text("Sealevel in meters")
-        self.sealevel_adjustment = Gtk.Adjustment(int(self.first_sealevel), 0, 10000, 1, 10, 0)
-        self.spinner_sealevel = Gtk.SpinButton(adjustment=self.sealevel_adjustment, numeric=True)
+        self.sealevel_adjustment = Gtk.Adjustment(
+            int(self.first_sealevel), 0, 10000, 1, 10, 0
+        )
+        self.spinner_sealevel = Gtk.SpinButton(
+            adjustment=self.sealevel_adjustment, numeric=True
+        )
         self.spinner_sealevel.set_tooltip_text("Sealevel in meters")
         self.grid.attach(self.label_sealevel, 0, 2, 1, 1)
         self.grid.attach(self.spinner_sealevel, 1, 2, 1, 1)
 
         # Timezone
         self.label_timezone = Gtk.Label(label="Timezone")
-        self.timezone_adjustment = Gtk.Adjustment(int(self.first_timezone), -12, 12, 1, 1, 0)
-        self.spinner_timezone = Gtk.SpinButton(adjustment=self.timezone_adjustment, numeric=True)
+        self.timezone_adjustment = Gtk.Adjustment(
+            int(self.first_timezone), -12, 12, 1, 1, 0
+        )
+        self.spinner_timezone = Gtk.SpinButton(
+            adjustment=self.timezone_adjustment, numeric=True
+        )
         self.spinner_timezone.set_tooltip_text("Timezone")
         self.grid.attach(self.label_timezone, 0, 3, 1, 1)
         self.grid.attach(self.spinner_timezone, 1, 3, 1, 1)
@@ -176,16 +187,24 @@ class ConfigurationWindow(Gtk.Window):
         # Sealevel
         self.label_sealevel2 = Gtk.Label(label="Sealevel")
         self.label_sealevel2.set_tooltip_text("Sealevel in meters")
-        self.sealevel_adjustment2 = Gtk.Adjustment(int(self.second_sealevel), 0, 10000, 1, 10, 0)
-        self.spinner_sealevel2 = Gtk.SpinButton(adjustment=self.sealevel_adjustment2, numeric=True)
+        self.sealevel_adjustment2 = Gtk.Adjustment(
+            int(self.second_sealevel), 0, 8849, 1, 10, 0
+        )
+        self.spinner_sealevel2 = Gtk.SpinButton(
+            adjustment=self.sealevel_adjustment2, numeric=True
+        )
         self.spinner_sealevel2.set_tooltip_text("Sealevel in meters")
         self.grid2.attach(self.label_sealevel2, 0, 2, 1, 1)
         self.grid2.attach(self.spinner_sealevel2, 1, 2, 1, 1)
 
         # Timezone
         self.label_timezone2 = Gtk.Label(label="Timezone")
-        self.timezone_adjustment2 = Gtk.Adjustment(int(self.second_timezone), -12, 12, 1, 1, 0)
-        self.spinner_timezone2 = Gtk.SpinButton(adjustment=self.timezone_adjustment2, numeric=True)
+        self.timezone_adjustment2 = Gtk.Adjustment(
+            int(self.second_timezone), -12, 12, 1, 1, 0
+        )
+        self.spinner_timezone2 = Gtk.SpinButton(
+            adjustment=self.timezone_adjustment2, numeric=True
+        )
         self.spinner_timezone2.set_tooltip_text("Timezone")
         self.grid2.attach(self.label_timezone2, 0, 3, 1, 1)
         self.grid2.attach(self.spinner_timezone2, 1, 3, 1, 1)
@@ -207,7 +226,7 @@ class ConfigurationWindow(Gtk.Window):
         self.toggle_visibility.set_tooltip_text("Show astrometry token")
         self.toggle_visibility.connect("toggled", self.on_toggle_visibility)
 
-        self.grid3.attach(self.astrometry_sec_label, 0, 0, 1, 1)  
+        self.grid3.attach(self.astrometry_sec_label, 0, 0, 1, 1)
         self.grid3.attach(self.entry_token, 1, 0, 1, 1)
         self.grid3.attach(self.toggle_visibility, 3, 0, 1, 1)
 
@@ -215,7 +234,9 @@ class ConfigurationWindow(Gtk.Window):
         self.timeout_label = Gtk.Label(label="Timeout")
         self.timeout_label.set_tooltip_text("Timeout in seconds")
         self.timeout_adjustment = Gtk.Adjustment(self.timeout, 0, 1000, 1, 10, 0)
-        self.spinner_timeout = Gtk.SpinButton(adjustment=self.timeout_adjustment, numeric=True, climb_rate=1)
+        self.spinner_timeout = Gtk.SpinButton(
+            adjustment=self.timeout_adjustment, numeric=True, climb_rate=1
+        )
         self.spinner_timeout.set_tooltip_text("Timeout in seconds")
         self.grid3.attach(self.timeout_label, 0, 1, 1, 1)
         self.grid3.attach(self.spinner_timeout, 1, 1, 1, 1)
@@ -223,8 +244,12 @@ class ConfigurationWindow(Gtk.Window):
         # Other configuration
         self.time_tolerance_label = Gtk.Label(label="Time tolerance")
         self.time_tolerance_label.set_tooltip_text("Time tolerance in seconds")
-        self.time_tolerance_adjustment = Gtk.Adjustment(int(self.time_tolerance), 0, 1000, 1, 10, 0)
-        self.spinner_time_tolerance = Gtk.SpinButton(adjustment=self.time_tolerance_adjustment, numeric=True, climb_rate=0.5)
+        self.time_tolerance_adjustment = Gtk.Adjustment(
+            int(self.time_tolerance), 0, 1000, 1, 10, 0
+        )
+        self.spinner_time_tolerance = Gtk.SpinButton(
+            adjustment=self.time_tolerance_adjustment, numeric=True, climb_rate=0.5
+        )
         self.spinner_time_tolerance.set_tooltip_text("Time tolerance in seconds")
         self.grid4.attach(self.time_tolerance_label, 0, 0, 1, 1)
         self.grid4.attach(self.spinner_time_tolerance, 1, 0, 1, 1)
@@ -243,8 +268,6 @@ class ConfigurationWindow(Gtk.Window):
         self.box.add(self.third_box)
         self.box.add(self.fourth_box)
 
-        # Save button
-
         self.save_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         self.button_save = Gtk.Button(label="Save")
         self.button_save.connect("clicked", self.on_button_save_clicked)
@@ -253,7 +276,7 @@ class ConfigurationWindow(Gtk.Window):
         self.box.add(self.save_box)
 
         self.add(self.box)
-    
+
     def on_toggle_visibility(self, widget):
         if widget.get_active():
             self.entry_token.set_visibility(True)
@@ -261,7 +284,12 @@ class ConfigurationWindow(Gtk.Window):
             self.entry_token.set_visibility(False)
 
     def on_button_select_folder_clicked(self, widget):
-        dialog = Gtk.FileChooserDialog("Please choose a folder", self, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Select", Gtk.ResponseType.OK))
+        dialog = Gtk.FileChooserDialog(
+            "Please choose a folder",
+            self,
+            Gtk.FileChooserAction.SELECT_FOLDER,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Select", Gtk.ResponseType.OK),
+        )
         dialog.set_default_size(800, 400)
         dialog.set_current_folder(self.entry_folder.get_text())
         response = dialog.run()
@@ -270,32 +298,49 @@ class ConfigurationWindow(Gtk.Window):
         dialog.destroy()
 
     def on_button_select_folder_clicked2(self, widget):
-        dialog = Gtk.FileChooserDialog("Please choose a folder", self, Gtk.FileChooserAction.SELECT_FOLDER, (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Select", Gtk.ResponseType.OK))
+        dialog = Gtk.FileChooserDialog(
+            "Please choose a folder",
+            self,
+            Gtk.FileChooserAction.SELECT_FOLDER,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Select", Gtk.ResponseType.OK),
+        )
         dialog.set_default_size(800, 400)
         dialog.set_current_folder(self.entry_folder2.get_text())
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             self.entry_folder2.set_text(dialog.get_filename())
         dialog.destroy()
-        
+
     def on_button_save_clicked(self, widget):
         logging.info("Configuration saved")
         # Save configuration
         first_obs = self.entry_folder.get_text().split("/")[-1]
         second_obs = self.entry_folder2.get_text().split("/")[-1]
-        editconfig().set_value("first_observatory",first_obs, "data")
+        editconfig().set_value("first_observatory", first_obs, "data")
         editconfig().set_value("second_observatory", second_obs, "data")
         editconfig().set_value("first_longitude", self.entry_long.get_text(), "data")
         editconfig().set_value("first_latitude", self.entry_lat.get_text(), "data")
-        editconfig().set_value("first_sealevel", self.spinner_sealevel.get_value(), "data")
-        editconfig().set_value("first_timezone", self.spinner_timezone.get_value(), "data")
+        editconfig().set_value(
+            "first_sealevel", self.spinner_sealevel.get_value(), "data"
+        )
+        editconfig().set_value(
+            "first_timezone", self.spinner_timezone.get_value(), "data"
+        )
         editconfig().set_value("second_longitude", self.entry_long2.get_text(), "data")
         editconfig().set_value("second_latitude", self.entry_lat2.get_text(), "data")
-        editconfig().set_value("second_sealevel", self.spinner_sealevel2.get_value(), "data")
-        editconfig().set_value("second_timezone", self.spinner_timezone2.get_value(), "data")
+        editconfig().set_value(
+            "second_sealevel", self.spinner_sealevel2.get_value(), "data"
+        )
+        editconfig().set_value(
+            "second_timezone", self.spinner_timezone2.get_value(), "data"
+        )
         editconfig().set_value("timeout", self.spinner_timeout.get_value(), "data")
-        editconfig().set_value("time_tolerance", self.spinner_time_tolerance.get_value(), "data")
-        editconfig().set_value("astrometry_token", self.entry_token.get_text(), "astrometry")
+        editconfig().set_value(
+            "time_tolerance", self.spinner_time_tolerance.get_value(), "data"
+        )
+        editconfig().set_value(
+            "astrometry_token", self.entry_token.get_text(), "astrometry"
+        )
         self.destroy()
 
     def validate_long(self, widget):
@@ -305,13 +350,22 @@ class ConfigurationWindow(Gtk.Window):
         try:
             long = float(widget.get_text())
             if long < -180 or long > 180:
-                widget.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "dialog-warning")
-                widget.set_icon_tooltip_text(Gtk.EntryIconPosition.SECONDARY, "Longitude must be between -180 and 180")
+                widget.set_icon_from_icon_name(
+                    Gtk.EntryIconPosition.SECONDARY, "dialog-warning"
+                )
+                widget.set_icon_tooltip_text(
+                    Gtk.EntryIconPosition.SECONDARY,
+                    "Longitude must be between -180 and 180",
+                )
             else:
                 widget.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, None)
         except ValueError:
-            widget.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "dialog-warning")
-            widget.set_icon_tooltip_text(Gtk.EntryIconPosition.SECONDARY, "Longitude must be a number")
+            widget.set_icon_from_icon_name(
+                Gtk.EntryIconPosition.SECONDARY, "dialog-warning"
+            )
+            widget.set_icon_tooltip_text(
+                Gtk.EntryIconPosition.SECONDARY, "Longitude must be a number"
+            )
 
     def validate_lat(self, widget):
         if widget.get_text() == "":
@@ -319,13 +373,23 @@ class ConfigurationWindow(Gtk.Window):
         try:
             lat = float(widget.get_text())
             if lat < -90 or lat > 90:
-                widget.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "dialog-warning")
-                widget.set_icon_tooltip_text(Gtk.EntryIconPosition.SECONDARY, "Latitude must be between -90 and 90")
+                widget.set_icon_from_icon_name(
+                    Gtk.EntryIconPosition.SECONDARY, "dialog-warning"
+                )
+                widget.set_icon_tooltip_text(
+                    Gtk.EntryIconPosition.SECONDARY,
+                    "Latitude must be between -90 and 90",
+                )
             else:
                 widget.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, None)
         except ValueError:
-            widget.set_icon_from_icon_name(Gtk.EntryIconPosition.SECONDARY, "dialog-warning")
-            widget.set_icon_tooltip_text(Gtk.EntryIconPosition.SECONDARY, "Latitude must be a number")
+            widget.set_icon_from_icon_name(
+                Gtk.EntryIconPosition.SECONDARY, "dialog-warning"
+            )
+            widget.set_icon_tooltip_text(
+                Gtk.EntryIconPosition.SECONDARY, "Latitude must be a number"
+            )
+
 
 def main():
     try:
@@ -335,6 +399,7 @@ def main():
         Gtk.main()
     except Exception as e:
         logging.error(f"Error starting GTK application: {e}")
+
 
 if __name__ == "__main__":
     main()
