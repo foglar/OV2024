@@ -153,8 +153,6 @@ def test_meteor_calculation():
                                                  job_ids,
                                                  prep=True)
 
-    calculation.calculate_trajectories()
-    calculation.calculate_radiant()
     calculation.plot_trajectory_geodetic()
     calculation.plot_velocities_along_trajectories()
 
