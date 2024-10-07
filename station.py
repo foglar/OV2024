@@ -44,7 +44,11 @@ class Station:
                                             lon=self.lon * u.deg,
                                             height=self.height * u.m)
 
-        self.geodetic = {'lat': self.lat,'lon': self.lon, 'height': self.height}
+        self.geodetic = {
+            'lat': self.lat,
+            'lon': self.lon,
+            'height': self.height
+        }
 
         self.time_zone = time_zone
         self.label = label
@@ -65,7 +69,11 @@ class Station:
         t = Time(time, location=self.earth_location) + self.time_zone * u.hour
         self.lst = t.sidereal_time('mean').value / 24 * 360
 
-        self.geodetic_lst = {'lat': self.lat, 'lon': self.lst, 'height': self.height}
+        self.geodetic_lst = {
+            'lat': self.lat,
+            'lon': self.lst,
+            'height': self.height
+        }
         self.geocentric_lst = geodetic_to_geocentric(self.geodetic_lst)
 
     def set_wcs(self, wcs_path: str, wcs_time: str) -> None:
