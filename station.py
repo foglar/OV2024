@@ -22,7 +22,11 @@ class Station:
     wcs_path: str
     wcs_time: Time
 
-    def __init__(self, lat: float, lon: float, height: float, time_zone: float, time: str = None, label: str = '', wcs_path: str = None, wcs_time: Time = None):
+    def __init__(self,
+                 lat: float, lon: float, height: float,
+                 time_zone: float, time: str = None,
+                 label: str = '',
+                 wcs_path: str = None, wcs_time: str = None):
         """Args:
             lat (float): Latitude of station in decimal degrees
             lon (float): Longitude of station in decimal degrees
@@ -46,7 +50,8 @@ class Station:
         self.label = label
 
         self.wcs_path = wcs_path
-        self.wcs_time = wcs_time
+        if wcs_time != None:
+            self.wcs_time = Time(wcs_time)
 
         # Calculate geocentric coordinates
         from coordinates import geodetic_to_geocentric
@@ -63,8 +68,31 @@ class Station:
         self.geodetic_lst = {'lat': self.lat, 'lon': self.lst, 'height': self.height}
         self.geocentric_lst = geodetic_to_geocentric(self.geodetic_lst)
 
-    def set_wcs(self, wcs_path, wcs_time):
-        """Updates the WCS file path and calculation time"""
+    def set_wcs(self, wcs_path: str, wcs_time: str) -> None:
+        """Updates the WCS file path and calculation time
+        
+        Args:
+            wcs_path (str): Path to wcs file to be used in fixed alignment
+            astrometry
+            wcs_time (str): A string representing the date and time of wcs
+            file measurement
+
+        Returns:
+            None
+        """
 
         self.wcs_path = wcs_path
-        self.wcs_time = wcs_time
+        self.wcs_time = Time(wcs_time)
+
+    def set_time(self, time: str) -> None:
+        """Updates the station time
+        
+        Args:
+            time (str): A string representing the date and time
+
+        Returns:
+            None
+        """
+
+        t = Time(time, location=self.earth_location) + self.time_zone * u.hour
+        self.lst = t.sidereal_time('mean').value / 24 * 360

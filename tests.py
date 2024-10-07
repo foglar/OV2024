@@ -14,7 +14,7 @@ def test_fixed_wcs_astrometry():
     time = Time('2024-01-08 21:35:44')
     kunzak = Station(lat=49.107290, lon=15.200930, height=656,
                      time_zone=0, time='2024-01-08 21:35:44', label='Kunžak',
-                     wcs_path='calibration.wcs', wcs_time=Time('2024-01-08 23:24:54'))
+                     wcs_path='calibration.wcs', wcs_time='2024-01-08 23:24:54')
 
     # Calculate meteor coordinates from WCS from the same image
     world_a = get_meteor_coordinates(client, './data/meteory/Kunzak/2024-01-08-21-35-44/2024-01-08-21-35-44.jpg', './data/meteory/Kunzak/2024-01-08-21-35-44/data.txt', kunzak, time)
@@ -114,7 +114,7 @@ def test_meteor_calculation():
                        time='2024-01-08 23:52:57',
                        label='Ondřejov',
                        wcs_path='ondrejov.wcs',
-                       wcs_time=Time('2024-01-08 21:35:44'))
+                       wcs_time='2024-01-08 21:35:44')
 
     kunzak = Station(lat=49.107290,
                      lon=15.200930,
@@ -123,7 +123,7 @@ def test_meteor_calculation():
                      time='2024-01-08 23:52:57',
                      label='Kunžak',
                      wcs_path='kunzak.wcs',
-                     wcs_time=Time('2024-01-08 21:35:44'))
+                     wcs_time='2024-01-08 21:35:44')
     
     img_paths = [
         './data/meteory/Ondrejov/2024-01-08-23-52-57/2024-01-08-23-52-57.jpg',
@@ -140,18 +140,18 @@ def test_meteor_calculation():
         None,
     ]
 
-    # calculation: Meteor = Meteor.from_astrometry_fixed('test',
-    #                                                    [ondrejov, kunzak],
-    #                                                    data_paths,
-    #                                                    time,)
+    calculation: Meteor = Meteor.from_astrometry_fixed('test',
+                                                       [ondrejov, kunzak],
+                                                       data_paths,
+                                                       time,)
     
-    calculation: Meteor = Meteor.from_astrometry('test',
-                                                 [ondrejov, kunzak],
-                                                 img_paths,
-                                                 data_paths,
-                                                 time,
-                                                 job_ids,
-                                                 prep=True)
+    # calculation: Meteor = Meteor.from_astrometry('test',
+    #                                              [ondrejov, kunzak],
+    #                                              img_paths,
+    #                                              data_paths,
+    #                                              time,
+    #                                              job_ids,
+    #                                              prep=True)
 
     calculation.plot_trajectory_geodetic()
     calculation.plot_velocities_along_trajectories()
