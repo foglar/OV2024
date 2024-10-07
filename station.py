@@ -33,8 +33,16 @@ class Station:
             lon (float): Longitude of station in decimal degrees
             height (float): Height above see in metres
             time_zone (float): Offset in hours from UTC
-            time (str): time at the station at the time of observation
-            label (str): Label describing the station
+            time (str): Time at the station at the time of observation
+            label (str): Label describing the station, optional, an empty
+            string is used if not set
+            wcs_path (str): Path to wcs file to be used in fixed alignment
+            astrometry
+            wcs_time (str): A string representing the date and time of wcs
+            file measurement
+
+        Returns:
+            None
         """
 
         self.lat = lat
