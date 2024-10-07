@@ -48,7 +48,21 @@ home_dir = "/home/foglar/Documents/Programming/Projects/OV2024-Project/meteory"
 - `coordinates.py` - converts coordinates from pixels to **ra** and **dec**
 - `trajectory.py` - calculates meteor trajectory
 
-## Usage
+# Usage
+
+## Station instance setup
+
+A Station class instance is used to store information about the stations used for meteor trajectory calculation. It stores the station location, time, time zone and WCS file used for calculations without astrometry.
+
+### WCS updating
+
+The WCS file to be used for calculations without astrometry is stored in a .wcs file created by the `download_wcs_file()` function in `coordinates.py`. To perform these calculations, the time for which the astrometry used for camera alignment is needed. To update both of these, use the `set_wcs()` function, which takes the WCS file path and time as arguments. The time should be passed as a string in [one of the formats used by astropy.][astropy_times]
+
+### Time updating
+
+Time must be updated for each meteor, since it is used in the calculation. To update the time of the station, use `set_time()` function, which takes the time as string as an argument. The time should again be passed in [in one of the supported formats.][astropy_times] The time zone of the station can also be updated with this function, simply pass in the offset in hours from GMT in as `time_zone` to update it while updating the time.
+
+### Time updating
 
 ## Meteor calculation
 
@@ -60,3 +74,4 @@ The calculation can be performed automatically - when requesting specific data a
 
 [astrometryapi]: https://nova.astrometry.net/api_help
 [conda]: https://www.anaconda.com/download/
+[astropy_times]: https://docs.astropy.org/en/stable/time/index.html#time-format
