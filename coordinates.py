@@ -198,7 +198,7 @@ def preprocess(img_path: str, data_path: str, tmp_path: str) -> None:
     mask = cv2.circle(mask, (image.shape[1] // 2, image.shape[0] // 2), image.shape[0] // 2, (255, 255, 255), -1)
 
     meteor = load_meteors(data_path)
-    for point in meteor[0]:
+    for point in meteor[0][0]:
         mask = cv2.circle(mask, (int(point[0]), int(point[1])), 3, (0, 0, 0), -1)
 
     cv2.imwrite(tmp_path, cv2.bitwise_and(mask, image))
