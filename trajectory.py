@@ -451,22 +451,16 @@ class Meteor:
         """Calculates the velocity of meteor at each point in both trajectories"""
 
         # If the geocentric trajectories aren't calculated yet, calculate
-        if self.geocentric_trajectory_a == None or self.geocentric_trajectory_b == None:
-            self.calculate_trajectories()
+        if self.distance_from_beginning_b == None or self.distance_from_beginning_b == None:
+            self.calculate_distances_along_trajectories()
 
         self.velocities_a = []
         for i in range(1, len(self.geocentric_trajectory_a)):
-            distance_from_last = calculate_distance(self.geocentric_trajectory_a[i], self.geocentric_trajectory_a[i - 1])
-            time_from_last = self.times[0][i] - self.times[0][i - 1]
-
-            self.velocities_a.append(distance_from_last/time_from_last)
+            self.velocities_a.append(self.distance_from_beginning_a[i]/(self.times[0][i] - self.times[0][0]))
 
         self.velocities_b = []
         for i in range(1, len(self.geocentric_trajectory_b)):
-            distance_from_last = calculate_distance(self.geocentric_trajectory_b[i], self.geocentric_trajectory_b[i - 1])
-            time_from_last = self.times[1][i] - self.times[1][i - 1]
-
-            self.velocities_b.append(distance_from_last/time_from_last)
+            self.velocities_b.append(self.distance_from_beginning_b[i]/(self.times[1][i] - self.times[1][0]))
 
     def get_velocities_along_trajectories(self) -> list[list[float]]:
         """Returns the velocities at all but the first points from both trajectories
