@@ -16,6 +16,7 @@ class Station:
     Z: float
 
     # Time information
+    time: Time
     time_zone: float
 
     # Camera alignment
@@ -66,8 +67,8 @@ class Station:
         if time == None:
             return
         
-        t = Time(time, location=self.earth_location) + self.time_zone * u.hour
-        self.lst = t.sidereal_time('mean').value / 24 * 360
+        self.time = Time(time, location=self.earth_location) + self.time_zone * u.hour
+        self.lst = self.time.sidereal_time('mean').value / 24 * 360
 
         self.geodetic_lst = {
             'lat': self.lat,
@@ -92,15 +93,19 @@ class Station:
         self.wcs_path = wcs_path
         self.wcs_time = Time(wcs_time)
 
-    def set_time(self, time: str) -> None:
+    def set_time(self, time: str, time_zone: float = None) -> None:
         """Updates the station time
         
         Args:
             time (str): A string representing the date and time
+            time_zone (float): Offset in hours from GMT, optional
 
         Returns:
             None
         """
 
-        t = Time(time, location=self.earth_location) + self.time_zone * u.hour
-        self.lst = t.sidereal_time('mean').value / 24 * 360
+        if time_zone != None:
+            self.time_zone = time_zone
+
+        self.time = Time(time, location=self.earth_location) + self.time_zone * u.hour
+        self.lst = self.time.sidereal_time('mean').value / 24 * 360
