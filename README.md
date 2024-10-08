@@ -72,6 +72,63 @@ Meteor calculation is handled by the `trajectory.py` code using the `Meteor` cla
 
 The calculation can be performed automatically - when requesting specific data about the meteor (e. g. the radiant), the Meteor instance will perform all the required calculations to calculate the requested data. (e. g. the `Meteor.get_radiant function` will calculate the radiant), or manually, by using the specific function (e. g. `Meteor.calculate_radiant`).
 
+## Examples
+
+A Station instance can be created by the following code:
+
+```python
+from station.py import Station
+
+ondrejov = Station(lat=49.970222,
+                   lon=14.780208,
+                   height=524,
+                   time_zone=0,
+                   time='2024-01-08 23:52:57',
+                   label='Ondřejov')
+```
+
+With this code, we create a station instance representing the station in Ondřejov. Since the times in observations from this station are given in GMT, we set the `time_zone` to 0, even though geographically it should be -1.
+
+We can add WCS information using the `set_wcs` function, or whilst creating the station instance in the past example by passing in the wcs path and time as arguments.
+
+```python
+ondrejov.set_wcs(wcs_path='path/to/wcs/file',
+                 wcs_time='2024-01-08 23:52:57')
+```
+
+We can then use the station instance in meteor calculations. To create a Meteor instance from astrometry, we use the `Meteor.from_astrometry()` function.
+
+```python
+from trajectory.py import Meteor
+from astropy import Time
+
+img_paths = [
+   'path/to/img_a.jpg',
+   'path/to/img_b.jpg',
+]
+
+data_paths = [
+   'path/to/data_a.txt',
+   'path/to/data_b.txt',
+]
+
+time = Time('2024-01-08 23:52:57')
+
+meteor = Meteor.from_astrometry('test',
+                                [station_a, station_b],
+                                img_paths,
+                                data_paths,
+                                time)
+```
+
+With this snippet, we create a Meteor instance from astrometry using images and data.txt files. The `Meteor.from_astrometry()` function attempts to get an astrometry solution from the given images and data.txt files through the [astrometry.net api][astrometryapi]. If the astrometry fails, it attempts to get a solution from the fixed camera alignment set for each station. For faster but rougher calculation, we can use the `Meteor.from_astrometry_fixed()` function, which skips the astrometry step and calculates only the fixed camera solution.
+
+To perform calculations on this meteor, we call the desired functions to get the information we need. All required calculations are performed when calling the getter functions, or we can perform them implicitly by calling the required `calculate` functions.
+
+```python
+meteor.get_radiant()
+```
+
 [astrometryapi]: https://nova.astrometry.net/api_help
 [conda]: https://www.anaconda.com/download/
 [astropy_times]: https://docs.astropy.org/en/stable/time/index.html#time-format
