@@ -83,7 +83,6 @@ ondrejov = Station(lat=49.970222,
                    lon=14.780208,
                    height=524,
                    time_zone=0,
-                   time='2024-01-08 23:52:57',
                    label='Ondřejov')
 ```
 

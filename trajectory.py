@@ -242,8 +242,8 @@ class Meteor:
         """
 
         # Solve the station planes
-        vector_a = calculate_meteor_plane(self.observations[0]) + self.stations[0].geocentric_lst
-        vector_b = calculate_meteor_plane(self.observations[1]) + self.stations[1].geocentric_lst
+        vector_a = calculate_meteor_plane(self.observations[0]) + self.stations[0].get_geocentric_lst(self.time)
+        vector_b = calculate_meteor_plane(self.observations[1]) + self.stations[1].get_geocentric_lst(self.time)
 
         # Calculate GST
         GST = self.time.sidereal_time('mean', 'greenwich').value / 24 * 360

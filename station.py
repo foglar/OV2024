@@ -25,7 +25,7 @@ class Station:
 
     def __init__(self,
                  lat: float, lon: float, height: float,
-                 time_zone: float, time: str = None,
+                 time_zone: float,
                  label: str = '',
                  wcs_path: str = None, wcs_time: str = None):
         """Args:
@@ -71,20 +71,6 @@ class Station:
 
         self.geocentric = geodetic_to_geocentric(self.geodetic)
 
-        # Calculate local sidereal time if time is set
-        if time == None:
-            return
-        
-        self.time = Time(time, location=self.earth_location) + self.time_zone * u.hour
-        self.lst = self.time.sidereal_time('mean').value / 24 * 360
-
-        self.geodetic_lst = {
-            'lat': self.lat,
-            'lon': self.lst,
-            'height': self.height
-        }
-        self.geocentric_lst = geodetic_to_geocentric(self.geodetic_lst)
-
     def set_wcs(self, wcs_path: str, wcs_time: str) -> None:
         """Updates the WCS file path and calculation time
         
@@ -115,5 +101,39 @@ class Station:
         if time_zone != None:
             self.time_zone = time_zone
 
-        self.time = Time(time, location=self.earth_location) + self.time_zone * u.hour
+        self.time = Time(time, location=self.earth_location) \
+                    + self.time_zone * u.hour
         self.lst = self.time.sidereal_time('mean').value / 24 * 360
+
+    def get_geodetic_lst(self, time: Time) -> dict:
+        """Calculates the local sidereal time at station and returns the
+        location information as dict
+        
+        Args:
+            time (Time): Time from which to calculate LST
+        Returns:
+            dict: Position information
+        """
+
+        time = Time(time, location=self.earth_location) \
+               + self.time_zone * u.hour
+        lst = time.sidereal_time('mean').value / 24 * 360
+
+        return {
+            'lat': self.lat,
+            'lon': lst,
+            'height': self.height
+        }
+
+    def get_geocentric_lst(self, time: Time) -> list[float]:
+        """Calculates the local sidereal time at station and returns the
+        geodetic vector (X, Y, Z)
+        
+        Args:
+            time (Time): Time from which to calculate LST
+        Returns:
+            list[float]: Geocentric vector X, Y, Z
+        """
+
+        from coordinates import geodetic_to_geocentric
+        return geodetic_to_geocentric(self.get_geodetic_lst(time))

@@ -111,7 +111,6 @@ def test_meteor_calculation():
                        lon=14.780208,
                        height=524,
                        time_zone=0,
-                       time='2024-01-08 23:52:57',
                        label='Ondřejov',
                        wcs_path='ondrejov.wcs',
                        wcs_time='2024-01-08 21:35:44')
@@ -120,7 +119,6 @@ def test_meteor_calculation():
                      lon=15.200930,
                      height=656,
                      time_zone=0,
-                     time='2024-01-08 23:52:57',
                      label='Kunžak',
                      wcs_path='kunzak.wcs',
                      wcs_time='2024-01-08 21:35:44')
