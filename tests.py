@@ -154,7 +154,25 @@ def test_meteor_calculation():
     calculation.plot_trajectory_geodetic()
     calculation.plot_velocities_along_trajectories()
 
+def test_set_fix_wcs():
+    """Tests the Station.set_fix_wcs() function"""
+
+    ondrejov = Station(lat=49.970222,
+                       lon=14.780208,
+                       height=524,
+                       time_zone=0,
+                       label='Ondřejov',
+                       wcs_path='o.wcs')
+    
+    img_path = './data/meteory/Ondrejov/2024-01-08-23-52-57/2024-01-08-23-52-57.jpg'
+
+    client = AstrometryClient()
+    client.authenticate()
+
+    ondrejov.set_fixed_wcs(client, img_path)
+
 if __name__ == '__main__':
+    test_set_fix_wcs()
     test_meteor_calculation()
     test_fixed_wcs_astrometry()
     test_goniometry_solver()

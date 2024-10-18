@@ -2,6 +2,8 @@ from astropy.time import Time
 import astropy.units as u
 from astropy.coordinates import EarthLocation
 
+from astrometry import AstrometryClient
+
 class Station:
     label: str
 
@@ -70,6 +72,41 @@ class Station:
         from coordinates import geodetic_to_geocentric
 
         self.geocentric = geodetic_to_geocentric(self.geodetic)
+
+    def get_fixed_wcs(self,
+                      client: AstrometryClient,
+                      img_path: str,
+                      job_id: int = None,
+                      prep: bool = False) -> None:
+        """Do astrometry for the given image and save it as fixed camera
+        astrometry. The resulting WCS file will be saved to
+        
+        Args:
+            client (AstrometryClient): client to use for API communication
+            img_path (str): Image to use for astrometry
+            job_id (int): job_id to use if astrometry was already calculated
+            prep (bool): whether to preprocess the image before attempting
+            to get astrometry
+
+        Returns:
+            None
+        """
+
+        from coordinates import download_wcs_file, preprocess
+
+        # Check if image has astrometry
+        if job_id == None:
+            # If no, try doing astrometry on the image
+
+            # Preprocess the image
+            if prep:
+                preprocess(img_path, data_path, 'tmp.jpg')
+                img_path = 'tmp.jpg'
+            
+            job_id = download_wcs_file(client, img_path, self.wcs_path)
+        else:
+            # If yes, download the WCS file
+            client.get_wcs_file(job_id, self.wcs_path)
 
     def set_wcs(self, wcs_path: str, wcs_time: str) -> None:
         """Updates the WCS file path and calculation time
