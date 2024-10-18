@@ -74,6 +74,8 @@ The calculation can be performed automatically - when requesting specific data a
 
 ## Examples
 
+### Station instance setup
+
 A Station instance can be created by the following code:
 
 ```python
@@ -94,6 +96,19 @@ We can add WCS information using the `set_wcs` function, or whilst creating the 
 ondrejov.set_wcs(wcs_path='path/to/wcs/file',
                  wcs_time='2024-01-08 23:52:57')
 ```
+
+### WCS download for fixed camera astrometry
+
+To get a WCS file for fixed camera astrometry, we can use the `get_fixed_wcs` function. It takes an `AstrometryClient` instance and an image path as arguments. Additionally, a job_id can be given to download an already calculated WCS file, or the prep argument can be set `True` to preprocess the image before performing the astrometry.
+
+```
+get_fixed_wcs(client,
+              img_path,
+              job_id=None,
+              prep=False)
+```
+
+### Meteor calculations
 
 We can then use the station instance in meteor calculations. To create a Meteor instance from astrometry, we use the `Meteor.from_astrometry()` function.
 
