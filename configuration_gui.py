@@ -28,6 +28,7 @@ class ConfigurationWindow(Gtk.Window):
         self.time_tolerance = self.get_config_value("time_tolerance")
         
         self.astrometry_token = config().get_astrometry_key() or ""
+        self.user_theme = config().get_value_from_data("plt_style", "post_processing") or "default"
         
 
         Gtk.Window.__init__(self, title="Configuration")
@@ -254,6 +255,27 @@ class ConfigurationWindow(Gtk.Window):
         self.grid4.attach(self.time_tolerance_label, 0, 0, 1, 1)
         self.grid4.attach(self.spinner_time_tolerance, 1, 0, 1, 1)
 
+        self.theme_selection_label = Gtk.Label(label="Plot style")
+        self.theme_selection_label.set_tooltip_text("Plot style")
+        self.theme_selection = Gtk.ComboBoxText()
+        self.theme_selection.set_tooltip_text("Plot style")
+        self.theme_selection.append_text("light")
+        self.theme_selection.append_text("dark")
+        self.theme_selection.set_active(0)
+        self.grid4.attach(self.theme_selection_label, 0, 1, 1, 1)
+        self.grid4.attach(self.theme_selection, 1, 1, 1, 1)
+
+        self.meteor_plot_numpy_theme = Gtk.Label(label="Color theme")
+        self.meteor_plot_numpy_theme.set_tooltip_text("Meteor plot colour theme")
+        self.meteor_plot_numpy_theme_selection = Gtk.ComboBoxText()
+        self.meteor_plot_numpy_theme_selection.set_tooltip_text("Color theme")
+        self.meteor_plot_numpy_theme_selection.append_text("grey")
+        self.meteor_plot_numpy_theme_selection.append_text("bone")
+        self.meteor_plot_numpy_theme_selection.append_text("red")
+        self.meteor_plot_numpy_theme_selection.set_active(0)
+        self.grid4.attach(self.meteor_plot_numpy_theme, 0, 2, 1, 1)
+        self.grid4.attach(self.meteor_plot_numpy_theme_selection, 1, 2, 1, 1)
+
         self.first_box.add(self.first_label)
         self.first_box.add(self.grid)
         self.second_box.add(self.second_label)
@@ -339,8 +361,10 @@ class ConfigurationWindow(Gtk.Window):
             "time_tolerance", self.spinner_time_tolerance.get_value(), "data"
         )
         editconfig().set_value(
-            "astrometry_token", self.entry_token.get_text(), "astrometry"
+            "token", self.entry_token.get_text(), "astrometry"
         )
+        editconfig().set_value("plt_style", self.theme_selection.get_active_text(), "post_processing")
+        editconfig().set_value("meteor_plot_theme", self.meteor_plot_numpy_theme_selection.get_active_text(), "post_processing")
         self.destroy()
 
     def validate_long(self, widget):

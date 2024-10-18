@@ -3,6 +3,7 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GdkPixbuf
+from astropy.time import Time
 
 from post_processing import post_processing
 from trajectory import *
@@ -120,11 +121,11 @@ class MeteorApp(Gtk.Window):
         self.index_label.set_justify(Gtk.Justification.RIGHT)
         index_box.pack_start(self.index_label, True, True, 0)
 
-        btn_select_folder = Gtk.ToolButton(
+        self.btn_select_folder = Gtk.ToolButton(
             icon_name="folder-open", label="Select Folder"
         )
-        btn_select_folder.connect("clicked", self.welcome_dialog)
-        self.Toolbar.insert(btn_select_folder, 1)
+        self.btn_select_folder.connect("clicked", self.welcome_dialog)
+        self.Toolbar.insert(self.btn_select_folder, 1)
 
         btn_save_meteors = Gtk.ToolButton(
             icon_name="document-save", label="Save Meteors"
@@ -138,15 +139,15 @@ class MeteorApp(Gtk.Window):
         btn_save_to_file.connect("clicked", self.save_to_file_select)
         self.Toolbar.insert(btn_save_to_file, 2)
 
-        btn_settings_observatory = Gtk.ToolButton(
+        self.btn_settings_observatory = Gtk.ToolButton(
             icon_name="preferences-system", label="Settings"
         )
-        btn_settings_observatory.connect("clicked", self.setup_observatories)
-        self.Toolbar.insert(btn_settings_observatory, 4)
+        self.btn_settings_observatory.connect("clicked", self.setup_observatories)
+        self.Toolbar.insert(self.btn_settings_observatory, 4)
 
-        btn_load_data = Gtk.ToolButton(icon_name="download", label="Load Data")
-        btn_load_data.connect("clicked", self.open_loading_data)
-        self.Toolbar.insert(btn_load_data, 3)
+        self.btn_load_data = Gtk.ToolButton(icon_name="download", label="Load Data")
+        self.btn_load_data.connect("clicked", self.open_loading_data)
+        self.Toolbar.insert(self.btn_load_data, 3)
 
         self.btn_view_meteor = Gtk.Button(
             label="Preview Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
@@ -154,11 +155,11 @@ class MeteorApp(Gtk.Window):
         self.btn_view_meteor.connect("clicked", self.sky_image_analysis)
         btn_box.pack_start(self.btn_view_meteor, True, True, 0)
 
-        btn_location = Gtk.Button(
+        self.btn_location = Gtk.Button(
             label="Meteor Location", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
         )
-        btn_location.connect("clicked", self.location_dialog)
-        btn_box.pack_start(btn_location, True, True, 0)
+        self.btn_location.connect("clicked", self.location_dialog)
+        btn_box.pack_start(self.btn_location, True, True, 0)
 
         # btn_prev_meteor = Gtk.Button(
         #     label="Previous Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
@@ -166,12 +167,12 @@ class MeteorApp(Gtk.Window):
         # btn_prev_meteor.connect("clicked", self.previous_meteor)
         # btn_box.pack_start(btn_prev_meteor, True, True, 0)
 
-        btn_prev_meteor = Gtk.Button()
-        btn_prev_meteor.set_image(
+        self.btn_prev_meteor = Gtk.Button()
+        self.btn_prev_meteor.set_image(
             Gtk.Image.new_from_icon_name("go-previous", Gtk.IconSize.BUTTON)
         )
-        btn_prev_meteor.connect("clicked", self.previous_meteor)
-        btn_box.pack_start(btn_prev_meteor, True, True, 0)
+        self.btn_prev_meteor.connect("clicked", self.previous_meteor)
+        btn_box.pack_start(self.btn_prev_meteor, True, True, 0)
 
         # btn_next_meteor = Gtk.Button(
         #    label="Next Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
@@ -180,12 +181,12 @@ class MeteorApp(Gtk.Window):
         # btn_box.pack_start(btn_next_meteor, True, True, 0)
 
         # Button with next meteor icon and text
-        btn_next_meteor = Gtk.Button()
-        btn_next_meteor.set_image(
+        self.btn_next_meteor = Gtk.Button()
+        self.btn_next_meteor.set_image(
             Gtk.Image.new_from_icon_name("go-next", Gtk.IconSize.BUTTON)
         )
-        btn_next_meteor.connect("clicked", self.next_meteor)
-        btn_box.pack_start(btn_next_meteor, True, True, 0)
+        self.btn_next_meteor.connect("clicked", self.next_meteor)
+        btn_box.pack_start(self.btn_next_meteor, True, True, 0)
 
     def update_meteor_data(self):
         try:
@@ -263,9 +264,17 @@ class MeteorApp(Gtk.Window):
     def sky_image_analysis(self, widget):
         logging.info("Button clicked, plot meteor.")
         self.btn_view_meteor.set_sensitive(False)
+        self.btn_location.set_sensitive(False)
+        self.btn_settings_observatory.set_sensitive(False)
+        self.btn_select_folder.set_sensitive(False)
+        self.btn_load_data.set_sensitive(False)
 
         def on_close(event):
             self.btn_view_meteor.set_sensitive(True)
+            self.btn_location.set_sensitive(True)
+            self.btn_settings_observatory.set_sensitive(True)
+            self.btn_select_folder.set_sensitive(True)
+            self.btn_load_data.set_sensitive(True)
             logging.info("Meteor plot closed.")
 
         i = self.index - 1
@@ -302,6 +311,13 @@ class MeteorApp(Gtk.Window):
         location_data = self.location_data()
 
     def location_data(self):
+
+        self.btn_select_folder.set_sensitive(False)
+        self.btn_load_data.set_sensitive(False)
+        self.btn_view_meteor.set_sensitive(False)
+        self.btn_location.set_sensitive(False)
+        self.btn_settings_observatory.set_sensitive(False)
+
         # Get time in this format '2018-10-8 21:38:32'
         data = self.pp.meteor_data_table
         logging.info("Opening meteor location dialog.")
@@ -339,14 +355,11 @@ class MeteorApp(Gtk.Window):
             logging.error(f"Error getting observatory data: {e}")
             return
 
-        print(data)
-
         first_obs = Station(
             lat=latitude,
             lon=longitude,
             height=height,
             time_zone=timezone,
-            time=times[0],
             label=name,
         )
         second_obs = Station(
@@ -354,15 +367,74 @@ class MeteorApp(Gtk.Window):
             lon=second_longitude,
             height=second_height,
             time_zone=second_timezone,
-            time=times[1],
             label=second_name,
         )
 
-        # calculation = Meteor(meteor[0], ondrejov, kunzak, meteor[2], meteor[3], meteor[1])
-        ##calculation.save_trajectory_gpx(meteor[4], meteor[5])
-        # calculation.calculate_trajectories_geodetic()
-        # calculation.plot_trajectory_geodetic()
-        # return calculation
+        time = Time(data[i][1] + " " + data[i][2], format="iso")
+        second_time = Time(data[i][1] + " " + data[i][3], format="iso")
+
+        #!IMPORTANT: Set the wcs file path here or add it to configuration file
+        first_obs.set_wcs("./kunzak.wcs", time)
+        second_obs.set_wcs("./ondrejov.wcs", second_time)
+
+        label = data[i][0]
+        img_A = data[i][9]
+        img_B = data[i][10]
+        data_path_A = "/".join(data[i][9].split("/")[:-1]) + "/data.txt"
+        data_path_B = "/".join(data[i][10].split("/")[:-1]) + "/data.txt"
+        time = Time(data[i][1] + " " + data[i][2], format="iso")
+
+        meteor = Meteor.from_astrometry_fixed(
+            label,
+            [first_obs, second_obs],
+            # [img_A, img_B],
+            [data_path_A, data_path_B],
+            time,
+        )
+
+        def on_close(event):
+            self.btn_select_folder.set_sensitive(True)
+            self.btn_load_data.set_sensitive(True)
+            self.btn_view_meteor.set_sensitive(True)
+            self.btn_location.set_sensitive(True)
+            self.btn_settings_observatory.set_sensitive(True)
+            logging.info("Meteor location closed.")
+
+        from matplotlib import pyplot as plt
+        try:
+            THEME = ConfigLoader().get_value_from_data("plt_style", "post_processing")
+        except KeyError as e:
+            THEME = "default"
+            logging.error(f"Error getting theme data: {e}")
+
+        if THEME == "dark":
+            plt.style.use("dark_background")
+            logging.info("Dark theme loaded.")
+        else:
+            plt.style.use("default")
+            logging.info("Default theme loaded.")
+        
+        try:
+            meteor.get_trajectories_geodetic()
+            meteor.get_radiant()
+            plt, fig = meteor.plot_trajectory_geodetic()
+
+            fig.canvas.mpl_connect("close_event", on_close)
+            plt.show()
+        except ConnectionError as e:
+            logging.error(f"Error connecting to astrometry.net: {e}")
+            self.error_dialog(f"Error connecting to astrometry.net: {e}")
+        except Exception as e:
+            logging.error(f"Error processing meteor location: {e}")
+            self.error_dialog(f"Error processing meteor location: {e}")
+        finally:
+            self.btn_select_folder.set_sensitive(True)
+            self.btn_load_data.set_sensitive(True)
+            self.btn_view_meteor.set_sensitive(True)
+            self.btn_location.set_sensitive(True)
+            self.btn_settings_observatory.set_sensitive(True)
+
+        return meteor
 
     def next_meteor(self, widget):
 
@@ -520,7 +592,7 @@ class MeteorApp(Gtk.Window):
         # label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
         # label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
         # label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
-        label_text += f'<span size="20000">Meteor Position: {meteor_info[11][0][0]} X, {meteor_info[11][0][1]} Y, {meteor_info[11][1][0]} X, {meteor_info[11][1][0]} Y\n</span>'
+        #label_text += f'<span size="20000">Meteor Position: {meteor_info[11][0][0]} X, {meteor_info[11][0][1]} Y, {meteor_info[11][1][0]} X, {meteor_info[11][1][0]} Y\n</span>'
 
         self.first_meteor_label.set_markup(label_text)
 
@@ -536,7 +608,7 @@ class MeteorApp(Gtk.Window):
         # label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
         # label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
         # label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
-        label_text += f'<span size="20000">Meteor Position: {meteor_info[12][0][0]} X, {meteor_info[12][0][1]} Y, {meteor_info[12][1][0]} X, {meteor_info[12][1][0]} Y\n</span>'
+        # label_text += f'<span size="20000">Meteor Position: {meteor_info[12][0][0]} X, {meteor_info[12][0][1]} Y, {meteor_info[12][1][0]} X, {meteor_info[12][1][0]} Y\n</span>'
 
         self.second_meteor_label.set_markup(label_text)
 

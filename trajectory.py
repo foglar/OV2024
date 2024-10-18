@@ -378,9 +378,21 @@ class Meteor:
                     resolution = 'i', area_thresh = 10000,
                     lat_0 = 50, lon_0 = 15,
                     width=1200000, height=800000)
-    
-        m.drawcoastlines()
-        m.drawcountries()
+
+        if ConfigLoader().get_value_from_data('plt_style', 'post_processing') == 'dark':
+            plt_color = 'white'
+        else:
+            plt_color = 'black'
+
+        m.drawcoastlines(color=plt_color)
+        m.drawcountries(color=plt_color)
+
+        if ConfigLoader().get_value_from_data('map_style', 'post_processing') == 'shaderelief':
+            m.shadedrelief()
+            logging.info('Using shaded relief map style')
+        elif ConfigLoader().get_value_from_data('map_style', 'post_processing') == 'marble':
+            m.bluemarble()
+            logging.info('Using blue marble map style')
 
         # Draw stations
         m.scatter(latlon = True, x = self.stations[0].lon, y = self.stations[0].lat,
@@ -398,6 +410,7 @@ class Meteor:
             heights.append(point['height'])
 
         x, y = m(x, y)
+        plot.title(f'Meteor {self.label}')
         m.plot(x, y, linewidth=1.5, color='blue')
 
         # Add height marks
@@ -408,8 +421,7 @@ class Meteor:
         m.scatter(x[0], y[0], marker='^', color='blue')
         m.scatter(x[-1], y[-1], marker='x', color='blue')
             
-        plot.title(f'Meteor {self.label}')
-        plot.show()
+        return plot, fig
 
     def calculate_distances_along_trajectories(self) -> None:
         """Calculates the distance of each point on both trajectories from

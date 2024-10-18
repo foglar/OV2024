@@ -334,36 +334,36 @@ class post_processing:
         ax.set_title(f"{observatory} - {image_path.split('/')[-1]}")
 
         # Draw the grid
-        for i in range(1, 3):
-            
-            if i == 1:
-                ax.plot(
-                    [center_x - radius, center_x + radius],
-                    [
-                        center_y - radius + i * quadrant_size,
-                        center_y - radius + i * quadrant_size,
-                    ],
-                    color="blue",
-                    label="Grid",
-                )
-            else:
-                ax.plot(
-                    [center_x - radius, center_x + radius],
-                    [
-                        center_y - radius + i * quadrant_size,
-                        center_y - radius + i * quadrant_size,
-                    ],
-                    color="blue",
-                )
-            
-            ax.plot(
-                [
-                    center_x - radius + i * quadrant_size,
-                    center_x - radius + i * quadrant_size,
-                ],
-                [center_y - radius, center_y + radius],
-                color="blue",
-            )
+        #for i in range(1, 3):
+        #    
+        #    if i == 1:
+        #        ax.plot(
+        #            [center_x - radius, center_x + radius],
+        #            [
+        #                center_y - radius + i * quadrant_size,
+        #                center_y - radius + i * quadrant_size,
+        #            ],
+        #            color="blue",
+        #            label="Grid",
+        #        )
+        #    else:
+        #        ax.plot(
+        #            [center_x - radius, center_x + radius],
+        #            [
+        #                center_y - radius + i * quadrant_size,
+        #                center_y - radius + i * quadrant_size,
+        #            ],
+        #            color="blue",
+        #        )
+        #    
+        #    ax.plot(
+        #        [
+        #            center_x - radius + i * quadrant_size,
+        #            center_x - radius + i * quadrant_size,
+        #        ],
+        #        [center_y - radius, center_y + radius],
+        #        color="blue",
+        #    )
 
         if stars is not None:
             for i, star in enumerate(stars):
@@ -372,8 +372,23 @@ class post_processing:
                 else:
                     ax.plot(star[0], star[1], "ro", markersize=3)
 
+        try:
+            theme = ConfigLoader().get_value_from_data("meteor_plot_theme", "post_processing")
+        except KeyError:
+            theme = "grey"
+            logging.warning("No cmap specified in the config file. Using grey cmap.")
+
         # Best cmap for the image is grey, hot, bone
-        ax.imshow(image, cmap="grey")
+        if theme == "grey":
+            cmap = "grey"
+        elif theme == "red":
+            cmap = "hot"
+        elif theme == "bone":
+            cmap = "bone"
+        else:
+            cmap = "grey"
+
+        ax.imshow(image, cmap=cmap)
 
         # Draw the meteor path
         ax.plot(
