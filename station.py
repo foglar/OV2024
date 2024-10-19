@@ -27,7 +27,7 @@ class Station:
 
     def __init__(self,
                  lat: float, lon: float, height: float,
-                 time_zone: float,
+                 time_zone: float = 0,
                  label: str = '',
                  wcs_path: str = None, wcs_time: str = None):
         """Args:
