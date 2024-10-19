@@ -390,7 +390,7 @@ class Meteor:
         if ConfigLoader().get_value_from_data('map_style', 'post_processing') == 'shaderelief':
             m.shadedrelief()
             logging.info('Using shaded relief map style')
-        elif ConfigLoader().get_value_from_data('map_style', 'post_processing') == 'marble':
+        elif ConfigLoader().get_value_from_data('map_style', 'post_processing') == 'bluemarble':
             m.bluemarble()
             logging.info('Using blue marble map style')
 

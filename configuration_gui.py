@@ -19,16 +19,17 @@ class ConfigurationWindow(Gtk.Window):
         self.first_long = self.get_config_value("first_longitude")
         self.first_lat = self.get_config_value("first_latitude")
         self.first_sealevel = self.get_config_value("first_sealevel")
-        self.first_timezone = self.get_config_value("first_timezone")
+        self.first_timezone = int(self.get_config_value("first_timezone") or 0)
         self.second_long = self.get_config_value("second_longitude")
         self.second_lat = self.get_config_value("second_latitude")
         self.second_sealevel = self.get_config_value("second_sealevel")
-        self.second_timezone = self.get_config_value("second_timezone")
+        self.second_timezone = int(self.get_config_value("second_timezone") or 0)
         self.timeout = self.get_config_value("timeout")
         self.time_tolerance = self.get_config_value("time_tolerance")
         
         self.astrometry_token = config().get_astrometry_key() or ""
         self.user_theme = config().get_value_from_data("plt_style", "post_processing") or "default"
+        self.meteor_plot_theme = config().get_value_from_data("map_style", "post_processing")
         
 
         Gtk.Window.__init__(self, title="Configuration")
@@ -259,8 +260,8 @@ class ConfigurationWindow(Gtk.Window):
         self.theme_selection_label.set_tooltip_text("Plot style")
         self.theme_selection = Gtk.ComboBoxText()
         self.theme_selection.set_tooltip_text("Plot style")
-        self.theme_selection.append_text("light")
         self.theme_selection.append_text("dark")
+        self.theme_selection.append_text("light")
         self.theme_selection.set_active(0)
         self.grid4.attach(self.theme_selection_label, 0, 1, 1, 1)
         self.grid4.attach(self.theme_selection, 1, 1, 1, 1)
@@ -275,6 +276,17 @@ class ConfigurationWindow(Gtk.Window):
         self.meteor_plot_numpy_theme_selection.set_active(0)
         self.grid4.attach(self.meteor_plot_numpy_theme, 0, 2, 1, 1)
         self.grid4.attach(self.meteor_plot_numpy_theme_selection, 1, 2, 1, 1)
+
+        self.map_style_label = Gtk.Label(label="Map style")
+        self.map_style_label.set_tooltip_text("Map style")
+        self.map_style_selection = Gtk.ComboBoxText()
+        self.map_style_selection.set_tooltip_text("Map style")
+        self.map_style_selection.append_text("default")
+        self.map_style_selection.append_text("bluemarble")
+        self.map_style_selection.append_text("shaderelief")
+        self.map_style_selection.set_active(0)
+        self.grid4.attach(self.map_style_label, 0, 3, 1, 1)
+        self.grid4.attach(self.map_style_selection, 1, 3, 1, 1)
 
         self.first_box.add(self.first_label)
         self.first_box.add(self.grid)
@@ -365,6 +377,7 @@ class ConfigurationWindow(Gtk.Window):
         )
         editconfig().set_value("plt_style", self.theme_selection.get_active_text(), "post_processing")
         editconfig().set_value("meteor_plot_theme", self.meteor_plot_numpy_theme_selection.get_active_text(), "post_processing")
+        editconfig().set_value("map_style", self.map_style_selection.get_active_text(), "post_processing")
         self.destroy()
 
     def validate_long(self, widget):

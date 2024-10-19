@@ -253,12 +253,16 @@ class MeteorApp(Gtk.Window):
     def setup_observatories(self, widget):
         logging.info("Opening observatory settings.")
         win = ConfigApp()
+
+        self.btn_settings_observatory.set_sensitive(False)
+
         win.connect("destroy", self.on_observatory_settings_closed)
         win.show_all()
         Gtk.main()
 
     def on_observatory_settings_closed(self, widget):
         logging.info("Observatory settings closed.")
+        self.btn_settings_observatory.set_sensitive(True)
         widget.destroy()
 
     def sky_image_analysis(self, widget):
@@ -415,8 +419,7 @@ class MeteorApp(Gtk.Window):
             logging.info("Default theme loaded.")
         
         try:
-            meteor.get_trajectories_geodetic()
-            meteor.get_radiant()
+            logging.debug(meteor.get_trajectories_geodetic())
             plt, fig = meteor.plot_trajectory_geodetic()
 
             fig.canvas.mpl_connect("close_event", on_close)
