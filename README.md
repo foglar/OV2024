@@ -84,11 +84,10 @@ from station.py import Station
 ondrejov = Station(lat=49.970222,
                    lon=14.780208,
                    height=524,
-                   time_zone=0,
                    label='Ondřejov')
 ```
 
-With this code, we create a station instance representing the station in Ondřejov. Since the times in observations from this station are given in GMT, we set the `time_zone` to 0, even though geographically it should be -1.
+With this code, we create a station instance representing the station in Ondřejov. Since the times in observations from this station are given in GMT, we can leave the `time_zone` argument unset, defaulting to 0 (GMT), even though geographically it should be -1 (CET).
 
 We can add WCS information using the `set_wcs` function, or whilst creating the station instance in the past example by passing in the wcs path and time as arguments.
 
