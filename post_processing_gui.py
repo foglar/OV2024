@@ -11,6 +11,8 @@ from modules import EditConfig, ConfigLoader
 from configuration_gui import ConfigurationWindow as ConfigApp
 from main import MeteorsList as MeteorsData
 from data_window_gui import DataWindow as LoadingWindow
+from meteors_list_gui import MeteorsListGui
+
 
 # TODO: Test Other OS
 # TODO: Test how to compile
@@ -138,6 +140,13 @@ class MeteorApp(Gtk.Window):
         )
         btn_save_to_file.connect("clicked", self.save_to_file_select)
         self.Toolbar.insert(btn_save_to_file, 2)
+
+        self.btn_meteor_list = Gtk.ToolButton(
+            icon_name="table", label="Previous Meteor"
+        )
+        
+        self.btn_meteor_list.connect("clicked", self.meteor_list_open)
+        self.Toolbar.insert(self.btn_meteor_list, 3)
 
         self.btn_settings_observatory = Gtk.ToolButton(
             icon_name="preferences-system", label="Settings"
@@ -272,6 +281,7 @@ class MeteorApp(Gtk.Window):
         self.btn_settings_observatory.set_sensitive(False)
         self.btn_select_folder.set_sensitive(False)
         self.btn_load_data.set_sensitive(False)
+        self.btn_meteor_list.set_sensitive(False)
 
         def on_close(event):
             self.btn_view_meteor.set_sensitive(True)
@@ -279,6 +289,7 @@ class MeteorApp(Gtk.Window):
             self.btn_settings_observatory.set_sensitive(True)
             self.btn_select_folder.set_sensitive(True)
             self.btn_load_data.set_sensitive(True)
+            self.btn_meteor_list.set_sensitive(True)
             logging.info("Meteor plot closed.")
 
         i = self.index - 1
@@ -310,6 +321,31 @@ class MeteorApp(Gtk.Window):
     def on_loading_data_window_closed(self, widget):
         logging.info("Data window closed.")
         widget.destroy()
+
+    def meteor_list_open(self, widget):
+        logging.info("Opening meteor list.")
+        self.btn_select_folder.set_sensitive(False)
+        self.btn_load_data.set_sensitive(False)
+        self.btn_view_meteor.set_sensitive(False)   
+        self.btn_location.set_sensitive(False)
+        self.btn_settings_observatory.set_sensitive(False)
+        self.btn_meteor_list.set_sensitive(False)
+
+        win = MeteorsListGui(self.meteor_data)
+        win.connect("destroy", self.on_meteor_list_closed)
+        win.show_all()
+
+    def on_meteor_list_closed(self, widget):
+        logging.info("Meteor list closed.")
+        self.btn_select_folder.set_sensitive(True)
+        self.btn_load_data.set_sensitive(True)
+        self.btn_view_meteor.set_sensitive(True)
+        self.btn_location.set_sensitive(True)
+        self.btn_settings_observatory.set_sensitive(True)
+        self.btn_meteor_list.set_sensitive(True)
+        widget.destroy()
+
+
 
     def location_dialog(self, widget):
         location_data = self.location_data()
