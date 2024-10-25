@@ -441,7 +441,10 @@ class ConfigurationWindow(Gtk.Window):
         editconfig().set_value("plt_style", self.theme_selection.get_active_text(), "post_processing")
         editconfig().set_value("meteor_plot_theme", self.meteor_plot_numpy_theme_selection.get_active_text(), "post_processing")
         editconfig().set_value("map_style", self.map_style_selection.get_active_text(), "post_processing")
-        editconfig().set_value("load_fixed", self.wcs.get_text(), "data")
+        if self.fixed.get_active_text().lower() == "true":
+            editconfig().set_value("load_fixed", "true", "astrometry")
+        else:
+            editconfig().set_value("load_fixed", "false", "astrometry")
         editconfig().set_value("first_wcs_path", self.wcs.get_text(), "data")
         editconfig().set_value("second_wcs_path", self.wcs2.get_text(), "data")
         self.destroy()

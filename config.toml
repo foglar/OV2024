@@ -1,6 +1,6 @@
 [astrometry]
 token = "ijfeednnvwvojlfb"
-load_fixed = false
+load_fixed = "false"
 first_obs_wcs = "./kunzak.wcs"
 second_obs_wcs = "./ondrejov.wcs"
 
@@ -22,7 +22,6 @@ second_sealevel = 575.0
 second_timezone = 0.0
 second_wcs_path = "./ondrejov.wcs"
 second_wcs_time = "2024-01-08 21:35:44"
-load_fixed = "./kunzak.wcs"
 
 [post_processing]
 output_file = "overview.csv"
