@@ -419,11 +419,11 @@ class MeteorApp(Gtk.Window):
                 ConfigLoader().get_value_from_data("second_timezone", "data")
             )
 
-            if ConfigLoader().get_value_from_data("load_fixed", "astrometry") == "True":
+            if ConfigLoader().get_value_from_data("load_fixed", "astrometry") == "true":
                 load_fixed = True
             else:
                 load_fixed = False
-                
+
             first_obs_wcs = ConfigLoader().get_value_from_data(
                 "first_obs_wcs", "astrometry"
             )
