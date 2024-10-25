@@ -155,6 +155,18 @@ class ConfigurationWindow(Gtk.Window):
         self.grid.attach(self.label_timezone, 0, 3, 1, 1)
         self.grid.attach(self.spinner_timezone, 1, 3, 1, 1)
 
+        # WCS File configuration
+        self.wcs_label = Gtk.Label(label="WCS File")
+        self.wcs_label.set_tooltip_text("Use WCS file for coordinates")
+        wcs_file_path = config().get_value_from_data("second_obs_wcs", "astrometry") or ""
+        self.wcs = Gtk.Entry()
+        self.wcs.set_text(wcs_file_path)
+        self.wcs_button = Gtk.Button(label="...")
+        self.wcs_button.connect("clicked", self.on_button_select_wcs_file)
+        self.grid.attach(self.wcs_label, 0, 4, 1, 1)
+        self.grid.attach(self.wcs, 1, 4, 1, 1)
+        self.grid.attach(self.wcs_button, 3, 4, 1, 1)
+
         # Second observatory
         self.label_folder2 = Gtk.Label(label="Folder")
         self.entry_folder2 = Gtk.Entry()
@@ -211,6 +223,17 @@ class ConfigurationWindow(Gtk.Window):
         self.grid2.attach(self.label_timezone2, 0, 3, 1, 1)
         self.grid2.attach(self.spinner_timezone2, 1, 3, 1, 1)
 
+        self.wcs_label2 = Gtk.Label(label="WCS File")
+        self.wcs_label2.set_tooltip_text("Use WCS file for coordinates")
+        self.wcs_file_path2 = config().get_value_from_data("first_obs_wcs", "astrometry") or ""
+        self.wcs2 = Gtk.Entry()
+        self.wcs2.set_text(self.wcs_file_path2)
+        self.wcs_button2 = Gtk.Button(label="...")
+        self.wcs_button2.connect("clicked", self.on_button_select_wcs_file2)
+        self.grid2.attach(self.wcs_label2, 0, 4, 1, 1)
+        self.grid2.attach(self.wcs2, 1, 4, 1, 1)
+        self.grid2.attach(self.wcs_button2, 3, 4, 1, 1)
+
         # Astrometry configuration
         # Token
         self.astrometry_sec_label = Gtk.Label(label="Token")
@@ -231,6 +254,18 @@ class ConfigurationWindow(Gtk.Window):
         self.grid3.attach(self.astrometry_sec_label, 0, 0, 1, 1)
         self.grid3.attach(self.entry_token, 1, 0, 1, 1)
         self.grid3.attach(self.toggle_visibility, 3, 0, 1, 1)
+
+        # Fixed or not
+        self.fixed_label = Gtk.Label(label="Fixed")
+        self.fixed_label.set_tooltip_text("Use astrometry.net or fixed coordinates from wcs file")
+        self.fixed = Gtk.ComboBoxText()
+        self.fixed.set_tooltip_text("Use astrometry.net or fixed coordinates from wcs file")
+        self.fixed.append_text("True")
+        self.fixed.append_text("False")
+        self.fixed.set_active(1)
+        self.grid3.attach(self.fixed_label, 0, 2, 1, 1)
+        self.grid3.attach(self.fixed, 1, 2, 1, 1)
+
 
         # Timeout
         self.timeout_label = Gtk.Label(label="Timeout")
@@ -345,6 +380,34 @@ class ConfigurationWindow(Gtk.Window):
             self.entry_folder2.set_text(dialog.get_filename())
         dialog.destroy()
 
+    def on_button_select_wcs_file(self, widget):
+        dialog = Gtk.FileChooserDialog(
+            "Please choose a WCS file",
+            self,
+            Gtk.FileChooserAction.OPEN,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Select", Gtk.ResponseType.OK),
+        )
+        dialog.set_default_size(800, 400)
+        dialog.set_current_folder("".join(self.wcs.get_text().split("/")[:-1]))
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            self.wcs.set_text(dialog.get_filename())
+        dialog.destroy()
+
+    def on_button_select_wcs_file2(self, widget):
+        dialog = Gtk.FileChooserDialog(
+            "Please choose a WCS file",
+            self,
+            Gtk.FileChooserAction.OPEN,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Select", Gtk.ResponseType.OK),
+        )
+        dialog.set_default_size(800, 400)
+        dialog.set_current_folder("".join(self.wcs2.get_text().split("/")[:-1]))
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            self.wcs2.set_text(dialog.get_filename())
+        dialog.destroy()
+
     def on_button_save_clicked(self, widget):
         logging.info("Configuration saved")
         # Save configuration
@@ -378,6 +441,8 @@ class ConfigurationWindow(Gtk.Window):
         editconfig().set_value("plt_style", self.theme_selection.get_active_text(), "post_processing")
         editconfig().set_value("meteor_plot_theme", self.meteor_plot_numpy_theme_selection.get_active_text(), "post_processing")
         editconfig().set_value("map_style", self.map_style_selection.get_active_text(), "post_processing")
+        editconfig().set_value("first_obs_wcs", self.wcs.get_text(), "astrometry")
+        editconfig().set_value("second_obs_wcs", self.wcs2.get_text(), "astrometry")
         self.destroy()
 
     def validate_long(self, widget):

@@ -1,0 +1,4 @@
+- [] moznost nastavit graf oblohy aby mel modre kvadranty na rozdeleni oblohy a nebo ne
+- [] moznost vybrat v nastaveni, zda chceme pouzivat fixni nebo online astrometrii
+- [] cesty k wcs souborum v nastaveni
+- [] loading okno po dobu nacitani z astrometrie u otevirani grafu drahy a nacitani z cache.

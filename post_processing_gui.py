@@ -407,6 +407,9 @@ class MeteorApp(Gtk.Window):
                 ConfigLoader().get_value_from_data("second_timezone", "data")
             )
 
+            load_fixed = bool(ConfigLoader().get_value_from_data("load_fixed", "astrometry"))
+            first_obs_wcs = ConfigLoader().get_value_from_data("first_obs_wcs", "astrometry")
+            second_obs_wcs = ConfigLoader().get_value_from_data("second_obs_wcs", "astrometry")
             times = [data[i][1] + " " + data[i][2], data[i][1] + " " + data[i][3]]
         except Exception as e:
             logging.error(f"Error getting observatory data: {e}")
@@ -478,14 +481,10 @@ class MeteorApp(Gtk.Window):
             logging.info("Default theme loaded.")
         
         try:
-            logging.debug(meteor.get_trajectories_geodetic())
             plt, fig = meteor.plot_trajectory_geodetic()
 
             fig.canvas.mpl_connect("close_event", on_close)
             plt.show()
-        except ConnectionError as e:
-            logging.error(f"Error connecting to astrometry.net: {e}")
-            self.error_dialog(f"Error connecting to astrometry.net: {e}")
         except Exception as e:
             logging.error(f"Error processing meteor location: {e}")
             self.error_dialog(f"Error processing meteor location: {e}")

@@ -12,7 +12,7 @@ from main import MeteorsList
 class DataWindow(Gtk.Window):
 
     def __init__(self):
-        Gtk.Window.__init__(self, title="Spinner")
+        Gtk.Window.__init__(self, title="Loading data")
         self.set_border_width(3)
         self.set_default_size(400, 150)
         self.set_position(Gtk.WindowPosition.CENTER)

@@ -1,9 +1,12 @@
 [astrometry]
 token = "ijfeednnvwvojlfb"
+load_fixed = false
+first_obs_wcs = "/home/foglar/OV2024/ondrejov.wcs"
+second_obs_wcs = "/home/foglar/OV2024/kunzak.wcs"
 
 [data]
 timeout = 5.0
-home_dir = "./data/meteory"
+home_dir = "./data/meteory/"
 first_observatory = "Kunzak"
 second_observatory = "Ondrejov"
 time_tolerance = 2.0
