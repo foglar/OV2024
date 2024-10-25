@@ -22,7 +22,7 @@ class Meteor:
     Q_angle: float
 
     # Astrometry information
-    job_ids: int
+    job_ids: list[int]
     
     # Radiant information
     radiant: list[float]
@@ -450,7 +450,7 @@ class Meteor:
             
         return plot, fig
 
-    def calculate_distances_along_trajectories(self) -> None:
+    def calculate_distances(self) -> None:
         """Calculates the distance of each point on both trajectories from
         the first points.
 
@@ -472,7 +472,7 @@ class Meteor:
         for point in self.geocentric_trajectory_b:
             self.distance_from_beginning_b.append(sqrt((beginning[0] - point[0]) ** 2 + (beginning[1] - point[1]) ** 2 + (beginning[2] - point[2]) ** 2))
 
-    def get_distances_along_trajectories(self) -> list[list[float]]:
+    def get_distances(self) -> list[list[float]]:
         """Returns the distances of points on both trajectories from
         the first point
         
@@ -482,16 +482,16 @@ class Meteor:
 
         # If the distances aren't calculated yet, calculate
         if self.distance_from_beginning_a == None or self.distance_from_beginning_b == None:
-            self.calculate_distances_along_trajectories()
+            self.calculate_distances()
 
         return self.distance_from_beginning_a, self.distance_from_beginning_b
     
-    def calculate_velocities_along_trajectories(self) -> None:
+    def calculate_velocities(self) -> None:
         """Calculates the velocity of meteor at each point in both trajectories"""
 
         # If the geocentric trajectories aren't calculated yet, calculate
         if self.distance_from_beginning_b == None or self.distance_from_beginning_b == None:
-            self.calculate_distances_along_trajectories()
+            self.calculate_distances()
 
         self.velocities_a = []
         for i in range(1, len(self.geocentric_trajectory_a)):
@@ -501,7 +501,7 @@ class Meteor:
         for i in range(1, len(self.geocentric_trajectory_b)):
             self.velocities_b.append(self.distance_from_beginning_b[i]/(self.times[1][i] - self.times[1][0]))
 
-    def get_velocities_along_trajectories(self) -> list[list[float]]:
+    def get_velocities(self) -> list[list[float]]:
         """Returns the velocities at all but the first points from both trajectories
         
         Returns:
@@ -510,11 +510,11 @@ class Meteor:
 
         # If the velocities aren't calculated yet, calculate
         if self.velocities_a == None or self.velocities_b == None:
-            self.calculate_velocities_along_trajectories()
+            self.calculate_velocities()
 
         return self.velocities_a, self.velocities_b
     
-    def plot_velocities_along_trajectories(self) -> None:
+    def plot_velocities(self) -> None:
         """Plots a velocity vs time graph
         
         Returns:
@@ -523,7 +523,7 @@ class Meteor:
 
         # If the velocities aren't calculated yet, calculate
         if self.velocities_a == None or self.velocities_b == None:
-            self.calculate_velocities_along_trajectories()
+            self.calculate_velocities()
 
         fig, ax = plot.subplots()
 

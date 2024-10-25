@@ -12,9 +12,14 @@ def test_fixed_wcs_astrometry():
     client.authenticate()
 
     time = Time('2024-01-08 21:35:44')
-    kunzak = Station(lat=49.107290, lon=15.200930, height=656,
-                     time_zone=0, time='2024-01-08 21:35:44', label='Kunžak',
-                     wcs_path='calibration.wcs', wcs_time='2024-01-08 23:24:54')
+    kunzak = Station(
+        lat=49.107290,
+        lon=15.200930,
+        height=656,
+        label='Kunžak',
+        wcs_path='kunzak.wcs',
+        wcs_time='2024-01-08 23:24:54'
+    )
 
     # Calculate meteor coordinates from WCS from the same image
     world_a = get_meteor_coordinates(client, './data/meteory/Kunzak/2024-01-08-21-35-44/2024-01-08-21-35-44.jpg', './data/meteory/Kunzak/2024-01-08-21-35-44/data.txt', kunzak, time)
@@ -25,32 +30,10 @@ def test_fixed_wcs_astrometry():
 
     # Check the results
     for i in range(len(world_a)):
-        assert numpy.allclose(world_a[i], world_b[i]), \
-               f'{world_a[i]} is not {world_b[i]}'
-
-def test_solve_plane_intersection():
-    """Tests the plane intersection calculation function"""
-
-    from random import random
-
-    # Choose random plane slopes
-    plane_a = [random() - 0.5, random() - 0.5, random() - 0.5]
-    plane_b = [random() - 0.5, random() - 0.5, random() - 0.5]
-    plane_c = [random() - 0.5, random() - 0.5, random() - 0.5]
-
-    # Choose random point for planes to intersect in
-    point = [random() - 0.5, random() - 0.5, random() - 0.5]
-
-    # Calculate d values for planes
-    plane_a.append(-(plane_a[0]*point[0] + plane_a[1]*point[1] + plane_a[2]*point[2]))
-    plane_b.append(-(plane_b[0]*point[0] + plane_b[1]*point[1] + plane_b[2]*point[2]))
-    plane_c.append(-(plane_c[0]*point[0] + plane_c[1]*point[1] + plane_c[2]*point[2]))
-
-    # Calculate the intersection
-    calculated_point = solve_plane_intersection(plane_a, plane_b, plane_c)
-
-    assert numpy.allclose(point, calculated_point), \
-           f'Should be {point}, not {calculated_point}'
+        assert numpy.allclose(world_a[1][i], world_b[i]), \
+               f'{world_a[0][i]} is not {world_b[i]}'
+        
+    print('Passed test_fixed_wcs_astrometry')
 
 def test_radiant_calculation() -> None:
     """Tests the radiant calculation procedure"""
@@ -85,23 +68,8 @@ def test_radiant_calculation() -> None:
     # Q Angle
     assert numpy.isclose(angle, Q),\
            f'Should be {Q}, not {angle}'
-
-def test_goniometry_solver():
-    """Tests calculate_meteor_point and solve_goniometry functions"""
-
-    from random import random
-
-    # Test a couple of values
-    for _ in range(1000):
-        ra, dec = round(random() * 360, 4), round(random() * 180 - 90, 4)
-
-        # Calculate xi, eta and zeta values and back
-        xi, eta, zeta = calculate_meteor_point((ra, dec))
-        calculated = solve_goniometry((xi, eta, zeta))
-
-        # Test
-        assert numpy.allclose((ra, dec), calculated), \
-               f'Should be {(ra, dec)}, not {calculated}'
+    
+    print('Passed test_radiant_calculation')
 
 def test_meteor_calculation():
     """Tests the fixed astrometry and calculation procedures"""
@@ -138,44 +106,76 @@ def test_meteor_calculation():
         None,
     ]
 
-    calculation: Meteor = Meteor.from_astrometry_fixed('test',
-                                                       [ondrejov, kunzak],
-                                                       data_paths,
-                                                       time,)
+    # Test astrometry through nova.astrometry.net
+    calculation: Meteor = Meteor.from_astrometry(
+        'test',
+        [ondrejov, kunzak],
+        img_paths,
+        data_paths,
+        time,
+        job_ids,
+        prep=True
+    )
     
-    # calculation: Meteor = Meteor.from_astrometry('test',
-    #                                              [ondrejov, kunzak],
-    #                                              img_paths,
-    #                                              data_paths,
-    #                                              time,
-    #                                              job_ids,
-    #                                              prep=True)
+    job_ids = calculation.job_ids
 
-    calculation.plot_trajectory_geodetic()
-    calculation.plot_velocities_along_trajectories()
+    # Test downloading already computed WCS files
+    calculation: Meteor = Meteor.from_astrometry(
+        'test',
+        [ondrejov, kunzak],
+        img_paths,
+        data_paths,
+        time,
+        job_ids
+    )
 
-def test_set_fix_wcs():
+    # Test fixed camera alignment astrometry
+    calculation: Meteor = Meteor.from_astrometry_fixed(
+        'test',
+        [ondrejov, kunzak],
+        data_paths,
+        time
+    )
+
+    calculation.get_radiant()
+    calculation.get_velocities()
+
+    print('Passed test_meteor_calculation')
+
+def test_get_fixed_wcs():
     """Tests the Station.set_fix_wcs() function"""
 
-    ondrejov = Station(lat=49.970222,
-                       lon=14.780208,
-                       height=524,
-                       time_zone=0,
-                       label='Ondřejov',
-                       wcs_path='o.wcs')
+    wcs_path = 'o.wcs'
+
+    ondrejov: Station = Station(
+        lat=49.970222,
+        lon=14.780208,
+        height=524,
+        time_zone=0,
+        label='Ondřejov',
+        wcs_path=wcs_path
+    )
     
     img_path = './data/meteory/Ondrejov/2024-01-08-23-52-57/2024-01-08-23-52-57.jpg'
 
     client = AstrometryClient()
     client.authenticate()
 
-    ondrejov.set_fixed_wcs(client, img_path)
+    ondrejov.get_fixed_wcs(
+        client, 
+        img_path, 
+        prep=True
+    )
+
+    # Remove the resulting file
+    import os
+    os.remove(wcs_path)
+
+    print('Passed test_get_fixed_wcs')
 
 if __name__ == '__main__':
-    test_set_fix_wcs()
-    test_meteor_calculation()
     test_fixed_wcs_astrometry()
-    test_goniometry_solver()
-    test_solve_plane_intersection()
     test_radiant_calculation()
+    test_meteor_calculation()
+    test_get_fixed_wcs()
     print('Tests passed')

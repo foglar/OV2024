@@ -79,7 +79,8 @@ class Station:
                       job_id: int = None,
                       prep: bool = False) -> None:
         """Do astrometry for the given image and save it as fixed camera
-        astrometry. The resulting WCS file will be saved to
+        astrometry. The resulting WCS file will be saved to the station's
+        wcs_path.
         
         Args:
             client (AstrometryClient): client to use for API communication
