@@ -264,14 +264,25 @@ class MeteorApp(Gtk.Window):
         win = ConfigApp()
 
         self.btn_settings_observatory.set_sensitive(False)
+        self.btn_view_meteor.set_sensitive(False)
+        self.btn_location.set_sensitive(False)
+        self.btn_settings_observatory.set_sensitive(False)
+        self.btn_select_folder.set_sensitive(False)
+        self.btn_load_data.set_sensitive(False)
+        self.btn_meteor_list.set_sensitive(False)
 
         win.connect("destroy", self.on_observatory_settings_closed)
         win.show_all()
         Gtk.main()
-
+        
     def on_observatory_settings_closed(self, widget):
         logging.info("Observatory settings closed.")
         self.btn_settings_observatory.set_sensitive(True)
+        self.btn_view_meteor.set_sensitive(True)
+        self.btn_location.set_sensitive(True)
+        self.btn_select_folder.set_sensitive(True)
+        self.btn_load_data.set_sensitive(True)
+        self.btn_meteor_list.set_sensitive(True)
         widget.destroy()
 
     def sky_image_analysis(self, widget):
@@ -357,6 +368,7 @@ class MeteorApp(Gtk.Window):
         self.btn_view_meteor.set_sensitive(False)
         self.btn_location.set_sensitive(False)
         self.btn_settings_observatory.set_sensitive(False)
+        self.btn_load_data.set_sensitive(False)
 
         # Get time in this format '2018-10-8 21:38:32'
         data = self.pp.meteor_data_table
