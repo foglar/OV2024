@@ -151,6 +151,13 @@ class MeteorApp(Gtk.Window):
         self.btn_meteor_list.connect("clicked", self.meteor_list_open)
         self.Toolbar.insert(self.btn_meteor_list, 3)
 
+        self.btn_export_gpx = Gtk.ToolButton(
+            icon_name="document-export", label="Export GPX"
+        )
+        self.btn_export_gpx.set_tooltip_text("Export meteor data to GPX file.")
+        self.btn_export_gpx.connect("clicked", self.export_gpx_file)
+        self.Toolbar.insert(self.btn_export_gpx, 4)
+
         self.btn_settings_observatory = Gtk.ToolButton(
             icon_name="preferences-system", label="Settings"
         )
@@ -265,6 +272,11 @@ class MeteorApp(Gtk.Window):
             return folder
         else:
             return None
+        
+
+    def export_gpx_file(self, widget):
+        logging.info("Exporting meteor data to GPX file.")
+        
 
     def setup_observatories(self, widget):
         logging.info("Opening observatory settings.")
