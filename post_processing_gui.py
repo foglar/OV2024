@@ -446,13 +446,13 @@ class MeteorApp(Gtk.Window):
         data_path_B = "/".join(data[i][9].split("/")[:-1]) + "/data.txt"
         time = Time(data[i][1] + " " + data[i][2], format="iso")
 
-        meteor = Meteor.from_astrometry_fixed(
+        meteor = Meteor.from_astrometry(
             label,
             [first_obs, second_obs],
-            # [img_A, img_B],
+            [img_A, img_B],
             [data_path_A, data_path_B],
             time,
-            # prep=True,
+            prep=True,
         )
 
         def on_close(event):
