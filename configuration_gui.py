@@ -36,7 +36,7 @@ class ConfigurationWindow(Gtk.Window):
         self.set_border_width(10)
         self.set_default_size(500, 500)
         self.set_position(Gtk.WindowPosition.CENTER)
-        self.set_resizable(False)
+        self.set_resizable(True)
         self.connect("destroy", Gtk.main_quit)
 
         # Header
@@ -158,7 +158,7 @@ class ConfigurationWindow(Gtk.Window):
         # WCS File configuration
         self.wcs_label = Gtk.Label(label="WCS File")
         self.wcs_label.set_tooltip_text("Use WCS file for coordinates")
-        wcs_file_path = config().get_value_from_data("second_obs_wcs", "astrometry") or ""
+        wcs_file_path = config().get_value_from_data("second_wcs_path", "data") or ""
         self.wcs = Gtk.Entry()
         self.wcs.set_text(wcs_file_path)
         self.wcs_button = Gtk.Button(label="...")
@@ -225,7 +225,7 @@ class ConfigurationWindow(Gtk.Window):
 
         self.wcs_label2 = Gtk.Label(label="WCS File")
         self.wcs_label2.set_tooltip_text("Use WCS file for coordinates")
-        self.wcs_file_path2 = config().get_value_from_data("first_obs_wcs", "astrometry") or ""
+        self.wcs_file_path2 = config().get_value_from_data("first_wcs_path", "data") or ""
         self.wcs2 = Gtk.Entry()
         self.wcs2.set_text(self.wcs_file_path2)
         self.wcs_button2 = Gtk.Button(label="...")
@@ -441,8 +441,8 @@ class ConfigurationWindow(Gtk.Window):
         editconfig().set_value("plt_style", self.theme_selection.get_active_text(), "post_processing")
         editconfig().set_value("meteor_plot_theme", self.meteor_plot_numpy_theme_selection.get_active_text(), "post_processing")
         editconfig().set_value("map_style", self.map_style_selection.get_active_text(), "post_processing")
-        editconfig().set_value("first_obs_wcs", self.wcs.get_text(), "astrometry")
-        editconfig().set_value("second_obs_wcs", self.wcs2.get_text(), "astrometry")
+        editconfig().set_value("first_wcs_path", self.wcs.get_text(), "data")
+        editconfig().set_value("second_wcs_path", self.wcs2.get_text(), "data")
         self.destroy()
 
     def validate_long(self, widget):
