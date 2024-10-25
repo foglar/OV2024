@@ -445,13 +445,13 @@ class MeteorApp(Gtk.Window):
         time = Time(data[i][1] + " " + data[i][3], format="iso")
 
         first_obs.set_wcs(
-            ConfigLoader().get_value_from_data("first_wcs_path", "data"),
-            Time(ConfigLoader().get_value_from_data("first_wcs_time", "data"))
+            ConfigLoader().get_value_from_data("second_wcs_path", "data"),
+            Time(ConfigLoader().get_value_from_data("second_wcs_time", "data"))
         )
 
         second_obs.set_wcs(
-            ConfigLoader().get_value_from_data("second_wcs_path", "data"),
-            Time(ConfigLoader().get_value_from_data("second_wcs_time", "data"))
+            ConfigLoader().get_value_from_data("first_wcs_path", "data"),
+            Time(ConfigLoader().get_value_from_data("first_wcs_time", "data"))
         )
 
         label = data[i][0]
