@@ -36,7 +36,7 @@ class ConfigurationWindow(Gtk.Window):
         self.set_border_width(10)
         self.set_default_size(500, 500)
         self.set_position(Gtk.WindowPosition.CENTER)
-        self.set_resizable(True)
+        self.set_resizable(False)
         self.connect("destroy", Gtk.main_quit)
 
         # Header

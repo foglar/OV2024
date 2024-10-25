@@ -167,7 +167,9 @@ class MeteorApp(Gtk.Window):
         self.Toolbar.insert(self.btn_settings_observatory, 4)
 
         self.btn_load_data = Gtk.ToolButton(icon_name="download", label="Load Data")
-        self.btn_load_data.set_tooltip_text("Load ra and dec data for all meteors from astrometry API")
+        self.btn_load_data.set_tooltip_text(
+            "Load all meteor data from astrometry API"
+        )
         self.btn_load_data.connect("clicked", self.open_loading_data)
         self.Toolbar.insert(self.btn_load_data, 3)
 
@@ -273,11 +275,9 @@ class MeteorApp(Gtk.Window):
             return folder
         else:
             return None
-        
 
     def export_gpx_file(self, widget):
         logging.info("Exporting meteor data to GPX file.")
-        
 
     def setup_observatories(self, widget):
         logging.info("Opening observatory settings.")
@@ -294,7 +294,7 @@ class MeteorApp(Gtk.Window):
         win.connect("destroy", self.on_observatory_settings_closed)
         win.show_all()
         Gtk.main()
-        
+
     def on_observatory_settings_closed(self, widget):
         logging.info("Observatory settings closed.")
         self.btn_settings_observatory.set_sensitive(True)
@@ -357,7 +357,7 @@ class MeteorApp(Gtk.Window):
         logging.info("Opening meteor list.")
         self.btn_select_folder.set_sensitive(False)
         self.btn_load_data.set_sensitive(False)
-        self.btn_view_meteor.set_sensitive(False)   
+        self.btn_view_meteor.set_sensitive(False)
         self.btn_location.set_sensitive(False)
         self.btn_settings_observatory.set_sensitive(False)
         self.btn_meteor_list.set_sensitive(False)
@@ -419,9 +419,15 @@ class MeteorApp(Gtk.Window):
                 ConfigLoader().get_value_from_data("second_timezone", "data")
             )
 
-            load_fixed = bool(ConfigLoader().get_value_from_data("load_fixed", "astrometry"))
-            first_obs_wcs = ConfigLoader().get_value_from_data("first_obs_wcs", "astrometry")
-            second_obs_wcs = ConfigLoader().get_value_from_data("second_obs_wcs", "astrometry")
+            load_fixed = bool(
+                ConfigLoader().get_value_from_data("load_fixed", "astrometry")
+            )
+            first_obs_wcs = ConfigLoader().get_value_from_data(
+                "first_obs_wcs", "astrometry"
+            )
+            second_obs_wcs = ConfigLoader().get_value_from_data(
+                "second_obs_wcs", "astrometry"
+            )
             times = [data[i][1] + " " + data[i][2], data[i][1] + " " + data[i][3]]
         except Exception as e:
             logging.error(f"Error getting observatory data: {e}")
@@ -444,14 +450,19 @@ class MeteorApp(Gtk.Window):
 
         time = Time(data[i][1] + " " + data[i][3], format="iso")
 
+        #!IMPORTANT: Remember, first observatory in calculation is actually the second observatory in the data table
         first_obs.set_wcs(
-            ConfigLoader().get_value_from_data("second_wcs_path", "data"),
-            Time(ConfigLoader().get_value_from_data("second_wcs_time", "data"))
+            ConfigLoader().get_value_from_data(
+                "second_wcs_path", "data"
+            ),  #! <- First observatory in calculation is actually the second observatory in the data table
+            Time(ConfigLoader().get_value_from_data("second_wcs_time", "data")),
         )
 
         second_obs.set_wcs(
-            ConfigLoader().get_value_from_data("first_wcs_path", "data"),
-            Time(ConfigLoader().get_value_from_data("first_wcs_time", "data"))
+            ConfigLoader().get_value_from_data(
+                "first_wcs_path", "data"
+            ),  #! <- Second observatory in calculation is actually the first observatory in the data table
+            Time(ConfigLoader().get_value_from_data("first_wcs_time", "data")),
         )
 
         label = data[i][0]
@@ -462,7 +473,11 @@ class MeteorApp(Gtk.Window):
         time = Time(data[i][1] + " " + data[i][2], format="iso")
 
         try:
-            if load_fixed and os.path.exists(first_obs_wcs) and os.path.exists(second_obs_wcs):
+            if (
+                load_fixed
+                and os.path.exists(first_obs_wcs)
+                and os.path.exists(second_obs_wcs)
+            ):
                 try:
                     logging.info("Loading fixed wcs data.")
                     meteor = Meteor.from_astrometry_fixed(
@@ -511,6 +526,7 @@ class MeteorApp(Gtk.Window):
             logging.info("Meteor location closed.")
 
         from matplotlib import pyplot as plt
+
         try:
             THEME = ConfigLoader().get_value_from_data("plt_style", "post_processing")
         except KeyError as e:
@@ -523,7 +539,7 @@ class MeteorApp(Gtk.Window):
         else:
             plt.style.use("default")
             logging.info("Default theme loaded.")
-        
+
         try:
             plt, fig = meteor.plot_trajectory_geodetic()
 
@@ -697,7 +713,7 @@ class MeteorApp(Gtk.Window):
         # label_text += f'<span size="20000">Meteor Magnitude: {meteor_info[6]}\n</span>'
         # label_text += f'<span size="20000">Meteor Velocity: {meteor_info[7]}\n</span>'
         # label_text += f'<span size="20000">Meteor Azimuth: {meteor_info[8]}\n</span>'
-        #label_text += f'<span size="20000">Meteor Position: {meteor_info[11][0][0]} X, {meteor_info[11][0][1]} Y, {meteor_info[11][1][0]} X, {meteor_info[11][1][0]} Y\n</span>'
+        # label_text += f'<span size="20000">Meteor Position: {meteor_info[11][0][0]} X, {meteor_info[11][0][1]} Y, {meteor_info[11][1][0]} X, {meteor_info[11][1][0]} Y\n</span>'
 
         self.first_meteor_label.set_markup(label_text)
 
