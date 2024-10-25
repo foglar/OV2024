@@ -363,8 +363,6 @@ class MeteorApp(Gtk.Window):
         self.btn_meteor_list.set_sensitive(True)
         widget.destroy()
 
-
-
     def location_dialog(self, widget):
         location_data = self.location_data()
 
@@ -429,24 +427,24 @@ class MeteorApp(Gtk.Window):
             label=second_name,
         )
 
-        time = Time(data[i][1] + " " + data[i][2], format="iso")
-        second_time = Time(data[i][1] + " " + data[i][3], format="iso")
+        time = Time(data[i][1] + " " + data[i][3], format="iso")
+        second_time = Time(data[i][1] + " " + data[i][2], format="iso")
 
         #!IMPORTANT: Set the wcs file path here or add it to configuration file
         first_obs.set_wcs("./ondrejov.wcs", time)
         second_obs.set_wcs("./kunzak.wcs", second_time)
 
         label = data[i][0]
-        img_A = data[i][9]
-        img_B = data[i][10]
-        data_path_A = "/".join(data[i][9].split("/")[:-1]) + "/data.txt"
-        data_path_B = "/".join(data[i][10].split("/")[:-1]) + "/data.txt"
+        img_A = data[i][10]
+        img_B = data[i][9]
+        data_path_A = "/".join(data[i][10].split("/")[:-1]) + "/data.txt"
+        data_path_B = "/".join(data[i][9].split("/")[:-1]) + "/data.txt"
         time = Time(data[i][1] + " " + data[i][2], format="iso")
 
-        meteor = Meteor.from_astrometry_fixed(
+        meteor = Meteor.from_astrometry(
             label,
             [first_obs, second_obs],
-            #[img_A, img_B],
+            [img_A, img_B],
             [data_path_A, data_path_B],
             time,
         )
