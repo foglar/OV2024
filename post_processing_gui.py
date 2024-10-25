@@ -1,5 +1,6 @@
 import logging
 import gi
+import os
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GdkPixbuf
@@ -379,7 +380,6 @@ class MeteorApp(Gtk.Window):
         location_data = self.location_data()
 
     def location_data(self):
-
         self.btn_select_folder.set_sensitive(False)
         self.btn_load_data.set_sensitive(False)
         self.btn_view_meteor.set_sensitive(False)
@@ -445,12 +445,12 @@ class MeteorApp(Gtk.Window):
         time = Time(data[i][1] + " " + data[i][3], format="iso")
 
         first_obs.set_wcs(
-            ConfigLoader().get_value_from_data("first_wcs_path", "data"),
+            ConfigLoader().get_value_from_data("first_obs_wcs", "astrometry"),
             Time(ConfigLoader().get_value_from_data("first_wcs_time", "data"))
         )
 
         second_obs.set_wcs(
-            ConfigLoader().get_value_from_data("second_wcs_path", "data"),
+            ConfigLoader().get_value_from_data("second_obs_wcs", "astrometry"),
             Time(ConfigLoader().get_value_from_data("second_wcs_time", "data"))
         )
 
@@ -461,14 +461,50 @@ class MeteorApp(Gtk.Window):
         data_path_B = "/".join(data[i][9].split("/")[:-1]) + "/data.txt"
         time = Time(data[i][1] + " " + data[i][2], format="iso")
 
-        meteor = Meteor.from_astrometry(
-            label,
-            [first_obs, second_obs],
-            [img_A, img_B],
-            [data_path_A, data_path_B],
-            time,
-            prep=True,
-        )
+        try:
+            if load_fixed and os.path.exists(first_obs_wcs) and os.path.exists(second_obs_wcs):
+                try:
+                    logging.info("Loading fixed wcs data.")
+                    first_obs.set_fixed_wcs(first_obs_wcs)
+                    second_obs.set_fixed_wcs(second_obs_wcs)
+                    meteor = Meteor.from_astrometry_fixed(
+                        label,
+                        [first_obs, second_obs],
+                        #[img_A, img_B],
+                        [data_path_A, data_path_B],
+                        time,
+                        prep=True,
+                    )
+                except Exception as e:
+                    logging.error(f"Error creating meteor object: {e}")
+                    self.error_dialog(f"Error creating meteor object: {e}")
+                    self.btn_select_folder.set_sensitive(True)
+                    self.btn_load_data.set_sensitive(True)
+                    self.btn_view_meteor.set_sensitive(True)
+                    self.btn_location.set_sensitive(True)
+                    self.btn_settings_observatory.set_sensitive(True)
+                    return
+            else:
+                #!IMPORTANT: Loading should be added while waiting for the data to be loaded
+                logging.info("Loading meteor data from astrometry.")
+                meteor = Meteor.from_astrometry(
+                    label,
+                    [first_obs, second_obs],
+                    [img_A, img_B],
+                    [data_path_A, data_path_B],
+                    time,
+                    prep=True,
+                )
+        except Exception as e:
+            logging.error(f"Error creating meteor object: {e}")
+
+            self.error_dialog(f"Error creating meteor object: {e}")
+            self.btn_select_folder.set_sensitive(True)
+            self.btn_load_data.set_sensitive(True)
+            self.btn_view_meteor.set_sensitive(True)
+            self.btn_location.set_sensitive(True)
+            self.btn_settings_observatory.set_sensitive(True)
+            return
 
         def on_close(event):
             self.btn_select_folder.set_sensitive(True)
