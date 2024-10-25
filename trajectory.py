@@ -422,11 +422,18 @@ class Meteor:
             logging.info('Using blue marble map style')
 
         # Draw stations
-        m.scatter(latlon = True, x = self.stations[0].lon, y = self.stations[0].lat,
-                  color='red')
-
-        m.scatter(latlon = True, x = self.stations[1].lon, y = self.stations[1].lat,
-                  color='red')
+        for station in self.stations:
+            m.scatter(
+                latlon = True,
+                x = station.lon,
+                y = station.lat,
+                color='red'
+            )
+            
+            plot.annotate(
+                station.label,
+                m(station.lon, station.lat)
+            )
         
         # Draw meteor trajectories
         x, y, heights = [], [], []
@@ -442,7 +449,7 @@ class Meteor:
 
         # Add height marks
         for i in [0, len(x) - 1]:
-            plot.annotate(f'{self.merged_times[i]} - {round(heights[i] / 1000, 3)} km', (x[i], y[i]))
+            plot.annotate(f'{(int)(round(self.merged_times[i], 2) * 100)} ms; {round(heights[i] / 1000, 1)} km', (x[i], y[i]))
 
         # Draw the first and last points with special markers
         m.scatter(x[0], y[0], marker='^', color='blue')

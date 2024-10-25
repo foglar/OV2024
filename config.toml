@@ -7,8 +7,8 @@ second_obs_wcs = "./ondrejov.wcs"
 [data]
 timeout = 5.0
 home_dir = "./data/meteory/"
-first_observatory = "Kunzak"
-second_observatory = "Ondrejov"
+first_observatory = "Ondřejov"
+second_observatory = "Kunžak"
 time_tolerance = 2.0
 first_longitude = "14.784264"
 first_latitude = "49.904682"
