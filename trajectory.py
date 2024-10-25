@@ -329,8 +329,8 @@ class Meteor:
 
         return self.geodetic_trajectory_a, self.geodetic_trajectory_b
     
-    def save_trajectory_gpx(self, correct_start, correct_end) -> None:
-        """Returns the trajectory in a GPX format"""
+    def save_trajectory_gpx(self) -> None:
+        """Save the geodetic trajectory in a .gpx file"""
 
         # If the geodetic trajectories aren't calculated yet, calculate
         if self.geodetic_trajectory_a == None or self.geodetic_trajectory_b == None:
@@ -346,12 +346,6 @@ class Meteor:
         gpx += f'<trk><name>Trajectory {self.label}</name><trkseg>'
         for point in self.geodetic_trajectory:
             gpx += f'<trkpt lat="{point["lat"]}" lon="{point["lon"]}"><ele>{point["height"]}</ele></trkpt>'
-        gpx += '</trkseg></trk>'
-
-        #Write the correct trajectory
-        gpx += '<trk><name>Correct solution</name><trkseg>'
-        gpx += f'<trkpt lat="{correct_start[1]}" lon="{correct_start[0]}"><ele>{correct_start[2]}</ele></trkpt>'
-        gpx += f'<trkpt lat="{correct_end[1]}" lon="{correct_end[0]}"><ele>{correct_end[2]}</ele></trkpt>'
         gpx += '</trkseg></trk>'
 
         # Terminate the gpx file
@@ -414,7 +408,7 @@ class Meteor:
         m.plot(x, y, linewidth=1.5, color='blue')
 
         # Add height marks
-        for i in range(len(x)):
+        for i in [0, len(x) - 1]:
             plot.annotate(f'{self.merged_times[i]} - {round(heights[i] / 1000, 3)} km', (x[i], y[i]))
 
         # Draw the first and last points with special markers
