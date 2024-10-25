@@ -126,47 +126,54 @@ class MeteorApp(Gtk.Window):
         self.btn_select_folder = Gtk.ToolButton(
             icon_name="folder-open", label="Select Folder"
         )
+        self.btn_select_folder.set_tooltip_text("Select folder with meteor data.")
         self.btn_select_folder.connect("clicked", self.welcome_dialog)
         self.Toolbar.insert(self.btn_select_folder, 1)
 
         btn_save_meteors = Gtk.ToolButton(
             icon_name="document-save", label="Save Meteors"
         )
+        btn_save_meteors.set_tooltip_text("Save meteor data to file.")
         btn_save_meteors.connect("clicked", self.save_to_file)
         self.Toolbar.insert(btn_save_meteors, 2)
 
         btn_save_to_file = Gtk.ToolButton(
             icon_name="document-save-as", label="Save to File"
         )
+        btn_save_to_file.set_tooltip_text("Save meteor data to custom file.")
         btn_save_to_file.connect("clicked", self.save_to_file_select)
         self.Toolbar.insert(btn_save_to_file, 2)
 
         self.btn_meteor_list = Gtk.ToolButton(
             icon_name="table", label="Previous Meteor"
         )
-        
+        self.btn_meteor_list.set_tooltip_text("Open meteor list.")
         self.btn_meteor_list.connect("clicked", self.meteor_list_open)
         self.Toolbar.insert(self.btn_meteor_list, 3)
 
         self.btn_settings_observatory = Gtk.ToolButton(
             icon_name="preferences-system", label="Settings"
         )
+        self.btn_settings_observatory.set_tooltip_text("Open observatory settings.")
         self.btn_settings_observatory.connect("clicked", self.setup_observatories)
         self.Toolbar.insert(self.btn_settings_observatory, 4)
 
         self.btn_load_data = Gtk.ToolButton(icon_name="download", label="Load Data")
+        self.btn_load_data.set_tooltip_text("Load ra and dec data for all meteors from astrometry API")
         self.btn_load_data.connect("clicked", self.open_loading_data)
         self.Toolbar.insert(self.btn_load_data, 3)
 
         self.btn_view_meteor = Gtk.Button(
             label="Preview Meteor", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
         )
+        self.btn_view_meteor.set_tooltip_text("View meteor image analysis.")
         self.btn_view_meteor.connect("clicked", self.sky_image_analysis)
         btn_box.pack_start(self.btn_view_meteor, True, True, 0)
 
         self.btn_location = Gtk.Button(
             label="Meteor Location", halign=Gtk.Align.CENTER, valign=Gtk.Align.CENTER
         )
+        self.btn_location.set_tooltip_text("View meteor location.")
         self.btn_location.connect("clicked", self.location_dialog)
         btn_box.pack_start(self.btn_location, True, True, 0)
 
@@ -426,8 +433,8 @@ class MeteorApp(Gtk.Window):
         second_time = Time(data[i][1] + " " + data[i][3], format="iso")
 
         #!IMPORTANT: Set the wcs file path here or add it to configuration file
-        first_obs.set_wcs("./kunzak.wcs", time)
-        second_obs.set_wcs("./ondrejov.wcs", second_time)
+        first_obs.set_wcs("./ondrejov.wcs", time)
+        second_obs.set_wcs("./kunzak.wcs", second_time)
 
         label = data[i][0]
         img_A = data[i][9]
@@ -439,7 +446,7 @@ class MeteorApp(Gtk.Window):
         meteor = Meteor.from_astrometry_fixed(
             label,
             [first_obs, second_obs],
-            # [img_A, img_B],
+            #[img_A, img_B],
             [data_path_A, data_path_B],
             time,
         )
