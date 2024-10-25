@@ -3,7 +3,7 @@ token = "ijfeednnvwvojlfb"
 
 [data]
 timeout = 5.0
-home_dir = "/home/foglar/Programming/Projects/OV2024/data/meteory"
+home_dir = "./data/meteory"
 first_observatory = "Kunzak"
 second_observatory = "Ondrejov"
 time_tolerance = 2.0
