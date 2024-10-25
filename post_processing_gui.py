@@ -465,15 +465,11 @@ class MeteorApp(Gtk.Window):
             if load_fixed and os.path.exists(first_obs_wcs) and os.path.exists(second_obs_wcs):
                 try:
                     logging.info("Loading fixed wcs data.")
-                    first_obs.set_fixed_wcs(first_obs_wcs)
-                    second_obs.set_fixed_wcs(second_obs_wcs)
                     meteor = Meteor.from_astrometry_fixed(
                         label,
                         [first_obs, second_obs],
-                        #[img_A, img_B],
                         [data_path_A, data_path_B],
                         time,
-                        prep=True,
                     )
                 except Exception as e:
                     logging.error(f"Error creating meteor object: {e}")
