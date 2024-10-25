@@ -287,7 +287,10 @@ def get_meteor_coordinates(client: AstrometryClient,
             preprocess(img_path, data_path, 'tmp.jpg')
             img_path = 'tmp.jpg'
         
-        job_id = download_wcs_file(client, img_path)
+        try:
+            job_id = download_wcs_file(client, img_path)
+        except:
+            print('Astrometry unsuccessful, defaulting to fixed astrometry')
     else:
         # If yes, download the WCS file
         client.get_wcs_file(job_id, 'calibration.wcs')

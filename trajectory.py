@@ -110,21 +110,48 @@ class Meteor:
             astrometry
         """
 
+        import multiprocessing
+
         from astrometry import AstrometryClient
         client = AstrometryClient()
         client.authenticate()
 
-        observations = [
-            get_meteor_coordinates(client,
-                                   img_paths[i],
-                                   data_paths[i],
-                                   stations[i],
-                                   time,
-                                   job_ids[i],
-                                   prep) for i in range(len(stations))
-        ]
+        # Define a multiprocessing worker
+        def worker(process_number, return_list):
+            return_list[process_number] = get_meteor_coordinates(
+                client,
+                img_paths[process_number],
+                data_paths[process_number],
+                stations[process_number],
+                time,
+                job_ids[process_number],
+                prep
+            )
 
-        return Meteor(label, stations, [observations[i][1] for i in range(len(observations))], time, [observations[i][0] for i in range(len(observations))])
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
+
+        # Start workers for each station
+        jobs = []
+        for i in range(len(stations)):
+            p = multiprocessing.Process(target=worker, args=(i, return_dict))
+            jobs.append(p)
+            p.start()
+
+        # Wait for all workers to return
+        for p in jobs:
+            p.join()
+
+        # Order the observations correctly
+        observations = [return_dict[i] for i in range(len(stations))]
+
+        return Meteor(
+            label=label,
+            stations=stations,
+            observations=[observations[i][1] for i in range(len(observations))],
+            job_ids=[observations[i][0] for i in range(len(observations))],
+            time=time,
+        )
     
     def from_astrometry_fixed(label: str,
                               stations: list[Station],
@@ -146,7 +173,13 @@ class Meteor:
                                          time) for i in range(len(stations))
         ]
 
-        return Meteor(label, stations, observations, time, [None, None])
+        return Meteor(
+            label,
+            stations,
+            observations,
+            time,
+            [None, None]
+        )
 
     def calculate_radiant(self) -> None:
         """Calculates the radiant of the meteor according to Ceplecha (1987)
