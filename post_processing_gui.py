@@ -428,11 +428,16 @@ class MeteorApp(Gtk.Window):
         )
 
         time = Time(data[i][1] + " " + data[i][3], format="iso")
-        second_time = Time(data[i][1] + " " + data[i][2], format="iso")
 
-        #!IMPORTANT: Set the wcs file path here or add it to configuration file
-        first_obs.set_wcs("./ondrejov.wcs", time)
-        second_obs.set_wcs("./kunzak.wcs", second_time)
+        first_obs.set_wcs(
+            ConfigLoader().get_value_from_data("first_wcs_path", "data"),
+            Time(ConfigLoader().get_value_from_data("first_wcs_time", "data"))
+        )
+
+        second_obs.set_wcs(
+            ConfigLoader().get_value_from_data("second_wcs_path", "data"),
+            Time(ConfigLoader().get_value_from_data("second_wcs_time", "data"))
+        )
 
         label = data[i][0]
         img_A = data[i][10]
@@ -441,12 +446,13 @@ class MeteorApp(Gtk.Window):
         data_path_B = "/".join(data[i][9].split("/")[:-1]) + "/data.txt"
         time = Time(data[i][1] + " " + data[i][2], format="iso")
 
-        meteor = Meteor.from_astrometry(
+        meteor = Meteor.from_astrometry_fixed(
             label,
             [first_obs, second_obs],
-            [img_A, img_B],
+            # [img_A, img_B],
             [data_path_A, data_path_B],
             time,
+            # prep=True,
         )
 
         def on_close(event):

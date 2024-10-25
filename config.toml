@@ -11,10 +11,14 @@ first_longitude = "14.784264"
 first_latitude = "49.904682"
 first_sealevel = 467.0
 first_timezone = 0.0
+first_wcs_path = "./ondrejov.wcs"
+first_wcs_time = "2024-01-08 21:35:44"
 second_longitude = "15.190299"
 second_latitude = "49.121249"
 second_sealevel = 575.0
 second_timezone = 0.0
+second_wcs_path = "./kunzak.wcs"
+second_wcs_time = "2024-01-08 21:35:44"
 
 [post_processing]
 output_file = "overview.csv"
