@@ -8,12 +8,11 @@ from astropy.time import Time
 
 from post_processing import post_processing
 from trajectory import *
-from modules import EditConfig, ConfigLoader
+from modules import EditConfig, ConfigLoader, cache
 from configuration_gui import ConfigurationWindow as ConfigApp
 from main import MeteorsList as MeteorsData
 from data_window_gui import DataWindow as LoadingWindow
 from meteors_list_gui import MeteorsListGui
-
 
 # TODO: Test Other OS
 # TODO: Test how to compile
@@ -473,6 +472,10 @@ class MeteorApp(Gtk.Window):
         data_path_A = "/".join(data[i][10].split("/")[:-1]) + "/data.txt"
         data_path_B = "/".join(data[i][9].split("/")[:-1]) + "/data.txt"
         time = Time(data[i][1] + " " + data[i][2], format="iso")
+        try:
+            c = cache()
+        except Exception as e:
+            os.remove(path=cache().path)
 
         try:
             if (
@@ -508,9 +511,10 @@ class MeteorApp(Gtk.Window):
                     time,
                     prep=True,
                 )
+                #print(meteor)
+                #c.set_key(label,)
         except Exception as e:
             logging.error(f"Error creating meteor object: {e}")
-
             self.error_dialog(f"Error creating meteor object: {e}")
             self.btn_select_folder.set_sensitive(True)
             self.btn_load_data.set_sensitive(True)

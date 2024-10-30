@@ -2,6 +2,7 @@ import os
 import tomli
 import tomli_w
 import re
+import json
 class ConfigLoader:
     """
     A class for loading and retrieving configuration settings from a TOML file.
@@ -216,6 +217,53 @@ class ParseData:
         with open(self.data_path, 'r') as f:
             data = f.read()
         return data
+    
+class cache():
+    def __init__(self):
+        self.dirname = os.path.dirname(__file__)
+        self.cache_path = os.path.join(self.dirname, "cache")
+        self.cache_file = os.path.join(self.cache_path, "cache.json")
+        if not os.path.exists(self.cache_path):
+            self.create_cache()
+        self.load_cache()
+
+    def create_cache(self):
+        if not os.path.exists(self.cache_path):
+            os.mkdir(self.cache_path)
+            self.cache = {}
+            self.save_cache()
+        else:
+            print("Cache already exists")
+
+    def load_cache(self):
+        if os.path.exists(self.cache_file):
+            with open(self.cache_file, "r") as file:
+                self.cache = json.load(file)
+        else:
+            self.cache = {}
+    
+    def save_cache(self):
+        with open(self.cache_file, "w") as file:
+            json.dump(self.cache, file)
+
+    def get(self, key):
+        return self.cache.get(key)
+    
+    def set_key(self, key, value):
+        self.cache[key] = value
+        self.save_cache()
+
+    def delete(self, key):
+        if self.cache.get(key):
+            del self.cache[key]
+        self.save_cache()
+    
+    def print_cache(self):
+        print(self.cache)
+
+    def clear_cache(self):
+        self.cache = {}
+        self.save_cache()
 
 
 if __name__ == "__main__":
