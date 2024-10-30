@@ -110,7 +110,7 @@ class ConfigurationWindow(Gtk.Window):
 
         self.entry_folder.set_text(self.first_path)
         self.button_folder = Gtk.Button(label="...")
-        self.button_folder.connect("clicked", self.on_button_select_folder_clicked2)
+        self.button_folder.connect("clicked", self.on_button_select_folder_clicked)
         self.grid.attach(self.label_folder, 0, 0, 1, 1)
         self.grid.attach(self.entry_folder, 1, 0, 1, 1)
         self.grid.attach(self.button_folder, 3, 0, 1, 1)
