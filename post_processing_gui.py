@@ -2,6 +2,8 @@ import logging
 import gi
 import os
 
+logging.basicConfig(level=logging.WARNING)
+
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib, GdkPixbuf
 from astropy.time import Time
@@ -503,6 +505,14 @@ class MeteorApp(Gtk.Window):
             else:
                 #!IMPORTANT: Loading should be added while waiting for the data to be loaded
                 logging.info("Loading meteor data from astrometry.")
+                if c.search(label, first_obs.label) is not None:
+                    first_api_id = c.search(label, first_obs.label)
+                else:
+                    first_api_id = None
+                if c.search(label, second_obs.label) is not None:
+                    second_api_id = c.search(label, second_obs.label)
+                else:
+                    second_api_id = None
                 meteor = Meteor.from_astrometry(
                     label,
                     [first_obs, second_obs],
@@ -510,9 +520,18 @@ class MeteorApp(Gtk.Window):
                     [data_path_A, data_path_B],
                     time,
                     prep=True,
+                    job_ids=[first_api_id, second_api_id],
+
                 )
-                #print(meteor)
-                #c.set_key(label,)
+                print(second_obs.label)
+                print(meteor.job_ids[1])
+                print(first_obs.label)
+                print(meteor.job_ids[0])
+
+                if meteor.job_ids[0] is not None or first_obs.label is not None:
+                    c.set_key(meteor.job_ids[0], label, first_obs.label)
+                if meteor.job_ids[1] is not None or second_obs.label is not None:
+                    c.set_key(meteor.job_ids[1], label, second_obs.label)
         except Exception as e:
             logging.error(f"Error creating meteor object: {e}")
             self.error_dialog(f"Error creating meteor object: {e}")

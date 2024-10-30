@@ -249,8 +249,15 @@ class cache():
     def get(self, key):
         return self.cache.get(key)
     
-    def set_key(self, key, value):
-        self.cache[key] = value
+    def search(self, ident, obs):
+        for key, value in self.cache.items():
+            if value[0] == ident and value[1] == obs:
+                return key
+        return None
+    
+    def set_key(self, key, value, observatory):
+        # each key have two values, id and observatory
+        self.cache[key] = (value, observatory)
         self.save_cache()
 
     def delete(self, key):
