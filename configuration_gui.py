@@ -45,6 +45,12 @@ class ConfigurationWindow(Gtk.Window):
         self.header.set_title("Configuration")
 
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        # Add scroll window
+        self.scroll = Gtk.ScrolledWindow()
+        self.scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.scroll.set_min_content_height(400)
+        self.scroll.set_min_content_width(400)
+        
 
         self.first_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.second_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
@@ -344,7 +350,8 @@ class ConfigurationWindow(Gtk.Window):
         self.save_box.add(self.button_save)
         self.box.add(self.save_box)
 
-        self.add(self.box)
+        self.scroll.add(self.box)
+        self.add(self.scroll)
 
     def on_toggle_visibility(self, widget):
         if widget.get_active():
